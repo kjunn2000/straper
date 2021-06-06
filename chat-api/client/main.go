@@ -9,6 +9,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/google/uuid"
+	"github.com/kjunn2000/chat-app/chat-api/interceptors"
 	proto "github.com/kjunn2000/chat-app/chat-api/proto"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/grpclog"
@@ -87,9 +89,12 @@ func main() {
 	flag.Parse()
 
 	// id := sha256.Sum256([]byte(time.Now().String() + *nf))
-	id := *nf
 
-	conn, err := grpc.Dial("localhost:9050", grpc.WithInsecure())
+	conn, err := grpc.Dial("localhost:9090", grpc.WithInsecure(),
+		grpc.WithStreamInterceptor(interceptors.AddToStreamRequest),
+		grpc.WithUnaryInterceptor(interceptors.AddToUnaryReqeust),
+	)
+
 	if err != nil {
 		log.Fatalf("the connection is established unsuccessful => %v", err)
 	}
@@ -97,7 +102,7 @@ func main() {
 
 	User := proto.User{
 		// Id:   hex.EncodeToString(id[:]),
-		Id:   id,
+		Id:   uuid.NewString(),
 		Name: *nf,
 	}
 
