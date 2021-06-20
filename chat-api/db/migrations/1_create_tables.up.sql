@@ -1,7 +1,7 @@
 CREATE TABLE connects (
     id UUID PRIMARY KEY,
-    active BOOLEAN NOT NULL,
     userid UUID NOT NULL
+    active BOOLEAN NOT NULL,
 );
 
 CREATE TABLE messages(

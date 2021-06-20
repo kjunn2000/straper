@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	sq "github.com/Masterminds/squirrel"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
 	"github.com/kjunn2000/chat-app/chat-api/config"
@@ -31,11 +32,9 @@ func NewMessageStore(logger *zap.Logger) *MessageStore {
 }
 
 func (s *MessageStore) CreateMessage(e *proto.Message) error {
-	_, err := s.Db.Exec(
-		`INSERT INTO messages (id,content,created_at) values($1, $2, $3);`,
-		e.Id,
-		e.Content,
-		e.Timestamp)
+	sql, _, _ := sq.Insert("messages").Columns("id", "content", "created_at").Values(e.Id, e.Content, e.Timestamp).ToSql()
+
+	_, err := s.Db.Exec(sql)
 	if err != nil {
 		s.Log.Fatal("Failed to insert data to db", zap.Error(err))
 	}

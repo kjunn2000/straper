@@ -1,0 +1,55 @@
+.ChatInput {
+  width: 95%;
+  display: block;
+  margin: auto;
+
+  input {
+    padding: 10px;
+    margin: 0;
+    font-size: 16px;
+    border: none;
+    border-radius: 5px;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    width: 98%;
+    box-shadow: 0 5px 15px -5px rgba(0, 0, 0, 0.1);
+  }
+}
+
+.Message {
+  display: block;
+  background-color: white;
+  margin: 10px auto;
+  box-shadow: 0 5px 15px -5px rgba(0, 0, 0, 0.2);
+  padding: 10px 20px;
+  border-radius: 5px;
+  clear: both;
+
+  &.me {
+    color: white;
+    float: right;
+    background-color: #328ec4;
+  }
+}
+
+.header {
+  background-color: #15223b;
+  width: 100%;
+  margin: 0;
+  padding: 10px;
+  color: white;
+
+  h2 {
+    margin: 0;
+    padding: 0;
+  }
+}
+
+.ChatHistory {
+  background-color: #f7f7f7;
+  margin: 0;
+  padding: 20px;
+  h2 {
+    margin: 0;
+    padding: 0;
+  }
+}
