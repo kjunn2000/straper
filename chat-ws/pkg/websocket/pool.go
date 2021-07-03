@@ -1,23 +1,23 @@
 package websocket
 
-import (
-	rdb "github.com/kjunn2000/straper/chat-ws/pkg/redis"
-)
+import "github.com/kjunn2000/straper/chat-ws/pkg/storage/redis"
 
 type Pool struct {
+	Name       string
 	Register   chan *Client
 	Unregister chan *Client
 	Broadcast  chan Message
 	Clients    map[*Client]bool
-	Rdb        rdb.RedisClient
+	Rdb        redis.RedisClient
 }
 
-func NewPool() *Pool {
+func NewPool(name string) *Pool {
 	return &Pool{
+		Name:       name,
 		Register:   make(chan *Client),
 		Unregister: make(chan *Client),
 		Broadcast:  make(chan Message),
 		Clients:    make(map[*Client]bool),
-		Rdb:        rdb.NewRedisClient(),
+		Rdb:        redis.NewRedisClient(),
 	}
 }
