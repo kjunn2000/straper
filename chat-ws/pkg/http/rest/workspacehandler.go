@@ -31,17 +31,17 @@ func NewWorkspaceHandler(ws domain.WorkspaceService, log *zap.Logger) *workspace
 }
 
 func (w *workspaceHandler) CreateWorkspace(rw http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	name, ok := vars["name"]
-	if !ok {
-		w.log.Warn("Unable to extract name from create workplace request")
-		rw.WriteHeader(http.StatusBadRequest)
-		return
-	}
-	err := w.ws.CreateWorkspace(name)
-	if err != nil {
-		rw.WriteHeader(http.StatusBadRequest)
-	}
+	// vars := mux.Vars(r)
+	// name, ok := vars["name"]
+	// if !ok {
+	// 	w.log.Warn("Unable to extract name from create workplace request")
+	// 	rw.WriteHeader(http.StatusBadRequest)
+	// 	return
+	// }
+	// err := w.ws.CreateWorkspace(name)
+	// if err != nil {
+	// 	rw.WriteHeader(http.StatusBadRequest)
+	// }
 }
 
 func (w *workspaceHandler) EditWorkspace(rw http.ResponseWriter, r *http.Request) {

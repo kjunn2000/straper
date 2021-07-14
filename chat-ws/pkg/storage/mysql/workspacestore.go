@@ -1,4 +1,4 @@
-package storage
+package mysql 
 
 import (
 	"database/sql"

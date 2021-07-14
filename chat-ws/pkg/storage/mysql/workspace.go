@@ -1,4 +1,4 @@
-package storage
+package mysql 
 
 type Workspace struct {
 	id   string `db:"workspace_id"`

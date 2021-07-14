@@ -1,4 +1,4 @@
-package websocket
+package domain
 
 import (
 	"fmt"
@@ -7,14 +7,14 @@ import (
 )
 
 type Client struct {
-	Conn *websocket.Conn
-	Pool *Pool
+	Conn    *websocket.Conn
+	Channel *Channel
 }
 
-func NewClient(conn *websocket.Conn, pool *Pool) *Client {
+func NewClient(conn *websocket.Conn, channel *Channel) *Client {
 	return &Client{
-		Conn: conn,
-		Pool: pool,
+		Conn:    conn,
+		Channel: channel,
 	}
 }
 
@@ -30,7 +30,7 @@ type UpdateHistoryMessage struct {
 
 func (c *Client) ReadMsg() {
 	defer func() {
-		c.Pool.Unregister <- c
+		c.Channel.Unregister <- c
 		c.Conn.Close()
 	}()
 	for {
@@ -40,6 +40,6 @@ func (c *Client) ReadMsg() {
 			fmt.Println("Unable to read message from connection")
 			return
 		}
-		c.Pool.Broadcast <- msg
+		c.Channel.Broadcast <- msg
 	}
 }

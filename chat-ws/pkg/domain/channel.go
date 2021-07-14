@@ -1,8 +1,8 @@
-package websocket
+package domain
 
 import "github.com/kjunn2000/straper/chat-ws/pkg/storage/redis"
 
-type Pool struct {
+type Channel struct {
 	Name       string
 	Register   chan *Client
 	Unregister chan *Client
@@ -11,8 +11,8 @@ type Pool struct {
 	Rdb        redis.RedisClient
 }
 
-func NewPool(name string) *Pool {
-	return &Pool{
+func NewChannel(name string) *Channel {
+	return &Channel{
 		Name:       name,
 		Register:   make(chan *Client),
 		Unregister: make(chan *Client),

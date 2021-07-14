@@ -5,7 +5,7 @@ import (
 )
 
 type WorkspaceService interface {
-	CreateWorkspace(name string) error
+	CreateWorkspace(name string) (Workspace, error)
 	EditWorkspace(w Workspace) error
 	DeleteWorkspace(id string) error
 	GetWorkspaces() ([]Workspace, error)
@@ -13,7 +13,7 @@ type WorkspaceService interface {
 }
 
 type WorkspaceRepository interface {
-	CreateWorkspace(w Workspace) error
+	CreateWorkspace(w Workspace) (Workspace, error)
 	EditWorkspace(w Workspace) error
 	DeleteWorkspace(id string) error
 	GetWorkspaces() ([]Workspace, error)
@@ -33,11 +33,15 @@ func NewWorkspaceService(r WorkspaceRepository, log *zap.Logger) *workspaceServi
 }
 
 func (ws *workspaceService) CreateWorkspace(name string) error {
-	newWorkspace := Workspace{
-		Id:   "",
-		Name: name,
-	}
-	return ws.s.CreateWorkspace(newWorkspace)
+	// newWorkspace := Workspace{
+	// 	Id:   "",
+	// 	Name: name,
+	// }
+	// w, err := ws.s.CreateWorkspace(newWorkspace)
+	// if err != nil {
+	// 	return err
+	// }
+	return nil
 }
 
 func (ws *workspaceService) EditWorkspace(w Workspace) error {

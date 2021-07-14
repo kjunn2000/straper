@@ -1,17 +1,17 @@
-package websocket
+package domain
 
 import "fmt"
 
-func (p *Pool) StartWSServer() {
+func (c *Channel) StartWSServer() {
 	for {
 		select {
-		case client := <-p.Register:
-			p.Clients[client] = true
+		case client := <-c.Register:
+			c.Clients[client] = true
 			fmt.Println("New user enter room...")
-			for client, _ := range p.Clients {
+			for client, _ := range c.Clients {
 				client.Conn.WriteJSON(Message{Type: 1, Content: "New user enter room..."})
 			}
-			ch, err := p.Rdb.GetChatHistory()
+			ch, err := c.Rdb.GetChatHistory()
 			if err != nil {
 				fmt.Println(err)
 				fmt.Println("Unable to push chat history")
@@ -23,21 +23,21 @@ func (p *Pool) StartWSServer() {
 			}
 			client.Conn.WriteJSON(msg)
 
-		case client := <-p.Unregister:
-			delete(p.Clients, client)
+		case client := <-c.Unregister:
+			delete(c.Clients, client)
 			fmt.Println("One user quit room...")
-			for client, _ := range p.Clients {
+			for client, _ := range c.Clients {
 				client.Conn.WriteJSON(Message{Type: 2, Content: "One user quit room..."})
 			}
 
-		case msg := <-p.Broadcast:
+		case msg := <-c.Broadcast:
 			fmt.Println("Receive message :" + msg.Content)
-			err := p.Rdb.UpdateChatHistory(msg.Content)
+			err := c.Rdb.UpdateChatHistory(msg.Content)
 			if err != nil {
 				fmt.Println(err)
 				continue
 			}
-			for client, _ := range p.Clients {
+			for client, _ := range c.Clients {
 				client.Conn.WriteJSON(msg)
 			}
 		}
