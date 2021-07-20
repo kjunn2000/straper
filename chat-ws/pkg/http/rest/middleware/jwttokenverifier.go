@@ -4,7 +4,8 @@ import (
 	"net/http"
 
 	"github.com/dgrijalva/jwt-go/v4"
-	"github.com/kjunn2000/straper/chat-ws/pkg/domain"
+	"github.com/kjunn2000/straper/chat-ws/pkg/domain/auth"
+	"github.com/kjunn2000/straper/chat-ws/pkg/http/rest"
 )
 
 func JwtTokenVerifier(next http.Handler) http.Handler {
@@ -14,17 +15,19 @@ func JwtTokenVerifier(next http.Handler) http.Handler {
 
 		if v == "" {
 			w.WriteHeader(http.StatusForbidden)
+			rest.AddResponseToResponseWritter(w, nil, "Unauthorized request.")
 			return
 		}
 
-		c := &domain.Claims{}
+		c := &auth.Claims{}
 		token, err := jwt.ParseWithClaims(v, c,
 			func(t *jwt.Token) (interface{}, error) {
-				return domain.SecretKey, nil
+				return auth.SecretKey, nil
 			})
 
 		if err != nil || !token.Valid {
 			w.WriteHeader(http.StatusForbidden)
+			rest.AddResponseToResponseWritter(w, nil, "Unauthorized request.")
 			return
 		}
 		next.ServeHTTP(w, r)

@@ -4,13 +4,18 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/go-redis/redis/v8"
 	_ "github.com/go-sql-driver/mysql"
 
 	"github.com/gorilla/mux"
 	"github.com/jmoiron/sqlx"
-	"github.com/kjunn2000/straper/chat-ws/pkg/domain"
-	"github.com/kjunn2000/straper/chat-ws/pkg/http/rest"
+	"github.com/kjunn2000/straper/chat-ws/pkg/domain/account"
+	"github.com/kjunn2000/straper/chat-ws/pkg/domain/adding"
+	"github.com/kjunn2000/straper/chat-ws/pkg/domain/auth"
+	"github.com/kjunn2000/straper/chat-ws/pkg/domain/chatting"
+	"github.com/kjunn2000/straper/chat-ws/pkg/http/rest/handler"
 	storage "github.com/kjunn2000/straper/chat-ws/pkg/storage/mysql"
+	rdb "github.com/kjunn2000/straper/chat-ws/pkg/storage/redis"
 	"go.uber.org/zap"
 )
 
@@ -21,29 +26,29 @@ func setUpRoutes(log *zap.Logger) (*mux.Router, error) {
 		return nil, err
 	}
 
-	mr := mux.NewRouter()
+	mr := mux.NewRouter().PathPrefix("/api/v1").Subrouter()
 
-	// wstore := storage.NewWorkspaceStore(db, log)
-	// ws := domain.NewWorkspaceService(wstore, log)
-	// wh := rest.NewWorkspaceHandler(ws, log)
-	// wr := mr.PathPrefix("/api/v1/workspace").Subrouter()
-	// wr.HandleFunc("/{name}", wh.CreateWorkspace).Methods("POST")
-	// wr.HandleFunc("/{id}", wh.DeleteWorkspace).Methods("DELETE")
-	// wr.HandleFunc("/{id}", wh.GetWorkspace).Methods("GET")
-	// wr.HandleFunc("", wh.EditWorkspace).Methods("PUT")
+	workspaceStore := storage.NewWorkspaceStore(db, log)
+	channelStore := storage.NewChannelStore(db, log)
+	userStore := storage.NewUserStore(log, db)
 
-	ustore := storage.NewUserStore(log, db)
-	as := domain.NewAuthService(log, ustore)
-	ah := rest.NewAuthHandler(log, as)
-	ar := mr.PathPrefix("/api/auth").Subrouter()
-	ar.HandleFunc("/login", ah.LoginHandler)
-	ar.HandleFunc("/refresh-token", ah.RefreshTokenHandler)
+	rc := redis.NewClient(&redis.Options{
+		Addr:     "localhost:6379",
+		Password: "",
+		DB:       0,
+	})
+	redisClient := rdb.NewRedisClient(rc, log)
 
-	us := domain.NewUserService(log, ustore)
-	aoh := rest.NewAccOpeningHandler(log, us)
-	mr.HandleFunc("/api/account/opening", aoh.Register)
+	authService := auth.NewService(log, userStore)
+	userService := account.NewService(log, userStore)
+	addingService := adding.NewService(log, workspaceStore, channelStore)
+	chattingService := chatting.NewService(log, channelStore, &redisClient)
 
-	// mr.Use(middleware.JwtTokenVerifier)
+	mr.Handle("/auth", handler.NewAuthRouter(authService))
+	mr.Handle("/account", handler.NewAccountRouter(userService))
+	mr.Handle("/workspace", handler.NewWorkspaceRouter(addingService))
+	mr.Handle("/channel", handler.NewChannelRouter(addingService, chattingService))
+	mr.Handle("/connection", handler.NewConnRouter(log, chattingService))
 
 	return mr, nil
 }

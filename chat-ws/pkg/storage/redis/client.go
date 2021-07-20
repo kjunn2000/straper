@@ -4,56 +4,58 @@ import (
 	"bytes"
 	"context"
 	"encoding/gob"
-	"fmt"
-	"time"
 
 	"github.com/go-redis/redis/v8"
+	"github.com/gorilla/websocket"
+	"go.uber.org/zap"
 )
 
-type RedisClient struct {
+type redisClient struct {
 	Client *redis.Client
+	Log    *zap.Logger
 }
 
-func NewRedisClient() RedisClient {
-	rdb := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
-		Password: "",
-		DB:       0,
-	})
-	return RedisClient{
+func NewRedisClient(rdb *redis.Client, log *zap.Logger) redisClient {
+	return redisClient{
 		Client: rdb,
+		Log:    log,
 	}
 }
 
-func (c *RedisClient) UpdateChatHistory(message string) error {
-	ch, err := c.GetChatHistory()
-	if err != nil && err != redis.Nil {
-		return err
-	}
-	if ch == nil {
-		ch = make([]string, 0)
-	}
-	ch = append(ch, message)
-	fmt.Println(ch)
-
+func (c *redisClient) SaveConnnection(userId string, conn *websocket.Conn) error {
 	var v bytes.Buffer
-	if err := gob.NewEncoder(&v).Encode(ch); err != nil {
+	if err := gob.NewEncoder(&v).Encode(conn); err != nil {
+		c.Log.Info("Unable to encode user connection.", zap.Error(err))
 		return err
 	}
-	c.Client.Set(context.Background(), "ChatHistory", v.Bytes(), time.Minute*1)
+	err := c.Client.Set(context.Background(), userId, v.Bytes(), 0).Err()
+	if err != nil {
+		c.Log.Info("Failed to set value to redis.", zap.Error(err))
+		return err
+	}
 	return nil
 }
 
-func (c *RedisClient) GetChatHistory() ([]string, error) {
-	get := c.Client.Get(context.Background(), "ChatHistory")
-	historyBytes, err := get.Bytes()
+func (c *redisClient) GetConnection(userId string) (*websocket.Conn, error) {
+	connBytes, err := c.Client.Get(context.Background(), userId).Bytes()
 	if err != nil {
+		c.Log.Info("Failed to get user connection from redis.", zap.Error(err))
 		return nil, err
 	}
-	r := bytes.NewReader(historyBytes)
-	chatHistory := make([]string, 0)
-	if err = gob.NewDecoder(r).Decode(&chatHistory); err != nil {
+	r := bytes.NewReader(connBytes)
+	var conn *websocket.Conn
+	if err = gob.NewDecoder(r).Decode(conn); err != nil {
+		c.Log.Info("Failed to decode connection.", zap.Error(err))
 		return nil, err
 	}
-	return chatHistory, nil
+	return conn, nil
+}
+
+func (c *redisClient) StopConnection(userId string) error {
+	err := c.Client.Del(context.Background(), userId).Err()
+	if err != nil {
+		c.Log.Info("Failed to delete connection at redis.", zap.Error(err))
+		return err
+	}
+	return nil
 }
