@@ -5,6 +5,7 @@ import (
 	"github.com/jmoiron/sqlx"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/adding"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/chatting"
+	"github.com/kjunn2000/straper/chat-ws/pkg/domain/listing"
 	"go.uber.org/zap"
 )
 
@@ -36,21 +37,6 @@ func (cs *ChannelStore) CreateChannel(channel *adding.Channel) error {
 	return nil
 }
 
-func (cs *ChannelStore) GetAllChannelByWorkspaceId(workspaceId string) (adding.Channel, error) {
-	sql, args, err := sq.Select("*").From("channel").Where(sq.Eq{"workspace_id": workspaceId}).ToSql()
-	if err != nil {
-		cs.log.Info("Unable to create select channel sql.", zap.Error(err))
-		return adding.Channel{}, err
-	}
-	var channel adding.Channel
-	err = cs.db.Get(&channel, sql, args...)
-	if err != nil {
-		cs.log.Info("Failed to select channel by workspace id.", zap.Error(err))
-		return adding.Channel{}, err
-	}
-	return channel, nil
-}
-
 func (cs *ChannelStore) AddUserToChannel(channelId string, userIdList []string) error {
 	sqlBuilder := sq.Insert("channel_user").Columns("channel_id", "user_id")
 	for _, id := range userIdList {
@@ -70,6 +56,28 @@ func (cs *ChannelStore) AddUserToChannel(channelId string, userIdList []string) 
 	return nil
 }
 
+func (cs *ChannelStore) GetAllChannelByUserAndWorkspaceId(userId, workspaceId string) ([]listing.Channel, error) {
+	sql, args, err := sq.Select("channel.channel_id, channel_name").
+		From("channel").
+		InnerJoin("channel_user on channel.channel_id = channel_user.channel_id").
+		Where(sq.Eq{"workspace_id": workspaceId}).
+		Where(sq.Eq{"user_id": userId}).
+		ToSql()
+
+	if err != nil {
+		cs.log.Info("Unable to create select channel sql.", zap.Error(err))
+		return nil, err
+	}
+
+	var channels []listing.Channel
+	err = cs.db.Select(&channels, sql, args...)
+	if err != nil {
+		cs.log.Info("Failed to select channel by workspace id.", zap.Error(err))
+		return nil, err
+	}
+	return channels, nil
+}
+
 func (cs *ChannelStore) GetClientListByChannelId(channelId string) ([]chatting.Client, error) {
 	sql, args, err := sq.Select("user_id").From("channel_user").Where(sq.Eq{"channel_id": channelId}).ToSql()
 	if err != nil {
@@ -83,4 +91,75 @@ func (cs *ChannelStore) GetClientListByChannelId(channelId string) ([]chatting.C
 		return nil, err
 	}
 	return clientList, err
+}
+
+func (cs *ChannelStore) GetAllChannelByWorkspaceId(workspaceId string) ([]listing.Channel, error) {
+	sql, args, err := sq.Select("channel.channel_id, channel_name").
+		From("channel").
+		Where(sq.Eq{"workspace_id": workspaceId}).
+		ToSql()
+
+	if err != nil {
+		cs.log.Info("Unable to create select channel sql.", zap.Error(err))
+		return nil, err
+	}
+
+	var channels []listing.Channel
+	err = cs.db.Select(&channels, sql, args...)
+	if err != nil {
+		cs.log.Info("Failed to select channel by workspace id.", zap.Error(err))
+		return nil, err
+	}
+	return channels, nil
+}
+
+func (cs *ChannelStore) GetDefaultChannelByWorkspaceId(workspaceId string) (adding.Channel, error) {
+	sql, args, err := sq.Select("channel_id").From("channel").
+		Where(sq.Eq{"workspace_id": workspaceId}).
+		Where(sq.Eq{"channel_name": "General"}).
+		ToSql()
+	if err != nil {
+		cs.log.Info("Unable to create select default channel sql.", zap.Error(err))
+		return adding.Channel{}, err
+	}
+	var channel adding.Channel
+	err = cs.db.Get(&channel, sql, args...)
+	if err != nil {
+		cs.log.Info("Failed to select default channel - General from db.", zap.Error(err))
+		return adding.Channel{}, err
+	}
+	return channel, nil
+}
+
+func (cs *ChannelStore) DeleteChannel(channelId string) error {
+	sql, args, err := sq.Delete("channel").Where(sq.Eq{"channel_id": channelId}).ToSql()
+	if err != nil {
+		cs.log.Info("Unable to create delete channel sql.", zap.Error(err))
+		return err
+	}
+	_, err = cs.db.Exec(sql, args...)
+	if err != nil {
+		cs.log.Info("Failed to delete channel.", zap.Error(err))
+		return err
+	}
+	cs.log.Info("Successfully to delete 1 channel.", zap.String("channel_id", channelId))
+	return nil
+}
+
+func (cs *ChannelStore) RemoveUserFromChannelList(channelIdList []string, userId string) error {
+	sql, args, err := sq.Delete("channel_user").
+		Where(sq.Eq{"user_id": userId}).
+		Where(sq.Eq{"channel_id": channelIdList}).
+		ToSql()
+	if err != nil {
+		cs.log.Info("Unable to create remove user from channels sql.", zap.Error(err))
+		return err
+	}
+	_, err = cs.db.Exec(sql, args...)
+	if err != nil {
+		cs.log.Info("Failed to remove user from channels.", zap.Error(err))
+		return err
+	}
+	cs.log.Info("Successfully remove 1 user from channels.", zap.String("user_id", userId))
+	return nil
 }

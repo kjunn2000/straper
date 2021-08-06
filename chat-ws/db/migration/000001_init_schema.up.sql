@@ -40,7 +40,8 @@ END;
 CREATE TABLE workspace 
 (
 	workspace_id CHAR(36) PRIMARY KEY,
-	workspace_name VARCHAR(255) NOT NULL
+	workspace_name VARCHAR(255) NOT NULL,
+  creator_id VARCHAR(255) 
 );
 
 CREATE TABLE workspace_user
@@ -49,9 +50,9 @@ CREATE TABLE workspace_user
   user_id VARCHAR(255),
   PRIMARY KEY (workspace_id, user_id),
   CONSTRAINT fk_workspace_user_workspace_workspace_id
-    FOREIGN KEY fk_workspace_id(workspace_id) REFERENCES workspace(workspace_id),
+    FOREIGN KEY fk_workspace_id(workspace_id) REFERENCES workspace(workspace_id) ON DELETE CASCADE,
   CONSTRAINT fk_workspace_user_user_user_id
-    FOREIGN KEY fk_user_id(user_id) REFERENCES user(user_id)
+    FOREIGN KEY fk_user_id(user_id) REFERENCES user(user_id) ON DELETE CASCADE
 );
 
 CREATE TABLE channel
@@ -60,7 +61,7 @@ CREATE TABLE channel
   channel_name VARCHAR(255) NOT NULL,
   workspace_id CHAR(36) NOT NULL,
   CONSTRAINT fk_channel_workspace_workspace_id
-    FOREIGN KEY fk_workpsace_id(workspace_id) REFERENCES workspace(workspace_id)
+    FOREIGN KEY fk_workpsace_id(workspace_id) REFERENCES workspace(workspace_id) ON DELETE CASCADE
 );
 
 CREATE TABLE channel_user
@@ -69,7 +70,17 @@ CREATE TABLE channel_user
   user_id VARCHAR(255),
   PRIMARY KEY (channel_id, user_id),
   CONSTRAINT fk_channel_user_channel_channel_id
-    FOREIGN KEY fk_channel_id(channel_id) REFERENCES channel(channel_id),
+    FOREIGN KEY fk_channel_id(channel_id) REFERENCES channel(channel_id) ON DELETE CASCADE,
   CONSTRAINT fk_channel_user_user_user_id 
-    FOREIGN KEY fk_user_id(user_id) REFERENCES user(user_id)
+    FOREIGN KEY fk_user_id(user_id) REFERENCES user(user_id) ON DELETE CASCADE
 );
+
+DELETE wu, cu 
+FROM workspace_user wu
+INNER JOIN channel c
+  ON wu.workspace_id = c.workspace_id
+INNER JOIN channel_user u
+  ON c.channel_id = u.channel_id
+WHERE w.workpace_id = ''
+AND w.user_id = ''
+AND c.user_id = ''

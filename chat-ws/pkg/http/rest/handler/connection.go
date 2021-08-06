@@ -18,11 +18,10 @@ var Upgrader websocket.Upgrader = websocket.Upgrader{
 	CheckOrigin:     func(r *http.Request) bool { return true },
 }
 
-func NewConnRouter(log *zap.Logger, cs chatting.Service) *mux.Router {
-	mr := mux.NewRouter()
-	mr.HandleFunc("/upgrade", HandleUpgrade(log, cs)).Methods("POST")
-	mr.Use(middleware.JwtTokenVerifier)
-	return mr
+func SetUpConnectionRouter(mr *mux.Router, log *zap.Logger, cs chatting.Service) {
+	cr := mr.PathPrefix("/protected/connection").Subrouter()
+	cr.HandleFunc("/upgrade", HandleUpgrade(log, cs)).Methods("POST")
+	cr.Use(middleware.JwtTokenVerifier)
 }
 
 func HandleUpgrade(log *zap.Logger, cs chatting.Service) func(http.ResponseWriter, *http.Request) {
@@ -30,21 +29,18 @@ func HandleUpgrade(log *zap.Logger, cs chatting.Service) func(http.ResponseWrite
 		conn, err := Upgrader.Upgrade(rw, r, nil)
 		if err != nil {
 			log.Warn("Cannot upgrade to websocket connection.", zap.Error(err))
-			rw.WriteHeader(http.StatusBadRequest)
 			rest.AddResponseToResponseWritter(rw, nil, err.Error())
 			return
 		}
 		accessToken := r.Header.Get("Authorization")
 		claims, err := auth.ExtractClaimsFromTokenStr(accessToken)
 		if err != nil {
-			rw.WriteHeader(http.StatusBadRequest)
 			rest.AddResponseToResponseWritter(rw, nil, err.Error())
 			return
 		}
 		err = cs.SaveConnectionToCache(claims.UserId, conn)
 		if err != nil {
 			log.Warn("Connection cannot save to redis cache.", zap.Error(err))
-			rw.WriteHeader(http.StatusBadRequest)
 			rest.AddResponseToResponseWritter(rw, nil, err.Error())
 			return
 		}

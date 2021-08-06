@@ -6,16 +6,16 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/adding"
+	"github.com/kjunn2000/straper/chat-ws/pkg/domain/auth"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/chatting"
 	"github.com/kjunn2000/straper/chat-ws/pkg/http/rest"
 	"github.com/kjunn2000/straper/chat-ws/pkg/http/rest/middleware"
 )
 
-func NewChannelRouter(as adding.Service, cs chatting.Service) *mux.Router {
-	mr := mux.NewRouter()
-	mr.HandleFunc("", CreateChannel(as, cs)).Methods("POST")
-	mr.Use(middleware.JwtTokenVerifier)
-	return mr
+func SetUpChannelRouter(mr *mux.Router, as adding.Service, cs chatting.Service) {
+	cr := mr.PathPrefix("/protected/channel").Subrouter()
+	cr.HandleFunc("/create", CreateChannel(as, cs)).Methods("POST")
+	cr.Use(middleware.JwtTokenVerifier)
 }
 
 type ChannelRequest struct {
@@ -28,13 +28,17 @@ func CreateChannel(as adding.Service, cs chatting.Service) func(w http.ResponseW
 		var cq ChannelRequest
 		err := json.NewDecoder(r.Body).Decode(&cq)
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
 			rest.AddResponseToResponseWritter(w, nil, err.Error())
 			return
 		}
-		_, err = as.CreateChannel(cq.WorkspaceId, cq.ChannelName)
+		accessToken := r.Header.Get("Authorization")
+		claims, err := auth.ExtractClaimsFromTokenStr(accessToken)
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
+			rest.AddResponseToResponseWritter(w, nil, err.Error())
+			return
+		}
+		err = as.CreateChannel(cq.WorkspaceId, cq.ChannelName, claims.UserId)
+		if err != nil {
 			rest.AddResponseToResponseWritter(w, nil, err.Error())
 			return
 		}

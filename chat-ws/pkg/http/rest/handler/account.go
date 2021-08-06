@@ -9,19 +9,17 @@ import (
 	"github.com/kjunn2000/straper/chat-ws/pkg/http/rest"
 )
 
-func NewAccountRouter(us account.Service) *mux.Router {
-	router := mux.NewRouter()
-	router.HandleFunc("/opening", Register(us)).Methods("POST")
-	return router
+func SetUpAccountRouter(mr *mux.Router, as account.Service) {
+	ar := mr.PathPrefix("/account").Subrouter()
+	ar.HandleFunc("/opening", Register(as)).Methods("POST")
 }
 
-func Register(us account.Service) func(http.ResponseWriter, *http.Request) {
+func Register(as account.Service) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var user account.User
 		json.NewDecoder(r.Body).Decode(&user)
-		err := us.Register(user)
+		err := as.Register(user)
 		if err != nil {
-			w.WriteHeader(http.StatusBadRequest)
 			rest.AddResponseToResponseWritter(w, nil, err.Error())
 			return
 		}

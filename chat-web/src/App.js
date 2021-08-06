@@ -1,41 +1,29 @@
 import './App.scss';
-import Header from './component/Header';
-import ChatHistory from './component/ChatHistory';
-import ChatInput from './component/ChatInput';
-import { useEffect, useState } from 'react';
-import { connect, sendMsg } from "./api";
-
+import { Route, BrowserRouter as Router, Switch, Redirect } from 'react-router-dom';
+import Chat from './page/Chat';
+import Login from './page/Login';
+import Register from './page/Register';
 
 function App() {
 
-  const [chatHistory, setChatHistory] = useState([])
-
-  useEffect(()=> {
-    connect(updateHistory)
-  },[])
-
-
-  const updateHistory = (msg) => {
-    if (msg.type === 4){
-      console.log(msg)
-      setChatHistory(old => [...old, ...msg.content])
-      return
-    }
-    setChatHistory(old => [...old,msg.content])
-  }
-
-  const send = (event) => {
-    if (event.keyCode === 13 ) {
-      sendMsg(event.target.value);
-      event.target.value = "";
-    }
-  }
-
   return (
     <div className="App">
-      <Header />
-      <ChatHistory chatHistory={chatHistory} />
-      <ChatInput send ={send}/>
+      <Router>
+        <Switch>
+          <Route path="/workspace">
+            <Chat/>
+          </Route>
+          <Route path="/login">
+            <Login/>
+          </Route>
+          <Route path="/register">
+            <Register/>
+          </Route>
+          <Route path="/">
+            <Redirect to="/login"/>
+          </Route>
+        </Switch>
+      </Router>
     </div>
   );
 }

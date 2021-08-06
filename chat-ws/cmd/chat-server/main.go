@@ -7,12 +7,15 @@ import (
 	"github.com/go-redis/redis/v8"
 	_ "github.com/go-sql-driver/mysql"
 
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/jmoiron/sqlx"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/account"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/adding"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/auth"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/chatting"
+	"github.com/kjunn2000/straper/chat-ws/pkg/domain/deleting"
+	"github.com/kjunn2000/straper/chat-ws/pkg/domain/listing"
 	"github.com/kjunn2000/straper/chat-ws/pkg/http/rest/handler"
 	storage "github.com/kjunn2000/straper/chat-ws/pkg/storage/mysql"
 	rdb "github.com/kjunn2000/straper/chat-ws/pkg/storage/redis"
@@ -39,16 +42,18 @@ func setUpRoutes(log *zap.Logger) (*mux.Router, error) {
 	})
 	redisClient := rdb.NewRedisClient(rc, log)
 
+	accountService := account.NewService(log, userStore)
 	authService := auth.NewService(log, userStore)
-	userService := account.NewService(log, userStore)
 	addingService := adding.NewService(log, workspaceStore, channelStore)
 	chattingService := chatting.NewService(log, channelStore, &redisClient)
+	listingService := listing.NewService(log, workspaceStore, channelStore)
+	deletingService := deleting.NewService(log, workspaceStore, channelStore)
 
-	mr.Handle("/auth", handler.NewAuthRouter(authService))
-	mr.Handle("/account", handler.NewAccountRouter(userService))
-	mr.Handle("/workspace", handler.NewWorkspaceRouter(addingService))
-	mr.Handle("/channel", handler.NewChannelRouter(addingService, chattingService))
-	mr.Handle("/connection", handler.NewConnRouter(log, chattingService))
+	handler.SetUpAuthRouter(mr, authService)
+	handler.SetUpAccountRouter(mr, accountService)
+	handler.SetUpWorkspaceRouter(mr, addingService, listingService, deletingService)
+	handler.SetUpChannelRouter(mr, addingService, chattingService)
+	handler.SetUpConnectionRouter(mr, log, chattingService)
 
 	return mr, nil
 }
@@ -62,14 +67,20 @@ func main() {
 		return
 	}
 
+	corsHandler := handlers.CORS(
+		handlers.AllowedOrigins([]string{"http://localhost:3000"}),
+		handlers.AllowedHeaders([]string{"X-Requested-With", "Origin", "Content-Type", "Accept", "Authorization"}),
+		handlers.AllowCredentials(),
+	)
+
 	srv := &http.Server{
-		Handler:      mr,
-		Addr:         "127.0.0.1:9090",
+		Handler:      corsHandler(mr),
+		Addr:         "localhost:8080",
 		WriteTimeout: 15 * time.Second,
 		ReadTimeout:  15 * time.Second,
 	}
 
-	log.Info("Server is running.", zap.String("port", ":9090"))
+	log.Info("Server is running.", zap.String("port", ":8080"))
 
 	err = srv.ListenAndServe()
 

@@ -1,6 +1,9 @@
 package auth
 
 import (
+	"database/sql"
+	"errors"
+	"strings"
 	"time"
 
 	"github.com/dgrijalva/jwt-go/v4"
@@ -19,6 +22,7 @@ type Service interface {
 type LoginResponseModel struct {
 	AccessToken  string
 	RefreshToken string
+	User *User
 }
 
 type Claims struct {
@@ -56,9 +60,12 @@ func (as *service) Login(user User) (LoginResponseModel, error) {
 
 	u, err := as.ar.FindUserByUsername(user.Username)
 
-	if err != nil || u.Password != user.Password {
+	if err == sql.ErrNoRows {
 		as.log.Info("User not found")
-		return LoginResponseModel{}, err
+		return LoginResponseModel{}, errors.New("user.not.found")
+	} else if u.Password != user.Password {
+		as.log.Info("Invalid credential")
+		return LoginResponseModel{}, errors.New("invalid.credential")
 	}
 	atc := generateNewClaims(time.Now().Add(time.Minute*10), u.UserId, u.Username, u.Role)
 	rtc := generateNewClaims(time.Now().Add(time.Minute*45), u.UserId, u.Username, u.Role)
@@ -72,7 +79,11 @@ func (as *service) Login(user User) (LoginResponseModel, error) {
 		as.log.Warn("Unable to sign jwt token.", zap.Error(aerr), zap.Error(rerr))
 		return LoginResponseModel{}, err
 	}
-	return LoginResponseModel{AccessToken: ats, RefreshToken: rts}, nil
+	return LoginResponseModel{
+			AccessToken: "Bearer " + ats,
+			RefreshToken: "Bearer " + rts,
+			User: u,
+		}, nil
 }
 
 func (as *service) RefreshToken(refreshToken string) (string, error) {
@@ -94,10 +105,16 @@ func (as *service) RefreshToken(refreshToken string) (string, error) {
 		return "", err
 	}
 
-	return ats, nil
+	return "Bearer " + ats, nil
 }
 
 func ExtractClaimsFromTokenStr(tokenStr string) (Claims, error) {
+
+	i := strings.Index(tokenStr, "Bearer ")
+	if i == -1 || i != 0 {
+		return Claims{}, errors.New("invalid.token.format")
+	}
+	tokenStr = tokenStr[7:]
 
 	c := Claims{}
 	token, err := jwt.ParseWithClaims(tokenStr, &c,

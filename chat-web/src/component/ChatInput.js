@@ -1,11 +1,9 @@
 import React from 'react'
 
-const ChatInput = ({send}) => {
+const ChatInput = ({channel}) => {
 	return (
-		<div>
-			<div className="ChatInput">
-        			<input onKeyDown={send} />
-      			</div>	
+		<div className="bg-gray-800 bg-opacity-40 rounded-lg w-full">
+        		<input className="bg-transparent p-3 w-full" placeholder={"Message #" + channel.channel_name}/>
 		</div>
 	)
 }
