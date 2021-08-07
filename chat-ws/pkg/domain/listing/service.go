@@ -11,35 +11,30 @@ type Service interface {
 
 type service struct {
 	log *zap.Logger
-	wr  WorkspaceRepository
-	cr  ChannelRepository
+	r   Repository
 }
 
-func NewService(log *zap.Logger, wr WorkspaceRepository, cr ChannelRepository) *service {
+func NewService(log *zap.Logger, r Repository) *service {
 	return &service{
 		log: log,
-		wr:  wr,
-		cr:  cr,
+		r:   r,
 	}
 }
 
-type WorkspaceRepository interface {
+type Repository interface {
 	GetWorkspacesByUserId(userId string) ([]Workspace, error)
 	GetWorkspaceByWorkspaceId(workspaceId string) (Workspace, error)
-}
-
-type ChannelRepository interface {
-	GetAllChannelByWorkspaceId(workspaceId string)([]Channel,error)
+	GetAllChannelByWorkspaceId(workspaceId string) ([]Channel, error)
 	GetAllChannelByUserAndWorkspaceId(userId, workspaceId string) ([]Channel, error)
 }
 
 func (s *service) GetWorkspaceData(userId string) ([]Workspace, error) {
-	workspaces, err := s.wr.GetWorkspacesByUserId(userId)
+	workspaces, err := s.r.GetWorkspacesByUserId(userId)
 	if err != nil {
 		return nil, err
 	}
 	for i := 0; i < len(workspaces); i++ {
-		channels, err := s.cr.GetAllChannelByUserAndWorkspaceId(userId, workspaces[i].Id)
+		channels, err := s.r.GetAllChannelByUserAndWorkspaceId(userId, workspaces[i].Id)
 		if err != nil {
 			return nil, err
 		}
@@ -49,14 +44,14 @@ func (s *service) GetWorkspaceData(userId string) ([]Workspace, error) {
 }
 
 func (s *service) GetWorkspaceByWorkspaceId(workspaceId string) (Workspace, error) {
-	workspace, err := s.wr.GetWorkspaceByWorkspaceId(workspaceId)
+	workspace, err := s.r.GetWorkspaceByWorkspaceId(workspaceId)
 	if err != nil {
 		return Workspace{}, err
 	}
 
-	channelList, err := s.cr.GetAllChannelByWorkspaceId(workspaceId)
+	channelList, err := s.r.GetAllChannelByWorkspaceId(workspaceId)
 	workspace.ChannelList = channelList
-	
+
 	if err != nil {
 		return Workspace{}, err
 	}

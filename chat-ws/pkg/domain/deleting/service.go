@@ -11,24 +11,19 @@ type Service interface {
 
 type service struct {
 	log *zap.Logger
-	wr  WorkspaceRepository
-	cr  ChannelRepository
+	r   Repository
 }
 
-func NewService(log *zap.Logger, wr WorkspaceRepository, cr ChannelRepository) *service {
+func NewService(log *zap.Logger, r Repository) *service {
 	return &service{
 		log: log,
-		wr:  wr,
-		cr:  cr,
+		r:   r,
 	}
 }
 
-type WorkspaceRepository interface {
+type Repository interface {
 	DeleteWorkspace(workspaceId string) error
 	RemoveUserFromWorkspace(workspaceId, userId string) error
-}
-
-type ChannelRepository interface {
 	DeleteChannel(channelId string) error
 	RemoveUserFromChannelList(channelId []string, userId string) error
 }
@@ -38,7 +33,7 @@ type Channel struct {
 }
 
 func (s *service) DeleteWorkspace(workspaceId string) error {
-	err := s.wr.DeleteWorkspace(workspaceId)
+	err := s.r.DeleteWorkspace(workspaceId)
 	if err != nil {
 		return err
 	}
@@ -46,7 +41,7 @@ func (s *service) DeleteWorkspace(workspaceId string) error {
 }
 
 func (s *service) LeaveWorkspace(workspaceId, userId string) error {
-	err := s.wr.RemoveUserFromWorkspace(workspaceId, userId)
+	err := s.r.RemoveUserFromWorkspace(workspaceId, userId)
 	if err != nil {
 		return err
 	}
@@ -54,7 +49,7 @@ func (s *service) LeaveWorkspace(workspaceId, userId string) error {
 }
 
 func (s *service) DeleteChannel(channelId string) error {
-	err := s.cr.DeleteChannel(channelId)
+	err := s.r.DeleteChannel(channelId)
 	if err != nil {
 		return err
 	}
@@ -62,7 +57,7 @@ func (s *service) DeleteChannel(channelId string) error {
 }
 
 func (s *service) LeaveChannel(channelId, userId string) error {
-	err := s.cr.RemoveUserFromChannelList([]string{channelId}, userId)
+	err := s.r.RemoveUserFromChannelList([]string{channelId}, userId)
 	if err != nil {
 		return err
 	}

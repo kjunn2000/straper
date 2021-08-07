@@ -37,11 +37,11 @@ func CreateChannel(as adding.Service, cs chatting.Service) func(w http.ResponseW
 			rest.AddResponseToResponseWritter(w, nil, err.Error())
 			return
 		}
-		err = as.CreateChannel(cq.WorkspaceId, cq.ChannelName, claims.UserId)
+		channel, err := as.CreateChannel(cq.WorkspaceId, cq.ChannelName, claims.UserId)
 		if err != nil {
 			rest.AddResponseToResponseWritter(w, nil, err.Error())
 			return
 		}
-		rest.AddResponseToResponseWritter(w, nil, "")
+		rest.AddResponseToResponseWritter(w, channel, "")
 	}
 }

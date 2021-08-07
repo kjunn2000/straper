@@ -8,47 +8,39 @@ import (
 type Service interface {
 	CreateWorkspace(w Workspace, userId string) (Workspace, error)
 	AddUserToWorkspace(workspaceId string, userIdList []string) error
-	CreateChannel(workspaceId, channelName, userId string) error
+	CreateChannel(workspaceId, channelName, userId string) (Channel, error)
 	AddUserToChannel(channelId string, userIdList []string) error
 }
 
-type WorkspaceRepository interface {
-	CreateWorkspace(w Workspace) error
+type Repository interface {
+	CreateWorkspace(w Workspace, c Channel, userId string) (Workspace, error)
 	AddUserToWorkspace(workspaceId string, userIdList []string) error
-}
-
-type ChannelRepository interface {
-	CreateChannel(channel *Channel) error
+	CreateChannel(channel Channel, userId string) (Channel, error)
 	AddUserToChannel(channelId string, userId []string) error
 	GetDefaultChannelByWorkspaceId(workspaceId string) (Channel, error)
 }
 
 type service struct {
-	wr  WorkspaceRepository
-	cr  ChannelRepository
+	r   Repository
 	log *zap.Logger
 }
 
-func NewService(log *zap.Logger, wr WorkspaceRepository, cr ChannelRepository) *service {
+func NewService(log *zap.Logger, r Repository) *service {
 	return &service{
-		wr:  wr,
-		cr:  cr,
 		log: log,
+		r:   r,
 	}
 }
 
 func (s *service) CreateWorkspace(w Workspace, userId string) (Workspace, error) {
 	w.Id = uuid.New().String()
 	w.CreatorId = userId
-	err := s.wr.CreateWorkspace(w)
-	if err != nil {
-		return Workspace{}, err
+	c := Channel{
+		ChannelId:   uuid.New().String(),
+		ChannelName: "General",
+		WorkspaceId: w.Id,
 	}
-	err = s.AddUserToWorkspace(w.Id, []string{userId})
-	if err != nil {
-		return Workspace{}, err
-	}
-	err = s.CreateChannel(w.Id, "General", userId)
+	w, err := s.r.CreateWorkspace(w, c, userId)
 	if err != nil {
 		return Workspace{}, err
 	}
@@ -56,11 +48,11 @@ func (s *service) CreateWorkspace(w Workspace, userId string) (Workspace, error)
 }
 
 func (s *service) AddUserToWorkspace(workspaceId string, userIdList []string) error {
-	err := s.wr.AddUserToWorkspace(workspaceId, userIdList)
+	err := s.r.AddUserToWorkspace(workspaceId, userIdList)
 	if err != nil {
 		return err
 	}
-	c, err := s.cr.GetDefaultChannelByWorkspaceId(workspaceId)
+	c, err := s.r.GetDefaultChannelByWorkspaceId(workspaceId)
 	if err != nil {
 		return err
 	}
@@ -71,19 +63,15 @@ func (s *service) AddUserToWorkspace(workspaceId string, userIdList []string) er
 	return nil
 }
 
-func (s *service) CreateChannel(workspaceId, channelName, userId string) error {
+func (s *service) CreateChannel(workspaceId, channelName, userId string) (Channel, error) {
 	c := NewChannel(uuid.New().String(), channelName, workspaceId)
-	err := s.cr.CreateChannel(c)
+	channel, err := s.r.CreateChannel(*c, userId)
 	if err != nil {
-		return err
+		return channel, err
 	}
-	err = s.AddUserToChannel(c.ChannelId, []string{userId})
-	if err != nil {
-		return err
-	}
-	return nil
+	return channel, nil
 }
 
 func (s *service) AddUserToChannel(channelId string, userIdList []string) error {
-	return s.cr.AddUserToChannel(channelId, userIdList)
+	return s.r.AddUserToChannel(channelId, userIdList)
 }

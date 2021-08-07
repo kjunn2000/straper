@@ -12,14 +12,14 @@ type DBTX interface {
 	Select(dest interface{}, query string, args ...interface{}) error
 }
 
-type WorkspaceQuery struct {
+type Queries struct {
 	db  DBTX
-	Log *zap.Logger
+	log *zap.Logger
 }
 
-func NewWorkspaceQuery(db DBTX, log *zap.Logger) *WorkspaceQuery {
-	return &WorkspaceQuery{
+func NewQueries(db DBTX, log *zap.Logger) *Queries {
+	return &Queries{
 		db:  db,
-		Log: log,
+		log: log,
 	}
 }
