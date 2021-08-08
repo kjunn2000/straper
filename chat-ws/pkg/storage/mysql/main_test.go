@@ -16,15 +16,17 @@ var store *Store
 var log *zap.Logger
 
 func TestMain(m *testing.M) {
+	log, _ = zap.NewDevelopment()
 	config, err := configs.LoadConfig("../../../")
 	if err != nil {
 		log.Fatal("Unable to load config")
 	}
 	testDb, err = sqlx.Connect(config.DBDriver, config.DBSource)
+	log.Info(config.DBDriver)
+	log.Info(config.DBSource)
 	if err != nil {
-		log.Fatal("Failed to open conn.")
+		log.Fatal("Failed to open conn.", zap.Error(err))
 	}
-	log, _ = zap.NewDevelopment()
 	store = NewStore(testDb, log)
 	os.Exit(m.Run())
 }
