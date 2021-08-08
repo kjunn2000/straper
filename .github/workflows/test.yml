@@ -14,6 +14,9 @@ jobs:
       DB_DATABASE: straperdb
       DB_USER: root
       DB_PASSWORD: root
+    defaults:
+      run:
+        working-directory: ./chat-ws
     steps:
     - uses: actions/checkout@v2
 
@@ -31,6 +34,7 @@ jobs:
     - name: Set up MYSQL
       run: |
         sudo /etc/init.d/mysql start
+        mysql -e 'CREATE DATABASE ${{ env.DB_DATABASE }};' -u${{ env.DB_USER }} -p${{ env.DB_PASSWORD }}
         make migrate_up
 
     - name: Test
