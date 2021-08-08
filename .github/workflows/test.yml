@@ -35,7 +35,7 @@ jobs:
       run: |
         sudo /etc/init.d/mysql start
         mysql -e 'CREATE DATABASE ${{ env.DB_DATABASE }};' -u${{ env.DB_USER }} -p${{ env.DB_PASSWORD }}
-        make migrate_up 
+        make migrate_action_up 
 
     - name: Test
       run: DB_PASSWORD=root go test -v ./...
