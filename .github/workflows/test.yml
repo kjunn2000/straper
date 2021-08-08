@@ -13,7 +13,7 @@ jobs:
     env:
       DB_DATABASE: straperdb
       DB_USER: root
-      DB_PASSWORD: password 
+      DB_PASSWORD: root 
     defaults:
       run:
         working-directory: ./chat-ws
@@ -38,4 +38,4 @@ jobs:
         make migrate_up 
 
     - name: Test
-      run: make test
+      run: DB_PASSWORD=root go test -v ./...
