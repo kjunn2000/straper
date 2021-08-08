@@ -5,18 +5,37 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/adding"
+	"github.com/kjunn2000/straper/chat-ws/pkg/storage"
 	"github.com/stretchr/testify/require"
 )
 
 func TestCreateChannel(t *testing.T) {
+	randUser := generateRandomoUser()
+	err := store.SaveUser(randUser)
+	require.NoError(t, err)
+	user, err := store.FindUserByUsername(randUser.Username)
+	require.NoError(t, err)
+	workspaceId := uuid.New().String()
+	workspace := adding.Workspace{
+		Id:        workspaceId,
+		Name:      storage.RandomString(6),
+		CreatorId: user.UserId,
+	}
 	channel := adding.Channel{
 		ChannelId:   uuid.New().String(),
-		ChannelName: "Happy Channel 2",
-		WorkspaceId: "4ce6120b-dfd4-4460-b41c-af4f7d8e0efb",
+		ChannelName: "General",
+		WorkspaceId: workspaceId,
 	}
-	newChannel, err := store.CreateChannel(channel, "U000001")
+	_, err = store.CreateWorkspace(workspace, channel, user.UserId)
 	require.NoError(t, err)
-	require.Equal(t, channel.ChannelId, newChannel.ChannelId)
-	require.Equal(t, channel.ChannelName, newChannel.ChannelName)
-	require.Equal(t, channel.WorkspaceId, newChannel.WorkspaceId)
+	c := adding.Channel{
+		ChannelId:   uuid.New().String(),
+		ChannelName: storage.RandomString(6),
+		WorkspaceId: workspaceId,
+	}
+	newChannel, err := store.CreateChannel(c, user.UserId)
+	require.NoError(t, err)
+	require.Equal(t, c.ChannelId, newChannel.ChannelId)
+	require.Equal(t, c.ChannelName, newChannel.ChannelName)
+	require.Equal(t, c.WorkspaceId, newChannel.WorkspaceId)
 }

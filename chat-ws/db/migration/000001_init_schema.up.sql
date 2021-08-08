@@ -74,13 +74,3 @@ CREATE TABLE channel_user
   CONSTRAINT fk_channel_user_user_user_id 
     FOREIGN KEY fk_user_id(user_id) REFERENCES user(user_id) ON DELETE CASCADE
 );
-
-DELETE wu, cu 
-FROM workspace_user wu
-INNER JOIN channel c
-  ON wu.workspace_id = c.workspace_id
-INNER JOIN channel_user u
-  ON c.channel_id = u.channel_id
-WHERE w.workpace_id = ''
-AND w.user_id = ''
-AND c.user_id = ''

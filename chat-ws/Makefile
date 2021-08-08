@@ -11,3 +11,6 @@ migrate_down:
 force_migrate_down:
 		migrate -path db/migration \
 			-database mysql://root:password@"(localhost:3306)"/straperdb force 0 
+
+test:
+		go test -v ./...

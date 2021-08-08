@@ -52,14 +52,6 @@ func (s *service) AddUserToWorkspace(workspaceId string, userIdList []string) er
 	if err != nil {
 		return err
 	}
-	c, err := s.r.GetDefaultChannelByWorkspaceId(workspaceId)
-	if err != nil {
-		return err
-	}
-	err = s.AddUserToChannel(c.ChannelId, userIdList)
-	if err != nil {
-		return err
-	}
 	return nil
 }
 
