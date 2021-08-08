@@ -1,13 +1,13 @@
 package configs
 
 import (
-	"fmt"
-
 	"github.com/spf13/viper"
 )
 
 type Config struct {
 	DBDriver      string `mapstructure:"DB_DRIVER"`
+	DBUser        string `mapstructure:"DB_USER"`
+	DBPassword    string `mapstructure:"DB_PASSWORD"`
 	DBSource      string `mapstructure:"DB_SOURCE"`
 	ServerAddress string `mapstructure:"SERVER_ADDRESS"`
 }
@@ -22,7 +22,6 @@ func LoadConfig(path string) (Config, error) {
 
 	err := viper.ReadInConfig()
 	if err != nil {
-		fmt.Println(err)
 		return config, err
 	}
 	err = viper.Unmarshal(&config)

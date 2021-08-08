@@ -24,7 +24,8 @@ import (
 )
 
 func setUpRoutes(log *zap.Logger, config configs.Config) (*mux.Router, error) {
-	db, err := sqlx.Connect(config.DBDriver, config.DBSource)
+	connStr := config.DBUser + ":" + config.DBPassword + config.DBSource
+	db, err := sqlx.Connect(config.DBDriver, connStr)
 	if err != nil {
 		log.Warn("Unable to connect mysql database.", zap.Error(err))
 		return nil, err
@@ -84,7 +85,7 @@ func main() {
 		ReadTimeout:  15 * time.Second,
 	}
 
-	log.Info("Server is running.", zap.String("port", ":8080"))
+	log.Info("Server is running.", zap.String("port", config.ServerAddress))
 
 	err = srv.ListenAndServe()
 

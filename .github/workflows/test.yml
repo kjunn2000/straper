@@ -38,4 +38,4 @@ jobs:
         make migrate_action_up 
 
     - name: Test
-      run: DB_PASSWORD=root go test -v ./...
+      run: DB_PASSWORD=root make test
