@@ -1,0 +1,17 @@
+<mat-sidenav-container class="sidenav-container">
+    <mat-sidenav #drawer class="sidenav" fixedInViewport [attr.role]="(isHandset$ | async) ? 'dialog' : 'navigation'"
+        [mode]="(isHandset$ | async) ? 'over' : 'side'" [opened]="(isHandset$ | async) === false">
+        <mat-toolbar>Channel</mat-toolbar>
+        <mat-nav-list>
+            <a mat-list-item href="#">Channel 1</a>
+            <a mat-list-item href="#">Channel 2</a>
+            <a mat-list-item href="#">Channel 3</a>
+        </mat-nav-list>
+    </mat-sidenav>
+    <mat-sidenav-content>
+        <mat-toolbar style="background-color:#4f545c;">
+            <span># general</span>
+        </mat-toolbar>
+
+    </mat-sidenav-content>
+</mat-sidenav-container>

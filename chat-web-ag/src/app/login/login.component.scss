@@ -1,0 +1,15 @@
+.example-container .mat-form-field + .mat-form-field {
+
+    text-align: center;
+}
+
+.example-container {
+    display: grid;
+    grid-template-columns: 20vw;
+    justify-content: center;
+}
+
+.login-container {
+    height: 100%;
+    text-align: center;
+}
