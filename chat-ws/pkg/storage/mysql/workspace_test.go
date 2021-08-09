@@ -26,7 +26,7 @@ func TestCreateWorkspace(t *testing.T) {
 		ChannelName: "General",
 		WorkspaceId: workspaceId,
 	}
-	_, err = store.CreateWorkspace(workspace, channel, user.UserId)
+	_, err = store.CreateNewWorkspace(workspace, channel, user.UserId)
 	require.NoError(t, err)
 }
 
@@ -52,7 +52,7 @@ func TestAddUserToWorksapce(t *testing.T) {
 		ChannelName: "General",
 		WorkspaceId: workspaceId,
 	}
-	_, err = store.CreateWorkspace(workspace, channel, user.UserId)
+	_, err = store.CreateNewWorkspace(workspace, channel, user.UserId)
 	require.NoError(t, err)
 	err = store.AddUserToWorkspace(workspaceId, []string{user2.UserId})
 	require.NoError(t, err)

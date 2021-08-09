@@ -18,3 +18,9 @@ force_migrate_down:
 
 test:
 		go test -v ./...
+
+server:
+		go run cmd/chat-server/main.go
+
+mock:
+		mockgen -package mock -destination pkg/storage/mock/store.go github.com/kjunn2000/straper/chat-ws/pkg/storage/mysql Store 

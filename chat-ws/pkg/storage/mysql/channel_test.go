@@ -26,14 +26,14 @@ func TestCreateChannel(t *testing.T) {
 		ChannelName: "General",
 		WorkspaceId: workspaceId,
 	}
-	_, err = store.CreateWorkspace(workspace, channel, user.UserId)
+	_, err = store.CreateNewWorkspace(workspace, channel, user.UserId)
 	require.NoError(t, err)
 	c := adding.Channel{
 		ChannelId:   uuid.New().String(),
 		ChannelName: storage.RandomString(6),
 		WorkspaceId: workspaceId,
 	}
-	newChannel, err := store.CreateChannel(c, user.UserId)
+	newChannel, err := store.CreateNewChannel(c, user.UserId)
 	require.NoError(t, err)
 	require.Equal(t, c.ChannelId, newChannel.ChannelId)
 	require.Equal(t, c.ChannelName, newChannel.ChannelName)

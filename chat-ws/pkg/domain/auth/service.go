@@ -8,6 +8,7 @@ import (
 
 	"github.com/dgrijalva/jwt-go/v4"
 	"go.uber.org/zap"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type Repository interface {
@@ -22,7 +23,7 @@ type Service interface {
 type LoginResponseModel struct {
 	AccessToken  string
 	RefreshToken string
-	User *User
+	User         *User
 }
 
 type Claims struct {
@@ -63,7 +64,7 @@ func (as *service) Login(user User) (LoginResponseModel, error) {
 	if err == sql.ErrNoRows {
 		as.log.Info("User not found")
 		return LoginResponseModel{}, errors.New("user.not.found")
-	} else if u.Password != user.Password {
+	} else if err = as.comparePassword(u.Password, user.Password); err != nil {
 		as.log.Info("Invalid credential")
 		return LoginResponseModel{}, errors.New("invalid.credential")
 	}
@@ -80,10 +81,14 @@ func (as *service) Login(user User) (LoginResponseModel, error) {
 		return LoginResponseModel{}, err
 	}
 	return LoginResponseModel{
-			AccessToken: "Bearer " + ats,
-			RefreshToken: "Bearer " + rts,
-			User: u,
-		}, nil
+		AccessToken:  "Bearer " + ats,
+		RefreshToken: "Bearer " + rts,
+		User:         u,
+	}, nil
+}
+
+func (as *service) comparePassword(hashedPassword, password string) error {
+	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 }
 
 func (as *service) RefreshToken(refreshToken string) (string, error) {

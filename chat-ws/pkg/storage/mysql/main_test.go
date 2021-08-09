@@ -11,8 +11,7 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-var testDb *sqlx.DB
-var store *Store
+var store Store
 var log *zap.Logger
 
 func TestMain(m *testing.M) {
@@ -22,7 +21,7 @@ func TestMain(m *testing.M) {
 		log.Fatal("Unable to load config")
 	}
 	connStr := config.DBUser + ":" + config.DBPassword + config.DBSource
-	testDb, err = sqlx.Connect(config.DBDriver, connStr)
+	testDb, err := sqlx.Connect(config.DBDriver, connStr)
 	if err != nil {
 		log.Fatal("Failed to open conn.", zap.Error(err))
 	}

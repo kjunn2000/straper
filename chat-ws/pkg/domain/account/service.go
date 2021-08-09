@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"go.uber.org/zap"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type Repository interface {
@@ -26,7 +27,6 @@ func NewService(log *zap.Logger, ur Repository) *service {
 		log: log,
 		ur:  ur,
 	}
-
 }
 
 func (us *service) Register(user User) error {
@@ -36,6 +36,11 @@ func (us *service) Register(user User) error {
 		return err
 	}
 
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(user.Password), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+	user.Password = string(hashedPassword)
 	user.Role = "USER"
 	user.CreatedDate = time.Now()
 	err = us.ur.SaveUser(&user)

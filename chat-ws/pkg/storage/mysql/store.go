@@ -9,19 +9,26 @@ import (
 	"go.uber.org/zap"
 )
 
-type Store struct {
+type Store interface {
+	CreateNewWorkspace(w adding.Workspace, c adding.Channel, userId string) (adding.Workspace, error)
+	CreateNewChannel(channel adding.Channel, userId string) (adding.Channel, error)
+	AddUserToWorkspace(workspaceId string, userIdList []string) error
+	Querier
+}
+
+type SQLStore struct {
 	db *sqlx.DB
 	*Queries
 }
 
-func NewStore(db *sqlx.DB, log *zap.Logger) *Store {
-	return &Store{
+func NewStore(db *sqlx.DB, log *zap.Logger) Store {
+	return &SQLStore{
 		db:      db,
 		Queries: NewQueries(db, log),
 	}
 }
 
-func (s *Store) execTx(fn func(*Queries) error) error {
+func (s *SQLStore) execTx(fn func(*Queries) error) error {
 	tx, err := s.db.BeginTxx(context.Background(), nil)
 	if err != nil {
 		return err
@@ -36,7 +43,7 @@ func (s *Store) execTx(fn func(*Queries) error) error {
 	return tx.Commit()
 }
 
-func (s *Store) CreateWorkspace(w adding.Workspace, c adding.Channel, userId string) (adding.Workspace, error) {
+func (s *SQLStore) CreateNewWorkspace(w adding.Workspace, c adding.Channel, userId string) (adding.Workspace, error) {
 	err := s.execTx(func(q *Queries) error {
 		err := q.CreateWorkspace(w)
 		if err != nil {
@@ -64,7 +71,7 @@ func (s *Store) CreateWorkspace(w adding.Workspace, c adding.Channel, userId str
 	return w, nil
 }
 
-func (s *Store) CreateChannel(channel adding.Channel, userId string) (adding.Channel, error) {
+func (s *SQLStore) CreateNewChannel(channel adding.Channel, userId string) (adding.Channel, error) {
 	err := s.execTx(func(q *Queries) error {
 		err := q.CreateChannel(&channel)
 		if err != nil {
@@ -83,7 +90,7 @@ func (s *Store) CreateChannel(channel adding.Channel, userId string) (adding.Cha
 	return channel, nil
 }
 
-func (s *Store) AddUserToWorkspace(workspaceId string, userIdList []string) error {
+func (s *SQLStore) AddUserToWorkspace(workspaceId string, userIdList []string) error {
 	err := s.execTx(func(q *Queries) error {
 		err := q.AddUserToWorkspace(workspaceId, userIdList)
 		if err != nil {

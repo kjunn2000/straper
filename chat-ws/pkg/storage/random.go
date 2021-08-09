@@ -37,10 +37,14 @@ func RandomPassword() string {
 	return RandomString(8)
 }
 
+func RandomUserId() string {
+	return fmt.Sprintf("T%06d", RandomInt(1, 999999))
+}
+
 func RandomEmail() string {
 	return fmt.Sprintf("%s@email.com", RandomString(6))
 }
 
 func RandomPhoneNumber() string {
-	return fmt.Sprintf("+%011d", RandomInt(1,99999999999))
+	return fmt.Sprintf("+%011d", RandomInt(1, 99999999999))
 }

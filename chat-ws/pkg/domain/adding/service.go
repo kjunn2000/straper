@@ -13,9 +13,9 @@ type Service interface {
 }
 
 type Repository interface {
-	CreateWorkspace(w Workspace, c Channel, userId string) (Workspace, error)
+	CreateNewWorkspace(w Workspace, c Channel, userId string) (Workspace, error)
 	AddUserToWorkspace(workspaceId string, userIdList []string) error
-	CreateChannel(channel Channel, userId string) (Channel, error)
+	CreateNewChannel(channel Channel, userId string) (Channel, error)
 	AddUserToChannel(channelId string, userId []string) error
 	GetDefaultChannelByWorkspaceId(workspaceId string) (Channel, error)
 }
@@ -40,7 +40,7 @@ func (s *service) CreateWorkspace(w Workspace, userId string) (Workspace, error)
 		ChannelName: "General",
 		WorkspaceId: w.Id,
 	}
-	w, err := s.r.CreateWorkspace(w, c, userId)
+	w, err := s.r.CreateNewWorkspace(w, c, userId)
 	if err != nil {
 		return Workspace{}, err
 	}
@@ -57,7 +57,7 @@ func (s *service) AddUserToWorkspace(workspaceId string, userIdList []string) er
 
 func (s *service) CreateChannel(workspaceId, channelName, userId string) (Channel, error) {
 	c := NewChannel(uuid.New().String(), channelName, workspaceId)
-	channel, err := s.r.CreateChannel(*c, userId)
+	channel, err := s.r.CreateNewChannel(*c, userId)
 	if err != nil {
 		return channel, err
 	}
