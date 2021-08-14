@@ -1,4 +1,4 @@
-package listing
+package editing
 
 type Channel struct {
 	ChannelId   string `json:"channel_id" db:"channel_id"`

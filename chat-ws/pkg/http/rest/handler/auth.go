@@ -10,26 +10,26 @@ import (
 	"github.com/kjunn2000/straper/chat-ws/pkg/http/rest"
 )
 
-func SetUpAuthRouter(mr *mux.Router, as auth.Service) {
+func (server *Server) SetUpAuthRouter(mr *mux.Router, as auth.Service) {
 	ar := mr.PathPrefix("/auth").Subrouter()
-	ar.HandleFunc("/login", Login(as)).Methods("POST")
-	ar.HandleFunc("/refresh-token", RefreshToken(as)).Methods("POST")
+	ar.HandleFunc("/login", server.Login(as)).Methods("POST")
+	ar.HandleFunc("/refresh-token", server.RefreshToken(as)).Methods("POST")
 }
 
 type LoginResponseModal struct {
-	AccessToken string     `json:"access_token"`
-	Identity    *auth.User `json:"identity"`
+	AccessToken string                 `json:"access_token"`
+	User        auth.LoginResponseUser `json:"user"`
 }
 
-func Login(as auth.Service) func(http.ResponseWriter, *http.Request) {
+func (server *Server) Login(as auth.Service) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		user := auth.User{}
+		user := auth.LoginRequest{}
 		json.NewDecoder(r.Body).Decode(&user)
 		if user.Username == "" || user.Password == "" {
 			rest.AddResponseToResponseWritter(w, nil, "Invalid credential.")
 			return
 		}
-		loginResponse, err := as.Login(user)
+		loginResponse, err := as.Login(r.Context(), user)
 		if err != nil {
 			rest.AddResponseToResponseWritter(w, nil, err.Error())
 			return
@@ -37,7 +37,7 @@ func Login(as auth.Service) func(http.ResponseWriter, *http.Request) {
 		refreshTokenCookie := &http.Cookie{
 			Name:     "refresh_token",
 			Value:    loginResponse.RefreshToken,
-			Expires:  time.Now().Add(time.Minute * 45),
+			Expires:  time.Now().Add(server.config.RefreshTokenDuration),
 			HttpOnly: true,
 			Secure:   false,
 			Path:     "/",
@@ -45,13 +45,13 @@ func Login(as auth.Service) func(http.ResponseWriter, *http.Request) {
 		http.SetCookie(w, refreshTokenCookie)
 		loginResponseModal := LoginResponseModal{
 			AccessToken: loginResponse.AccessToken,
-			Identity:    loginResponse.User,
+			User:        loginResponse.User,
 		}
 		rest.AddResponseToResponseWritter(w, loginResponseModal, "")
 	}
 }
 
-func RefreshToken(as auth.Service) func(http.ResponseWriter, *http.Request) {
+func (server *Server) RefreshToken(as auth.Service) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		rt, err := r.Cookie("refresh_token")
 		if err != nil {
@@ -64,7 +64,7 @@ func RefreshToken(as auth.Service) func(http.ResponseWriter, *http.Request) {
 			rest.AddResponseToResponseWritter(w, nil, err.Error())
 			return
 		}
-		ats, err := as.RefreshToken(v)
+		ats, err := as.RefreshToken(r.Context(), v)
 		if err != nil {
 			rest.AddResponseToResponseWritter(w, nil, err.Error())
 			return

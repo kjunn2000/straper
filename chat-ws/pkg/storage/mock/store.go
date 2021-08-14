@@ -5,14 +5,16 @@
 package mock
 
 import (
+	context "context"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
 	account "github.com/kjunn2000/straper/chat-ws/pkg/domain/account"
-	adding "github.com/kjunn2000/straper/chat-ws/pkg/domain/adding"
 	auth "github.com/kjunn2000/straper/chat-ws/pkg/domain/auth"
 	chatting "github.com/kjunn2000/straper/chat-ws/pkg/domain/chatting"
-	listing "github.com/kjunn2000/straper/chat-ws/pkg/domain/listing"
+	adding "github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/adding"
+	editing "github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/editing"
+	listing "github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/listing"
 )
 
 // MockStore is a mock of Store interface.
@@ -38,278 +40,318 @@ func (m *MockStore) EXPECT() *MockStoreMockRecorder {
 	return m.recorder
 }
 
-// AddUserToChannel mocks base method.
-func (m *MockStore) AddUserToChannel(arg0 string, arg1 []string) error {
+// AddNewUserToWorkspace mocks base method.
+func (m *MockStore) AddNewUserToWorkspace(arg0 context.Context, arg1 string, arg2 []string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AddUserToChannel", arg0, arg1)
+	ret := m.ctrl.Call(m, "AddNewUserToWorkspace", arg0, arg1, arg2)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// AddNewUserToWorkspace indicates an expected call of AddNewUserToWorkspace.
+func (mr *MockStoreMockRecorder) AddNewUserToWorkspace(arg0, arg1, arg2 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddNewUserToWorkspace", reflect.TypeOf((*MockStore)(nil).AddNewUserToWorkspace), arg0, arg1, arg2)
+}
+
+// AddUserToChannel mocks base method.
+func (m *MockStore) AddUserToChannel(arg0 context.Context, arg1 string, arg2 []string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "AddUserToChannel", arg0, arg1, arg2)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // AddUserToChannel indicates an expected call of AddUserToChannel.
-func (mr *MockStoreMockRecorder) AddUserToChannel(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockStoreMockRecorder) AddUserToChannel(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddUserToChannel", reflect.TypeOf((*MockStore)(nil).AddUserToChannel), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddUserToChannel", reflect.TypeOf((*MockStore)(nil).AddUserToChannel), arg0, arg1, arg2)
 }
 
 // AddUserToWorkspace mocks base method.
-func (m *MockStore) AddUserToWorkspace(arg0 string, arg1 []string) error {
+func (m *MockStore) AddUserToWorkspace(arg0 context.Context, arg1 string, arg2 []string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AddUserToWorkspace", arg0, arg1)
+	ret := m.ctrl.Call(m, "AddUserToWorkspace", arg0, arg1, arg2)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // AddUserToWorkspace indicates an expected call of AddUserToWorkspace.
-func (mr *MockStoreMockRecorder) AddUserToWorkspace(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockStoreMockRecorder) AddUserToWorkspace(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddUserToWorkspace", reflect.TypeOf((*MockStore)(nil).AddUserToWorkspace), arg0, arg1)
-}
-
-// CheckUsernameExist mocks base method.
-func (m *MockStore) CheckUsernameExist(arg0 string) (bool, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CheckUsernameExist", arg0)
-	ret0, _ := ret[0].(bool)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// CheckUsernameExist indicates an expected call of CheckUsernameExist.
-func (mr *MockStoreMockRecorder) CheckUsernameExist(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CheckUsernameExist", reflect.TypeOf((*MockStore)(nil).CheckUsernameExist), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddUserToWorkspace", reflect.TypeOf((*MockStore)(nil).AddUserToWorkspace), arg0, arg1, arg2)
 }
 
 // CreateChannel mocks base method.
-func (m *MockStore) CreateChannel(arg0 *adding.Channel) error {
+func (m *MockStore) CreateChannel(arg0 context.Context, arg1 adding.Channel) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateChannel", arg0)
+	ret := m.ctrl.Call(m, "CreateChannel", arg0, arg1)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // CreateChannel indicates an expected call of CreateChannel.
-func (mr *MockStoreMockRecorder) CreateChannel(arg0 interface{}) *gomock.Call {
+func (mr *MockStoreMockRecorder) CreateChannel(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateChannel", reflect.TypeOf((*MockStore)(nil).CreateChannel), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateChannel", reflect.TypeOf((*MockStore)(nil).CreateChannel), arg0, arg1)
 }
 
 // CreateNewChannel mocks base method.
-func (m *MockStore) CreateNewChannel(arg0 adding.Channel, arg1 string) (adding.Channel, error) {
+func (m *MockStore) CreateNewChannel(arg0 context.Context, arg1 adding.Channel, arg2 string) (adding.Channel, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateNewChannel", arg0, arg1)
+	ret := m.ctrl.Call(m, "CreateNewChannel", arg0, arg1, arg2)
 	ret0, _ := ret[0].(adding.Channel)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // CreateNewChannel indicates an expected call of CreateNewChannel.
-func (mr *MockStoreMockRecorder) CreateNewChannel(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockStoreMockRecorder) CreateNewChannel(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateNewChannel", reflect.TypeOf((*MockStore)(nil).CreateNewChannel), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateNewChannel", reflect.TypeOf((*MockStore)(nil).CreateNewChannel), arg0, arg1, arg2)
 }
 
 // CreateNewWorkspace mocks base method.
-func (m *MockStore) CreateNewWorkspace(arg0 adding.Workspace, arg1 adding.Channel, arg2 string) (adding.Workspace, error) {
+func (m *MockStore) CreateNewWorkspace(arg0 context.Context, arg1 adding.Workspace, arg2 adding.Channel, arg3 string) (adding.Workspace, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateNewWorkspace", arg0, arg1, arg2)
+	ret := m.ctrl.Call(m, "CreateNewWorkspace", arg0, arg1, arg2, arg3)
 	ret0, _ := ret[0].(adding.Workspace)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // CreateNewWorkspace indicates an expected call of CreateNewWorkspace.
-func (mr *MockStoreMockRecorder) CreateNewWorkspace(arg0, arg1, arg2 interface{}) *gomock.Call {
+func (mr *MockStoreMockRecorder) CreateNewWorkspace(arg0, arg1, arg2, arg3 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateNewWorkspace", reflect.TypeOf((*MockStore)(nil).CreateNewWorkspace), arg0, arg1, arg2)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateNewWorkspace", reflect.TypeOf((*MockStore)(nil).CreateNewWorkspace), arg0, arg1, arg2, arg3)
+}
+
+// CreateUser mocks base method.
+func (m *MockStore) CreateUser(arg0 context.Context, arg1 account.CreateUserParam) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateUser", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateUser indicates an expected call of CreateUser.
+func (mr *MockStoreMockRecorder) CreateUser(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateUser", reflect.TypeOf((*MockStore)(nil).CreateUser), arg0, arg1)
 }
 
 // CreateWorkspace mocks base method.
-func (m *MockStore) CreateWorkspace(arg0 adding.Workspace) error {
+func (m *MockStore) CreateWorkspace(arg0 context.Context, arg1 adding.Workspace) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateWorkspace", arg0)
+	ret := m.ctrl.Call(m, "CreateWorkspace", arg0, arg1)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // CreateWorkspace indicates an expected call of CreateWorkspace.
-func (mr *MockStoreMockRecorder) CreateWorkspace(arg0 interface{}) *gomock.Call {
+func (mr *MockStoreMockRecorder) CreateWorkspace(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateWorkspace", reflect.TypeOf((*MockStore)(nil).CreateWorkspace), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateWorkspace", reflect.TypeOf((*MockStore)(nil).CreateWorkspace), arg0, arg1)
 }
 
 // DeleteChannel mocks base method.
-func (m *MockStore) DeleteChannel(arg0 string) error {
+func (m *MockStore) DeleteChannel(arg0 context.Context, arg1 string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteChannel", arg0)
+	ret := m.ctrl.Call(m, "DeleteChannel", arg0, arg1)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // DeleteChannel indicates an expected call of DeleteChannel.
-func (mr *MockStoreMockRecorder) DeleteChannel(arg0 interface{}) *gomock.Call {
+func (mr *MockStoreMockRecorder) DeleteChannel(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteChannel", reflect.TypeOf((*MockStore)(nil).DeleteChannel), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteChannel", reflect.TypeOf((*MockStore)(nil).DeleteChannel), arg0, arg1)
+}
+
+// DeleteUser mocks base method.
+func (m *MockStore) DeleteUser(arg0 context.Context, arg1 string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteUser", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteUser indicates an expected call of DeleteUser.
+func (mr *MockStoreMockRecorder) DeleteUser(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteUser", reflect.TypeOf((*MockStore)(nil).DeleteUser), arg0, arg1)
 }
 
 // DeleteWorkspace mocks base method.
-func (m *MockStore) DeleteWorkspace(arg0 string) error {
+func (m *MockStore) DeleteWorkspace(arg0 context.Context, arg1 string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteWorkspace", arg0)
+	ret := m.ctrl.Call(m, "DeleteWorkspace", arg0, arg1)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // DeleteWorkspace indicates an expected call of DeleteWorkspace.
-func (mr *MockStoreMockRecorder) DeleteWorkspace(arg0 interface{}) *gomock.Call {
+func (mr *MockStoreMockRecorder) DeleteWorkspace(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteWorkspace", reflect.TypeOf((*MockStore)(nil).DeleteWorkspace), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteWorkspace", reflect.TypeOf((*MockStore)(nil).DeleteWorkspace), arg0, arg1)
 }
 
-// FindUserByUsername mocks base method.
-func (m *MockStore) FindUserByUsername(arg0 string) (*auth.User, error) {
+// GetChannelsByUserId mocks base method.
+func (m *MockStore) GetChannelsByUserId(arg0 context.Context, arg1 string) ([]listing.Channel, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindUserByUsername", arg0)
-	ret0, _ := ret[0].(*auth.User)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// FindUserByUsername indicates an expected call of FindUserByUsername.
-func (mr *MockStoreMockRecorder) FindUserByUsername(arg0 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindUserByUsername", reflect.TypeOf((*MockStore)(nil).FindUserByUsername), arg0)
-}
-
-// GetAllChannelByUserAndWorkspaceId mocks base method.
-func (m *MockStore) GetAllChannelByUserAndWorkspaceId(arg0, arg1 string) ([]listing.Channel, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAllChannelByUserAndWorkspaceId", arg0, arg1)
+	ret := m.ctrl.Call(m, "GetChannelsByUserId", arg0, arg1)
 	ret0, _ := ret[0].([]listing.Channel)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetAllChannelByUserAndWorkspaceId indicates an expected call of GetAllChannelByUserAndWorkspaceId.
-func (mr *MockStoreMockRecorder) GetAllChannelByUserAndWorkspaceId(arg0, arg1 interface{}) *gomock.Call {
+// GetChannelsByUserId indicates an expected call of GetChannelsByUserId.
+func (mr *MockStoreMockRecorder) GetChannelsByUserId(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllChannelByUserAndWorkspaceId", reflect.TypeOf((*MockStore)(nil).GetAllChannelByUserAndWorkspaceId), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetChannelsByUserId", reflect.TypeOf((*MockStore)(nil).GetChannelsByUserId), arg0, arg1)
 }
 
-// GetAllChannelByWorkspaceId mocks base method.
-func (m *MockStore) GetAllChannelByWorkspaceId(arg0 string) ([]listing.Channel, error) {
+// GetUserByUserId mocks base method.
+func (m *MockStore) GetUserByUserId(arg0 context.Context, arg1 string) (account.User, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetAllChannelByWorkspaceId", arg0)
-	ret0, _ := ret[0].([]listing.Channel)
+	ret := m.ctrl.Call(m, "GetUserByUserId", arg0, arg1)
+	ret0, _ := ret[0].(account.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetAllChannelByWorkspaceId indicates an expected call of GetAllChannelByWorkspaceId.
-func (mr *MockStoreMockRecorder) GetAllChannelByWorkspaceId(arg0 interface{}) *gomock.Call {
+// GetUserByUserId indicates an expected call of GetUserByUserId.
+func (mr *MockStoreMockRecorder) GetUserByUserId(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAllChannelByWorkspaceId", reflect.TypeOf((*MockStore)(nil).GetAllChannelByWorkspaceId), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByUserId", reflect.TypeOf((*MockStore)(nil).GetUserByUserId), arg0, arg1)
 }
 
-// GetClientListByChannelId mocks base method.
-func (m *MockStore) GetClientListByChannelId(arg0 string) ([]chatting.Client, error) {
+// GetUserByUsername mocks base method.
+func (m *MockStore) GetUserByUsername(arg0 context.Context, arg1 string) (auth.User, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetClientListByChannelId", arg0)
-	ret0, _ := ret[0].([]chatting.Client)
+	ret := m.ctrl.Call(m, "GetUserByUsername", arg0, arg1)
+	ret0, _ := ret[0].(auth.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetClientListByChannelId indicates an expected call of GetClientListByChannelId.
-func (mr *MockStoreMockRecorder) GetClientListByChannelId(arg0 interface{}) *gomock.Call {
+// GetUserByUsername indicates an expected call of GetUserByUsername.
+func (mr *MockStoreMockRecorder) GetUserByUsername(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetClientListByChannelId", reflect.TypeOf((*MockStore)(nil).GetClientListByChannelId), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByUsername", reflect.TypeOf((*MockStore)(nil).GetUserByUsername), arg0, arg1)
 }
 
-// GetDefaultChannelByWorkspaceId mocks base method.
-func (m *MockStore) GetDefaultChannelByWorkspaceId(arg0 string) (adding.Channel, error) {
+// GetUserListByChannelId mocks base method.
+func (m *MockStore) GetUserListByChannelId(arg0 context.Context, arg1 string) ([]chatting.User, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetDefaultChannelByWorkspaceId", arg0)
-	ret0, _ := ret[0].(adding.Channel)
+	ret := m.ctrl.Call(m, "GetUserListByChannelId", arg0, arg1)
+	ret0, _ := ret[0].([]chatting.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetDefaultChannelByWorkspaceId indicates an expected call of GetDefaultChannelByWorkspaceId.
-func (mr *MockStoreMockRecorder) GetDefaultChannelByWorkspaceId(arg0 interface{}) *gomock.Call {
+// GetUserListByChannelId indicates an expected call of GetUserListByChannelId.
+func (mr *MockStoreMockRecorder) GetUserListByChannelId(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetDefaultChannelByWorkspaceId", reflect.TypeOf((*MockStore)(nil).GetDefaultChannelByWorkspaceId), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserListByChannelId", reflect.TypeOf((*MockStore)(nil).GetUserListByChannelId), arg0, arg1)
 }
 
 // GetWorkspaceByWorkspaceId mocks base method.
-func (m *MockStore) GetWorkspaceByWorkspaceId(arg0 string) (listing.Workspace, error) {
+func (m *MockStore) GetWorkspaceByWorkspaceId(arg0 context.Context, arg1 string) (listing.Workspace, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetWorkspaceByWorkspaceId", arg0)
+	ret := m.ctrl.Call(m, "GetWorkspaceByWorkspaceId", arg0, arg1)
 	ret0, _ := ret[0].(listing.Workspace)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetWorkspaceByWorkspaceId indicates an expected call of GetWorkspaceByWorkspaceId.
-func (mr *MockStoreMockRecorder) GetWorkspaceByWorkspaceId(arg0 interface{}) *gomock.Call {
+func (mr *MockStoreMockRecorder) GetWorkspaceByWorkspaceId(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetWorkspaceByWorkspaceId", reflect.TypeOf((*MockStore)(nil).GetWorkspaceByWorkspaceId), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetWorkspaceByWorkspaceId", reflect.TypeOf((*MockStore)(nil).GetWorkspaceByWorkspaceId), arg0, arg1)
 }
 
 // GetWorkspacesByUserId mocks base method.
-func (m *MockStore) GetWorkspacesByUserId(arg0 string) ([]listing.Workspace, error) {
+func (m *MockStore) GetWorkspacesByUserId(arg0 context.Context, arg1 string) ([]listing.Workspace, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetWorkspacesByUserId", arg0)
+	ret := m.ctrl.Call(m, "GetWorkspacesByUserId", arg0, arg1)
 	ret0, _ := ret[0].([]listing.Workspace)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetWorkspacesByUserId indicates an expected call of GetWorkspacesByUserId.
-func (mr *MockStoreMockRecorder) GetWorkspacesByUserId(arg0 interface{}) *gomock.Call {
+func (mr *MockStoreMockRecorder) GetWorkspacesByUserId(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetWorkspacesByUserId", reflect.TypeOf((*MockStore)(nil).GetWorkspacesByUserId), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetWorkspacesByUserId", reflect.TypeOf((*MockStore)(nil).GetWorkspacesByUserId), arg0, arg1)
 }
 
-// RemoveUserFromChannelList mocks base method.
-func (m *MockStore) RemoveUserFromChannelList(arg0 []string, arg1 string) error {
+// RemoveUserFromChannel mocks base method.
+func (m *MockStore) RemoveUserFromChannel(arg0 context.Context, arg1, arg2 string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RemoveUserFromChannelList", arg0, arg1)
+	ret := m.ctrl.Call(m, "RemoveUserFromChannel", arg0, arg1, arg2)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// RemoveUserFromChannelList indicates an expected call of RemoveUserFromChannelList.
-func (mr *MockStoreMockRecorder) RemoveUserFromChannelList(arg0, arg1 interface{}) *gomock.Call {
+// RemoveUserFromChannel indicates an expected call of RemoveUserFromChannel.
+func (mr *MockStoreMockRecorder) RemoveUserFromChannel(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveUserFromChannelList", reflect.TypeOf((*MockStore)(nil).RemoveUserFromChannelList), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveUserFromChannel", reflect.TypeOf((*MockStore)(nil).RemoveUserFromChannel), arg0, arg1, arg2)
 }
 
 // RemoveUserFromWorkspace mocks base method.
-func (m *MockStore) RemoveUserFromWorkspace(arg0, arg1 string) error {
+func (m *MockStore) RemoveUserFromWorkspace(arg0 context.Context, arg1, arg2 string) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "RemoveUserFromWorkspace", arg0, arg1)
+	ret := m.ctrl.Call(m, "RemoveUserFromWorkspace", arg0, arg1, arg2)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // RemoveUserFromWorkspace indicates an expected call of RemoveUserFromWorkspace.
-func (mr *MockStoreMockRecorder) RemoveUserFromWorkspace(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockStoreMockRecorder) RemoveUserFromWorkspace(arg0, arg1, arg2 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveUserFromWorkspace", reflect.TypeOf((*MockStore)(nil).RemoveUserFromWorkspace), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RemoveUserFromWorkspace", reflect.TypeOf((*MockStore)(nil).RemoveUserFromWorkspace), arg0, arg1, arg2)
 }
 
-// SaveUser mocks base method.
-func (m *MockStore) SaveUser(arg0 *account.User) error {
+// UpdateChannel mocks base method.
+func (m *MockStore) UpdateChannel(arg0 context.Context, arg1 editing.Channel) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SaveUser", arg0)
+	ret := m.ctrl.Call(m, "UpdateChannel", arg0, arg1)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// SaveUser indicates an expected call of SaveUser.
-func (mr *MockStoreMockRecorder) SaveUser(arg0 interface{}) *gomock.Call {
+// UpdateChannel indicates an expected call of UpdateChannel.
+func (mr *MockStoreMockRecorder) UpdateChannel(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SaveUser", reflect.TypeOf((*MockStore)(nil).SaveUser), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateChannel", reflect.TypeOf((*MockStore)(nil).UpdateChannel), arg0, arg1)
+}
+
+// UpdateUser mocks base method.
+func (m *MockStore) UpdateUser(arg0 context.Context, arg1 account.UpdateUserParam) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateUser", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateUser indicates an expected call of UpdateUser.
+func (mr *MockStoreMockRecorder) UpdateUser(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateUser", reflect.TypeOf((*MockStore)(nil).UpdateUser), arg0, arg1)
+}
+
+// UpdateWorkspace mocks base method.
+func (m *MockStore) UpdateWorkspace(arg0 context.Context, arg1 editing.Workspace) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateWorkspace", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateWorkspace indicates an expected call of UpdateWorkspace.
+func (mr *MockStoreMockRecorder) UpdateWorkspace(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateWorkspace", reflect.TypeOf((*MockStore)(nil).UpdateWorkspace), arg0, arg1)
 }

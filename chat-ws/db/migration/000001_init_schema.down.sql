@@ -1,9 +1,9 @@
-DROP TABLE workspace_user;
+DROP TABLE IF EXISTS channel_user;
 
-DROP TABLE channel_user;
+DROP TABLE IF EXISTS workspace_user;
 
-DROP TABLE user;
+DROP TABLE IF EXISTS channel;
 
-DROP TABLE channel;
+DROP TABLE IF EXISTS workspace;
 
-DROP TABLE workspace;
+DROP TABLE IF EXISTS user;

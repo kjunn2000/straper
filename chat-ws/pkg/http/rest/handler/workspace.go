@@ -5,25 +5,27 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
-	"github.com/kjunn2000/straper/chat-ws/pkg/domain/adding"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/auth"
-	"github.com/kjunn2000/straper/chat-ws/pkg/domain/deleting"
-	"github.com/kjunn2000/straper/chat-ws/pkg/domain/listing"
+	"github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/adding"
+	"github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/deleting"
+	"github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/editing"
+	"github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/listing"
 	"github.com/kjunn2000/straper/chat-ws/pkg/http/rest"
 	"github.com/kjunn2000/straper/chat-ws/pkg/http/rest/middleware"
 )
 
-func SetUpWorkspaceRouter(mr *mux.Router, as adding.Service, ls listing.Service, ds deleting.Service) {
+func (server *Server) SetUpWorkspaceRouter(mr *mux.Router, as adding.Service, ls listing.Service, es editing.Service, ds deleting.Service) {
 	wr := mr.PathPrefix("/protected/workspace").Subrouter()
-	wr.HandleFunc("/create", CreateWorkspace(as, ls)).Methods("POST")
-	wr.HandleFunc("/join", JoinWorkspace(as, ls)).Methods("POST")
-	wr.HandleFunc("/list", GetWorkspaces(ls)).Methods("GET")
-	wr.HandleFunc("/delete/{workspace_id}", DeleteWorkspace(ds)).Methods("POST")
-	wr.HandleFunc("/leave/{workspace_id}", LeaveWorkspace(ds)).Methods("POST")
-	wr.Use(middleware.JwtTokenVerifier)
+	wr.HandleFunc("/create", server.CreateWorkspace(as)).Methods("POST")
+	wr.HandleFunc("/join/{workspace_id}", server.JoinWorkspace(as)).Methods("POST")
+	wr.HandleFunc("/list", server.GetWorkspaces(ls)).Methods("GET")
+	wr.HandleFunc("/update", server.UpdateWorkspace(es)).Methods("POST")
+	wr.HandleFunc("/delete/{workspace_id}", server.DeleteWorkspace(ds)).Methods("POST")
+	wr.HandleFunc("/leave/{workspace_id}", server.LeaveWorkspace(ds)).Methods("POST")
+	wr.Use(middleware.TokenVerifier(server.tokenMaker))
 }
 
-func CreateWorkspace(as adding.Service, ls listing.Service) func(http.ResponseWriter, *http.Request) {
+func (server *Server) CreateWorkspace(as adding.Service) func(http.ResponseWriter, *http.Request) {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		var workspace adding.Workspace
 		err := json.NewDecoder(r.Body).Decode(&workspace)
@@ -31,60 +33,65 @@ func CreateWorkspace(as adding.Service, ls listing.Service) func(http.ResponseWr
 			rest.AddResponseToResponseWritter(rw, nil, err.Error())
 			return
 		}
-		userId, err := extractUserId(r)
+		payloadVal := r.Context().Value(middleware.TokenPayload{})
+		if payloadVal == nil {
+			rest.AddResponseToResponseWritter(rw, nil, "payload.not.found.in.context")
+			return
+		}
+		payload, ok := payloadVal.(*auth.Payload)
+		if !ok {
+			rest.AddResponseToResponseWritter(rw, nil, "invalid.payload.in.context")
+			return
+		}
+		_, err = as.CreateWorkspace(r.Context(), workspace, payload.UserId)
 		if err != nil {
 			rest.AddResponseToResponseWritter(rw, nil, err.Error())
 			return
 		}
-		workspace, err = as.CreateWorkspace(workspace, userId)
-		if err != nil {
-			rest.AddResponseToResponseWritter(rw, nil, err.Error())
-			return
-		}
-		w, err := ls.GetWorkspaceByWorkspaceId(workspace.Id)
-		if err != nil {
-			rest.AddResponseToResponseWritter(rw, nil, err.Error())
-			return
-		}
-		rest.AddResponseToResponseWritter(rw, w, "")
+		rest.AddResponseToResponseWritter(rw, nil, "")
 	}
 }
 
-func JoinWorkspace(as adding.Service, ls listing.Service) func(http.ResponseWriter, *http.Request) {
+func (server *Server) JoinWorkspace(as adding.Service) func(http.ResponseWriter, *http.Request) {
 	return func(rw http.ResponseWriter, r *http.Request) {
-		var workspace adding.Workspace
-		err := json.NewDecoder(r.Body).Decode(&workspace)
+		vars := mux.Vars(r)
+		workspaceId, ok := vars["workspace_id"]
+		if !ok {
+			rest.AddResponseToResponseWritter(rw, nil, "workspace.id.not.found")
+			return
+		}
+		payloadVal := r.Context().Value(middleware.TokenPayload{})
+		if payloadVal == nil {
+			rest.AddResponseToResponseWritter(rw, nil, "payload.not.found.in.context")
+			return
+		}
+		payload, ok := payloadVal.(*auth.Payload)
+		if !ok {
+			rest.AddResponseToResponseWritter(rw, nil, "invalid.payload.in.context")
+			return
+		}
+		err := as.AddUserToWorkspace(r.Context(), workspaceId, []string{payload.UserId})
 		if err != nil {
 			rest.AddResponseToResponseWritter(rw, nil, err.Error())
 			return
 		}
-		userId, err := extractUserId(r)
-		if err != nil {
-			rest.AddResponseToResponseWritter(rw, nil, err.Error())
-			return
-		}
-		err = as.AddUserToWorkspace(workspace.Id, []string{userId})
-		if err != nil {
-			rest.AddResponseToResponseWritter(rw, nil, err.Error())
-			return
-		}
-		w, err := ls.GetWorkspaceByWorkspaceId(workspace.Id)
-		if err != nil {
-			rest.AddResponseToResponseWritter(rw, nil, err.Error())
-			return
-		}
-		rest.AddResponseToResponseWritter(rw, w, "")
+		rest.AddResponseToResponseWritter(rw, nil, "")
 	}
 }
 
-func GetWorkspaces(ls listing.Service) func(http.ResponseWriter, *http.Request) {
+func (server *Server) GetWorkspaces(ls listing.Service) func(http.ResponseWriter, *http.Request) {
 	return func(rw http.ResponseWriter, r *http.Request) {
-		userId, err := extractUserId(r)
-		if err != nil {
-			rest.AddResponseToResponseWritter(rw, nil, err.Error())
+		payloadVal := r.Context().Value(middleware.TokenPayload{})
+		if payloadVal == nil {
+			rest.AddResponseToResponseWritter(rw, nil, "payload.not.found.in.context")
 			return
 		}
-		workspaceList, err := ls.GetWorkspaceData(userId)
+		payload, ok := payloadVal.(*auth.Payload)
+		if !ok {
+			rest.AddResponseToResponseWritter(rw, nil, "invalid.payload.in.context")
+			return
+		}
+		workspaceList, err := ls.GetWorkspaceData(r.Context(), payload.UserId)
 		if err != nil {
 			rest.AddResponseToResponseWritter(rw, nil, err.Error())
 			return
@@ -93,7 +100,24 @@ func GetWorkspaces(ls listing.Service) func(http.ResponseWriter, *http.Request) 
 	}
 }
 
-func DeleteWorkspace(ds deleting.Service) func(http.ResponseWriter, *http.Request) {
+func (server *Server) UpdateWorkspace(as editing.Service) func(http.ResponseWriter, *http.Request) {
+	return func(rw http.ResponseWriter, r *http.Request) {
+		var workspace editing.Workspace
+		err := json.NewDecoder(r.Body).Decode(&workspace)
+		if err != nil {
+			rest.AddResponseToResponseWritter(rw, nil, err.Error())
+			return
+		}
+		err = as.UpdateWorkspace(r.Context(), workspace)
+		if err != nil {
+			rest.AddResponseToResponseWritter(rw, nil, err.Error())
+			return
+		}
+		rest.AddResponseToResponseWritter(rw, nil, "")
+	}
+}
+
+func (server *Server) DeleteWorkspace(ds deleting.Service) func(http.ResponseWriter, *http.Request) {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		id, ok := vars["workspace_id"]
@@ -102,7 +126,7 @@ func DeleteWorkspace(ds deleting.Service) func(http.ResponseWriter, *http.Reques
 			rest.AddResponseToResponseWritter(rw, nil, "Id not found.")
 			return
 		}
-		err := ds.DeleteWorkspace(id)
+		err := ds.DeleteWorkspace(r.Context(), id)
 		if err != nil {
 			rw.WriteHeader(http.StatusBadRequest)
 			rest.AddResponseToResponseWritter(rw, nil, err.Error())
@@ -112,7 +136,7 @@ func DeleteWorkspace(ds deleting.Service) func(http.ResponseWriter, *http.Reques
 	}
 }
 
-func LeaveWorkspace(ds deleting.Service) func(http.ResponseWriter, *http.Request) {
+func (server *Server) LeaveWorkspace(ds deleting.Service) func(http.ResponseWriter, *http.Request) {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		id, ok := vars["workspace_id"]
@@ -120,42 +144,21 @@ func LeaveWorkspace(ds deleting.Service) func(http.ResponseWriter, *http.Request
 			rest.AddResponseToResponseWritter(rw, nil, "Id not found.")
 			return
 		}
-		userId, err := extractUserId(r)
-		if err != nil {
-			rest.AddResponseToResponseWritter(rw, nil, "Id not found.")
+		payloadVal := r.Context().Value(middleware.TokenPayload{})
+		if payloadVal == nil {
+			rest.AddResponseToResponseWritter(rw, nil, "payload.not.found.in.context")
 			return
 		}
-		err = ds.LeaveWorkspace(id, userId)
+		payload, ok := payloadVal.(*auth.Payload)
+		if !ok {
+			rest.AddResponseToResponseWritter(rw, nil, "invalid.payload.in.context")
+			return
+		}
+		err := ds.LeaveWorkspace(r.Context(), id, payload.UserId)
 		if err != nil {
 			rest.AddResponseToResponseWritter(rw, nil, err.Error())
 			return
 		}
 		rest.AddResponseToResponseWritter(rw, nil, "")
 	}
-}
-
-// func (w *workspaceHandler) EditWorkspace(rw http.ResponseWriter, r *http.Request) {
-// 	var ws domain.Workspace
-// 	err := json.NewDecoder(r.Body).Decode(&ws)
-// 	if err != nil {
-// 		rw.WriteHeader(http.StatusBadRequest)
-// 		rest.AddResponseToResponseWritter(rw, nil, err.Error())
-// 		return
-// 	}
-// 	err = w.ws.EditWorkspace(ws)
-// 	if err != nil {
-// 		rw.WriteHeader(http.StatusBadRequest)
-// 		rest.AddResponseToResponseWritter(rw, nil, err.Error())
-// 		return
-// 	}
-// 	rest.AddResponseToResponseWritter(rw, nil, "")
-// }
-
-func extractUserId(r *http.Request) (string, error) {
-	accessToken := r.Header.Get("Authorization")
-	claims, err := auth.ExtractClaimsFromTokenStr(accessToken)
-	if err != nil {
-		return "", err
-	}
-	return claims.UserId, nil
 }

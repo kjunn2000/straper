@@ -5,14 +5,14 @@ import (
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
-	"github.com/kjunn2000/straper/chat-ws/pkg/domain/adding"
+	"github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/adding"
 	"go.uber.org/zap"
 )
 
 type Store interface {
-	CreateNewWorkspace(w adding.Workspace, c adding.Channel, userId string) (adding.Workspace, error)
-	CreateNewChannel(channel adding.Channel, userId string) (adding.Channel, error)
-	AddUserToWorkspace(workspaceId string, userIdList []string) error
+	CreateNewWorkspace(ctx context.Context, w adding.Workspace, c adding.Channel, userId string) (adding.Workspace, error)
+	CreateNewChannel(ctx context.Context, channel adding.Channel, userId string) (adding.Channel, error)
+	AddNewUserToWorkspace(ctx context.Context, workspaceId string, userIdList []string) error
 	Querier
 }
 
@@ -43,22 +43,22 @@ func (s *SQLStore) execTx(fn func(*Queries) error) error {
 	return tx.Commit()
 }
 
-func (s *SQLStore) CreateNewWorkspace(w adding.Workspace, c adding.Channel, userId string) (adding.Workspace, error) {
+func (s *SQLStore) CreateNewWorkspace(ctx context.Context, w adding.Workspace, c adding.Channel, userId string) (adding.Workspace, error) {
 	err := s.execTx(func(q *Queries) error {
-		err := q.CreateWorkspace(w)
+		err := q.CreateWorkspace(ctx, w)
 		if err != nil {
 			return err
 		}
 		userIdList := []string{userId}
-		err = q.AddUserToWorkspace(w.Id, userIdList)
+		err = q.AddUserToWorkspace(ctx, w.Id, userIdList)
 		if err != nil {
 			return err
 		}
-		err = q.CreateChannel(&c)
+		err = q.CreateChannel(ctx, c)
 		if err != nil {
 			return err
 		}
-		err = q.AddUserToChannel(c.ChannelId, userIdList)
+		err = q.AddUserToChannel(ctx, c.ChannelId, userIdList)
 		if err != nil {
 			return err
 		}
@@ -71,13 +71,13 @@ func (s *SQLStore) CreateNewWorkspace(w adding.Workspace, c adding.Channel, user
 	return w, nil
 }
 
-func (s *SQLStore) CreateNewChannel(channel adding.Channel, userId string) (adding.Channel, error) {
+func (s *SQLStore) CreateNewChannel(ctx context.Context, channel adding.Channel, userId string) (adding.Channel, error) {
 	err := s.execTx(func(q *Queries) error {
-		err := q.CreateChannel(&channel)
+		err := q.CreateChannel(ctx, channel)
 		if err != nil {
 			return err
 		}
-		err = q.AddUserToChannel(channel.ChannelId, []string{userId})
+		err = q.AddUserToChannel(ctx, channel.ChannelId, []string{userId})
 		if err != nil {
 			return err
 		}
@@ -90,17 +90,17 @@ func (s *SQLStore) CreateNewChannel(channel adding.Channel, userId string) (addi
 	return channel, nil
 }
 
-func (s *SQLStore) AddUserToWorkspace(workspaceId string, userIdList []string) error {
+func (s *SQLStore) AddNewUserToWorkspace(ctx context.Context, workspaceId string, userIdList []string) error {
 	err := s.execTx(func(q *Queries) error {
-		err := q.AddUserToWorkspace(workspaceId, userIdList)
+		err := q.AddUserToWorkspace(ctx, workspaceId, userIdList)
 		if err != nil {
 			return err
 		}
-		c, err := q.GetDefaultChannelByWorkspaceId(workspaceId)
+		c, err := q.GetDefaultChannelByWorkspaceId(ctx, workspaceId)
 		if err != nil {
 			return err
 		}
-		err = s.AddUserToChannel(c.ChannelId, userIdList)
+		err = s.AddUserToChannel(ctx, c.ChannelId, userIdList)
 		if err != nil {
 			return err
 		}

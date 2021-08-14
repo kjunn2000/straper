@@ -1,135 +1,106 @@
 package auth
 
 import (
+	"context"
 	"database/sql"
 	"errors"
-	"strings"
-	"time"
 
-	"github.com/dgrijalva/jwt-go/v4"
+	"github.com/kjunn2000/straper/chat-ws/configs"
 	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
 )
 
-type Repository interface {
-	FindUserByUsername(username string) (*User, error)
-}
-
 type Service interface {
-	Login(user User) (LoginResponseModel, error)
-	RefreshToken(refreshToken string) (string, error)
+	Login(ctx context.Context, req LoginRequest) (LoginResponse, error)
+	RefreshToken(ctx context.Context, refreshToken string) (string, error)
 }
 
-type LoginResponseModel struct {
+type LoginRequest struct {
+	Username string `json:"username" db:"username"`
+	Password string `json:"password" db:"password"`
+}
+
+type LoginResponse struct {
 	AccessToken  string
 	RefreshToken string
-	User         *User
+	User         LoginResponseUser
 }
 
-type Claims struct {
-	UserId   string
-	Username string
-	Role     string
-	jwt.StandardClaims
+type LoginResponseUser struct {
+	UserId   string `json:"user_id" db:"user_id"`
+	Username string `json:"username" db:"username"`
+	Role     string `json:"role" db:"role"`
+	Email    string `json:"email" db:"email" validate:"email"`
+	PhoneNo  string `json:"phone_no" db:"phone_no"`
 }
 
 type service struct {
-	log *zap.Logger
-	ar  Repository
+	log        *zap.Logger
+	ar         Repository
+	tokenMaker Maker
+	config     configs.Config
 }
 
-func NewService(log *zap.Logger, ar Repository) *service {
+func NewService(log *zap.Logger, ar Repository, tokenMaker Maker, config configs.Config) *service {
 	return &service{
-		log: log,
-		ar:  ar,
+		log:        log,
+		ar:         ar,
+		tokenMaker: tokenMaker,
+		config:     config,
 	}
 }
 
-func generateNewClaims(expiredAt time.Time, userId string, username string, role string) Claims {
-	return Claims{
-		UserId:   userId,
-		Username: username,
-		Role:     role,
-		StandardClaims: jwt.StandardClaims{
-			IssuedAt:  jwt.Now(),
-			ExpiresAt: jwt.At(expiredAt),
-		},
-	}
-}
+func (as *service) Login(ctx context.Context, req LoginRequest) (LoginResponse, error) {
 
-func (as *service) Login(user User) (LoginResponseModel, error) {
-
-	u, err := as.ar.FindUserByUsername(user.Username)
+	u, err := as.ar.GetUserByUsername(ctx, req.Username)
 
 	if err == sql.ErrNoRows {
 		as.log.Info("User not found")
-		return LoginResponseModel{}, errors.New("user.not.found")
-	} else if err = as.comparePassword(u.Password, user.Password); err != nil {
+		return LoginResponse{}, errors.New("user.not.found")
+	} else if err = as.comparePassword(u.Password, req.Password); err != nil {
 		as.log.Info("Invalid credential")
-		return LoginResponseModel{}, errors.New("invalid.credential")
+		return LoginResponse{}, errors.New("invalid.credential")
 	}
-	atc := generateNewClaims(time.Now().Add(time.Minute*10), u.UserId, u.Username, u.Role)
-	rtc := generateNewClaims(time.Now().Add(time.Minute*45), u.UserId, u.Username, u.Role)
-	att := jwt.NewWithClaims(jwt.SigningMethodHS256, atc)
-	rtt := jwt.NewWithClaims(jwt.SigningMethodHS256, rtc)
 
-	ats, aerr := att.SignedString(SecretKey)
-	rts, rerr := rtt.SignedString(SecretKey)
-
-	if aerr != nil || rerr != nil {
-		as.log.Warn("Unable to sign jwt token.", zap.Error(aerr), zap.Error(rerr))
-		return LoginResponseModel{}, err
+	accessToken, err := as.tokenMaker.CreateToken(u.UserId, u.Username, as.config.AccessTokenDuration)
+	if err != nil {
+		return LoginResponse{}, err
 	}
-	return LoginResponseModel{
-		AccessToken:  "Bearer " + ats,
-		RefreshToken: "Bearer " + rts,
-		User:         u,
+
+	refreshToken, err := as.tokenMaker.CreateToken(u.UserId, u.Username, as.config.AccessTokenDuration)
+	if err != nil {
+		return LoginResponse{}, err
+	}
+
+	loginResponseUser := LoginResponseUser{
+		UserId:   u.UserId,
+		Username: u.Username,
+		Role:     u.Role,
+		Email:    u.Email,
+		PhoneNo:  u.PhoneNo,
+	}
+
+	return LoginResponse{
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+		User:         loginResponseUser,
 	}, nil
+}
+
+func (as *service) RefreshToken(ctx context.Context, refreshToken string) (string, error) {
+	payload, err := as.tokenMaker.VerifyToken(refreshToken)
+	if err != nil {
+		return "", err
+	}
+
+	accessToken, err := as.tokenMaker.CreateToken(payload.UserId, payload.Username, as.config.AccessTokenDuration)
+	if err != nil {
+		return "", err
+	}
+
+	return accessToken, nil
 }
 
 func (as *service) comparePassword(hashedPassword, password string) error {
 	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
-}
-
-func (as *service) RefreshToken(refreshToken string) (string, error) {
-
-	claims, err := ExtractClaimsFromTokenStr(refreshToken)
-	if err != nil {
-		as.log.Info("Unable to extract claims from refresh token.")
-		return "", err
-	}
-
-	atc := generateNewClaims(time.Now().Add(time.Minute*10), claims.UserId, claims.Username, claims.Role)
-
-	att := jwt.NewWithClaims(jwt.SigningMethodHS256, atc)
-
-	ats, err := att.SignedString(SecretKey)
-
-	if err != nil {
-		as.log.Warn("Unable to sign jwt token.", zap.Error(err))
-		return "", err
-	}
-
-	return "Bearer " + ats, nil
-}
-
-func ExtractClaimsFromTokenStr(tokenStr string) (Claims, error) {
-
-	i := strings.Index(tokenStr, "Bearer ")
-	if i == -1 || i != 0 {
-		return Claims{}, errors.New("invalid.token.format")
-	}
-	tokenStr = tokenStr[7:]
-
-	c := Claims{}
-	token, err := jwt.ParseWithClaims(tokenStr, &c,
-		func(t *jwt.Token) (interface{}, error) {
-			return SecretKey, nil
-		})
-
-	if err != nil || !token.Valid || c.ExpiresAt.Time.Before(time.Now()) {
-		return Claims{}, err
-	}
-	return c, nil
-
 }

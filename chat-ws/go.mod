@@ -4,7 +4,7 @@ go 1.16
 
 require (
 	github.com/Masterminds/squirrel v1.5.0
-	github.com/dgrijalva/jwt-go/v4 v4.0.0-preview1
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-playground/validator/v10 v10.9.0
 	github.com/go-redis/redis/v8 v8.11.2
 	github.com/go-sql-driver/mysql v1.6.0
@@ -14,6 +14,7 @@ require (
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/websocket v1.4.2
 	github.com/jmoiron/sqlx v1.3.4
+	github.com/o1egl/paseto v1.0.0
 	github.com/spf13/viper v1.8.1
 	github.com/stretchr/testify v1.7.0
 	go.uber.org/atomic v1.9.0 // indirect

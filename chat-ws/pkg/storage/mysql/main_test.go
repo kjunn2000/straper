@@ -20,8 +20,7 @@ func TestMain(m *testing.M) {
 	if err != nil {
 		log.Fatal("Unable to load config")
 	}
-	connStr := config.DBUser + ":" + config.DBPassword + config.DBSource
-	testDb, err := sqlx.Connect(config.DBDriver, connStr)
+	testDb, err := sqlx.Connect(config.DBDriver, config.DataSourceName)
 	if err != nil {
 		log.Fatal("Failed to open conn.", zap.Error(err))
 	}

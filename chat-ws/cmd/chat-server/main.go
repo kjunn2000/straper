@@ -31,8 +31,7 @@ func main() {
 }
 
 func getSQLStore(log *zap.Logger, config configs.Config) (mysql.Store, error) {
-	connStr := config.DBUser + ":" + config.DBPassword + config.DBSource
-	db, err := sqlx.Connect(config.DBDriver, connStr)
+	db, err := sqlx.Connect(config.DBDriver, config.DataSourceName)
 	if err != nil {
 		log.Warn("Unable to connect mysql database.", zap.Error(err))
 		return &mysql.SQLStore{}, err
