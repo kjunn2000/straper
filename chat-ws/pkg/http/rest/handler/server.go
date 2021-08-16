@@ -72,7 +72,7 @@ func (server *Server) StartServer() {
 
 	err := server.httpServer.ListenAndServe()
 	if err != nil {
-		server.log.Warn("Unable to start server.")
+		server.log.Warn("Unable to start server.", zap.Error(err))
 		return
 	}
 }

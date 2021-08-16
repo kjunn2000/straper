@@ -24,3 +24,6 @@ server:
 
 mock:
 		mockgen -package mock -destination pkg/storage/mock/store.go github.com/kjunn2000/straper/chat-ws/pkg/storage/mysql Store 
+
+build:
+		docker build -t straper:latest .
