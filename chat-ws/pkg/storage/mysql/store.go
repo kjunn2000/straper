@@ -5,11 +5,13 @@ import (
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/kjunn2000/straper/chat-ws/pkg/domain/account"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/adding"
 	"go.uber.org/zap"
 )
 
 type Store interface {
+	CreateUser(ctx context.Context, params account.CreateUserParam) error
 	CreateNewWorkspace(ctx context.Context, w adding.Workspace, c adding.Channel, userId string) (adding.Workspace, error)
 	CreateNewChannel(ctx context.Context, channel adding.Channel, userId string) (adding.Channel, error)
 	AddNewUserToWorkspace(ctx context.Context, workspaceId string, userIdList []string) error
@@ -35,7 +37,8 @@ func (s *SQLStore) execTx(fn func(*Queries) error) error {
 	}
 	err = fn(NewQueries(tx, s.log))
 	if err != nil {
-		if rbErr := tx.Rollback(); rbErr != nil {
+		rbErr := tx.Rollback(); 
+		if rbErr != nil {
 			return fmt.Errorf("tx err: %v, rb err: %v", err, rbErr)
 		}
 		return err

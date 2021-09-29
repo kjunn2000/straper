@@ -13,9 +13,13 @@ import (
 
 type Querier interface {
 	// user
-	CreateUser(ctx context.Context, params account.CreateUserParam) error
-	GetUserByUserId(ctx context.Context, userId string) (account.User, error)
-	GetUserByUsername(ctx context.Context, username string) (auth.User, error)
+	CreateUserDetail(ctx context.Context, params CreateUserDetailParam) error
+	CreateUserCredential(ctx context.Context, params CreateUserCredentialParam) error
+	CreateUserAccessInfo(ctx context.Context, params CreateUserAccessInfo) error
+	GetUserDetailByUsername(ctx context.Context, username string) (account.UserDetail, error)
+	GetUserDetailByUserId(ctx context.Context, userId string) (account.UserDetail, error)
+	GetUserCredentialByUsername(ctx context.Context, username string) (auth.User, error)
+	GetUserCredentialByUserId(ctx context.Context, userId string) (auth.User, error)
 	UpdateUser(ctx context.Context, params account.UpdateUserParam) error
 	DeleteUser(ctx context.Context, userId string) error
 

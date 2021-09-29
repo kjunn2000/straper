@@ -2,27 +2,34 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gorilla/mux"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/account"
 	"github.com/kjunn2000/straper/chat-ws/pkg/http/rest"
+	"github.com/kjunn2000/straper/chat-ws/pkg/http/rest/middleware"
+	zxcvbn "github.com/nbutton23/zxcvbn-go"
 )
 
 func (server *Server) SetUpAccountRouter(mr *mux.Router, as account.Service) {
+	validate := validator.New()
+	validate.RegisterValidation("password", validatePassword)
 	ar := mr.PathPrefix("/account").Subrouter()
-	ar.HandleFunc("/create", server.Register(as)).Methods("POST")
-	ar.HandleFunc("/read/{user_id}", server.GetAccount(as)).Methods("GET")
-	ar.HandleFunc("/update", server.UpdateAccount(as)).Methods("POST")
-	ar.HandleFunc("/delete/{user_id}", server.DeleteAccount(as)).Methods("POST")
+	pr := mr.PathPrefix("/protected/account").Subrouter()
+	ar.HandleFunc("/create", server.Register(as, validate)).Methods("POST")
+	pr.HandleFunc("/read/{user_id}", server.GetAccount(as)).Methods("GET")
+	pr.HandleFunc("/update", server.UpdateAccount(as)).Methods("POST")
+	pr.HandleFunc("/delete/{user_id}", server.DeleteAccount(as)).Methods("POST")
+	pr.Use(middleware.TokenVerifier(server.tokenMaker))
 }
 
-func (server *Server) Register(as account.Service) func(http.ResponseWriter, *http.Request) {
+func (server *Server) Register(as account.Service, validate *validator.Validate) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		validate := validator.New()
 		var user account.CreateUserParam
 		json.NewDecoder(r.Body).Decode(&user)
+		fmt.Println(user)
 		err := validate.Struct(user)
 		if err != nil {
 			rest.AddResponseToResponseWritter(w, nil, err.Error())
@@ -88,4 +95,10 @@ func (server *Server) DeleteAccount(as account.Service) func(http.ResponseWriter
 		}
 		rest.AddResponseToResponseWritter(w, nil, "")
 	}
+}
+
+func validatePassword(fl validator.FieldLevel) bool {
+	password := fl.Field().String()
+	score := zxcvbn.PasswordStrength(password, []string{})
+	return score.Score >= 3
 }

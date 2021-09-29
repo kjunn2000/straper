@@ -10,7 +10,7 @@ import (
 
 type Service interface {
 	Register(ctx context.Context, params CreateUserParam) error
-	GetUserByUserId(ctx context.Context, userId string) (User, error)
+	GetUserByUserId(ctx context.Context, userId string) (UserDetail, error)
 	UpdateUser(ctx context.Context, param UpdateUserParam) error
 	DeleteUser(ctx context.Context, userId string) error
 }
@@ -34,6 +34,7 @@ func (us *service) Register(ctx context.Context, params CreateUserParam) error {
 	}
 	params.Password = hashedPassword
 	params.Role = "USER"
+	params.Status = "ACTIVE"
 	params.CreatedDate = time.Now()
 	err = us.ur.CreateUser(ctx, params)
 	if err != nil {
@@ -42,11 +43,12 @@ func (us *service) Register(ctx context.Context, params CreateUserParam) error {
 	return nil
 }
 
-func (us *service) GetUserByUserId(ctx context.Context, userId string) (User, error) {
-	return us.ur.GetUserByUserId(ctx, userId)
+func (us *service) GetUserByUserId(ctx context.Context, userId string) (UserDetail, error) {
+	return us.ur.GetUserDetailByUserId(ctx, userId)
 }
 
 func (us *service) UpdateUser(ctx context.Context, params UpdateUserParam) error {
+	params.UpdatedDate = time.Now()
 	return us.ur.UpdateUser(ctx, params)
 }
 

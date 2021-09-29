@@ -30,8 +30,6 @@ type LoginResponseUser struct {
 	UserId   string `json:"user_id" db:"user_id"`
 	Username string `json:"username" db:"username"`
 	Role     string `json:"role" db:"role"`
-	Email    string `json:"email" db:"email" validate:"email"`
-	PhoneNo  string `json:"phone_no" db:"phone_no"`
 }
 
 type service struct {
@@ -52,7 +50,7 @@ func NewService(log *zap.Logger, ar Repository, tokenMaker Maker, config configs
 
 func (as *service) Login(ctx context.Context, req LoginRequest) (LoginResponse, error) {
 
-	u, err := as.ar.GetUserByUsername(ctx, req.Username)
+	u, err := as.ar.GetUserCredentialByUsername(ctx, req.Username)
 
 	if err == sql.ErrNoRows {
 		as.log.Info("User not found")
@@ -76,8 +74,6 @@ func (as *service) Login(ctx context.Context, req LoginRequest) (LoginResponse, 
 		UserId:   u.UserId,
 		Username: u.Username,
 		Role:     u.Role,
-		Email:    u.Email,
-		PhoneNo:  u.PhoneNo,
 	}
 
 	return LoginResponse{
