@@ -22,6 +22,18 @@ CREATE TABLE `user_access_info` (
   `last_seen` DATETIME NOT NULL
 );
 
+CREATE TABLE `verify_email_token` (
+  `token_id` CHAR(36) PRIMARY KEY,
+  `user_id` VARCHAR(255) NOT NULL,
+  `created_date` DATETIME NOT NULL DEFAULT (now())
+);
+
+CREATE TABLE `reset_password_token` (
+  `token_id` CHAR(36) PRIMARY KEY,
+  `user_id` VARCHAR(255) NOT NULL,
+  `created_date` DATETIME NOT NULL DEFAULT (now())
+);
+
 CREATE TABLE `workspace` (
   `workspace_id` CHAR(36) PRIMARY KEY,
   `workspace_name` VARCHAR(255) NOT NULL,
@@ -111,6 +123,10 @@ ALTER TABLE `user_credential` ADD FOREIGN KEY (`user_id`) REFERENCES `user_detai
 ALTER TABLE `user_access_info` ADD FOREIGN KEY (`credential_id`) REFERENCES `user_credential` (`credential_id`) ON DELETE CASCADE;
 
 ALTER TABLE `workspace` ADD FOREIGN KEY (`creator_id`) REFERENCES `user_detail` (`user_id`) ON DELETE CASCADE;
+
+ALTER TABLE `verify_email_token` ADD FOREIGN KEY (`user_id`) REFERENCES `user_credential` (`user_id`) ON DELETE CASCADE;
+
+ALTER TABLE `reset_password_token` ADD FOREIGN KEY (`user_id`) REFERENCES `user_credential` (`user_id`) ON DELETE CASCADE;
 
 ALTER TABLE `workspace_user` ADD FOREIGN KEY (`workspace_id`) REFERENCES `workspace` (`workspace_id`) ON DELETE CASCADE;
 

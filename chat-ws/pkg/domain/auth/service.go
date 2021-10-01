@@ -58,6 +58,9 @@ func (as *service) Login(ctx context.Context, req LoginRequest) (LoginResponse, 
 	} else if err = as.comparePassword(u.Password, req.Password); err != nil {
 		as.log.Info("Invalid credential")
 		return LoginResponse{}, errors.New("invalid.credential")
+	} else if u.Status != "ACTIVE" {
+		as.log.Info("Invalid account status")
+		return LoginResponse{}, errors.New("invalid.account.status")
 	}
 
 	accessToken, err := as.tokenMaker.CreateToken(u.UserId, u.Username, as.config.AccessTokenDuration)

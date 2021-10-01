@@ -30,7 +30,7 @@ const Login = () => {
 				if(res.data.Success){
 					setAccessToken(res.data.Data?.access_token)
 					setIdentity(res.data.Data?.identity)
-					fetchWorkspaceData()
+					// fetchWorkspaceData()
 				}else if (res.data.ErrorMessage == "invalid.credential"){
 					updateErrMsg("Invalid credenital.")
 				}else if (res.data.ErrorMessage == "user.not.found"){
@@ -39,19 +39,19 @@ const Login = () => {
 			})
 	}
 
-	const fetchWorkspaceData = () => {
-		axios.get("http://localhost:8080/api/v1/protected/workspace/list")
-			.then(res => {
-				if (res.data.Success){
-					const workspaces = res.data.Data
-					if (workspaces && workspaces.length >0 ){
-						setWorkspaces(workspaces)
-						setCurrWorkspace(workspaces[0])
-					}
-					history.push("/workspace")
-				}
-			})
-	}
+	// const fetchWorkspaceData = () => {
+	// 	axios.get("http://localhost:8080/api/v1/protected/workspace/list")
+	// 		.then(res => {
+	// 			if (res.data.Success){
+	// 				const workspaces = res.data.Data
+	// 				if (workspaces && workspaces.length >0 ){
+	// 					setWorkspaces(workspaces)
+	// 					setCurrWorkspace(workspaces[0])
+	// 				}
+	// 				history.push("/workspace")
+	// 			}
+	// 		})
+	// }
 
 	const updateErrMsg = (msg) => {
 		setErrMsg(msg)

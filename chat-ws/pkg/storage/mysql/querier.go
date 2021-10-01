@@ -23,6 +23,11 @@ type Querier interface {
 	UpdateUser(ctx context.Context, params account.UpdateUserParam) error
 	DeleteUser(ctx context.Context, userId string) error
 
+	// verify_email
+	CreateVerifyEmailToken(ctx context.Context, token account.VerifyEmailToken) error
+	GetVerifyEmailToken(ctx context.Context, userId string) (account.VerifyEmailToken, error)
+	DeleteVerifyEmailToken(ctx context.Context, userId string) error
+
 	// workspace
 	CreateWorkspace(ctx context.Context, w adding.Workspace) error
 	AddUserToWorkspace(ctx context.Context, workspaceId string, userIdList []string) error

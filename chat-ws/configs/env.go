@@ -16,6 +16,10 @@ type Config struct {
 	AccessTokenDuration  time.Duration `mapstructure:"ACCESS_TOKEN_DURATION"`
 	RefreshTokenDuration time.Duration `mapstructure:"REFRESH_TOKEN_DURATION"`
 	DataSourceName       string
+	SenderEmail          string `mapstructure:"SENDER_EMAIL"`
+	SenderPassword       string `mapstructure:"SENDER_PASSWORD"`
+	SMTPHost             string `mapstructure:"SMTP_HOST"`
+	SMTPPort             string `mapstructure:"SMTP_PORT"`
 }
 
 func LoadConfig(path string) (Config, error) {

@@ -20,8 +20,12 @@ DROP TABLE IF EXISTS workspace_user;
 
 DROP TABLE IF EXISTS workspace;
 
-DROP TABLE IF EXISTS user_credential;
+DROP TABLE IF EXISTS verify_email_token;
 
-DROP TABLE IF EXISTS user_access;
+DROP TABLE IF EXISTS reset_password_token;
+
+DROP TABLE IF EXISTS user_access_info;
+
+DROP TABLE IF EXISTS user_credential;
 
 DROP TABLE IF EXISTS user_detail;

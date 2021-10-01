@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/kjunn2000/straper/chat-ws/configs"
 	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -16,14 +17,16 @@ type Service interface {
 }
 
 type service struct {
-	log *zap.Logger
-	ur  Repository
+	log    *zap.Logger
+	ur     Repository
+	config configs.Config
 }
 
-func NewService(log *zap.Logger, ur Repository) *service {
+func NewService(log *zap.Logger, ur Repository, config configs.Config) *service {
 	return &service{
-		log: log,
-		ur:  ur,
+		log:    log,
+		ur:     ur,
+		config: config,
 	}
 }
 
@@ -34,9 +37,17 @@ func (us *service) Register(ctx context.Context, params CreateUserParam) error {
 	}
 	params.Password = hashedPassword
 	params.Role = "USER"
-	params.Status = "ACTIVE"
+	params.Status = "VERIFYING"
 	params.CreatedDate = time.Now()
 	err = us.ur.CreateUser(ctx, params)
+	if err != nil {
+		return err
+	}
+	user, err := us.ur.GetUserDetailByUsername(ctx, params.Username)
+	if err != nil {
+		return err
+	}
+	err = us.CreateAndSendVerifyEmailToken(ctx, user)
 	if err != nil {
 		return err
 	}
