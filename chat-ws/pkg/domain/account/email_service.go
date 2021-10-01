@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/smtp"
 	"text/template"
+	"time"
 
 	"github.com/google/uuid"
 	"go.uber.org/zap"
@@ -26,8 +27,9 @@ func (us *service) CreateAndSendVerifyEmailToken(ctx context.Context, user UserD
 func (us *service) CreateVerifyEmailToken(ctx context.Context, userId string) (VerifyEmailToken, error) {
 	id, _ := uuid.NewRandom()
 	token := VerifyEmailToken{
-		TokenId: id.String(),
-		UserId:  userId,
+		TokenId:     id.String(),
+		UserId:      userId,
+		CreatedDate: time.Now(),
 	}
 	err := us.ur.CreateVerifyEmailToken(ctx, token)
 	if err != nil {
@@ -70,5 +72,17 @@ func (us *service) SendVerifyEmailToken(ctx context.Context, userDetail UserDeta
 		return err
 	}
 
+	return nil
+}
+
+func (s *service) ValidateVerifyEmailToken(ctx context.Context, tokenId string) error {
+	token, err := s.ur.GetVerifyEmailToken(ctx, tokenId)
+	if err != nil {
+		return err
+	}
+	err = s.ur.ValidateAccountEmail(ctx, token.UserId, tokenId)
+	if err != nil {
+		return err
+	}
 	return nil
 }

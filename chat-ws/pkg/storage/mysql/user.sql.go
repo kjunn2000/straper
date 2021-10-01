@@ -1,7 +1,8 @@
-package mysql
+package mysql 
 
 import (
 	"context"
+	"time"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/account"
@@ -164,6 +165,42 @@ func (q *Queries) UpdateUser(ctx context.Context, params account.UpdateUserParam
 		return err
 	}
 	q.log.Info("Successful update user.", zap.Int64("count", r))
+	return nil
+}
+
+func (q *Queries) UpdateAccountStatus(ctx context.Context, userId, status string) error {
+	sql, args, err := sq.Update("user_credential").
+		Set("status", status).
+		Set("updated_date", time.Now()).
+		Where(sq.Eq{"user_id": userId}).
+		ToSql()
+	if err != nil {
+		q.log.Warn("Failed to create user account status query.")
+		return err
+	}
+	_, err = q.db.Exec(sql, args...)
+	if err != nil {
+		q.log.Warn("Failed to update account status to db.", zap.Error(err))
+		return err
+	}
+	return nil
+}
+
+func (q *Queries) UpdateAccountPassword(ctx context.Context, userId, password string) error {
+	sql, args, err := sq.Update("user_credential").
+		Set("password", password).
+		Set("updated_date", time.Now()).
+		Where(sq.Eq{"user_id": userId}).
+		ToSql()
+	if err != nil {
+		q.log.Warn("Failed to create update account password query.")
+		return err
+	}
+	_, err = q.db.Exec(sql, args...)
+	if err != nil {
+		q.log.Warn("Failed to update account password to db.", zap.Error(err))
+		return err
+	}
 	return nil
 }
 

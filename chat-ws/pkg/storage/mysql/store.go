@@ -15,6 +15,7 @@ type Store interface {
 	CreateNewWorkspace(ctx context.Context, w adding.Workspace, c adding.Channel, userId string) (adding.Workspace, error)
 	CreateNewChannel(ctx context.Context, channel adding.Channel, userId string) (adding.Channel, error)
 	AddNewUserToWorkspace(ctx context.Context, workspaceId string, userIdList []string) error
+	ValidateAccountEmail(ctx context.Context, userId string, tokenId string) error
 	Querier
 }
 

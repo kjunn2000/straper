@@ -11,5 +11,5 @@ type Repository interface {
 
 	CreateVerifyEmailToken(ctx context.Context, token VerifyEmailToken) error
 	GetVerifyEmailToken(ctx context.Context, tokenId string) (VerifyEmailToken, error)
-	DeleteVerifyEmailToken(ctx context.Context, tokenId string) error
+	ValidateAccountEmail(ctx context.Context, userId, status string) error
 }

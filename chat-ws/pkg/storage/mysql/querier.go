@@ -21,12 +21,14 @@ type Querier interface {
 	GetUserCredentialByUsername(ctx context.Context, username string) (auth.User, error)
 	GetUserCredentialByUserId(ctx context.Context, userId string) (auth.User, error)
 	UpdateUser(ctx context.Context, params account.UpdateUserParam) error
+	UpdateAccountStatus(ctx context.Context, userId, status string) error
+	UpdateAccountPassword(ctx context.Context, userId, password string) error
 	DeleteUser(ctx context.Context, userId string) error
 
 	// verify_email
 	CreateVerifyEmailToken(ctx context.Context, token account.VerifyEmailToken) error
 	GetVerifyEmailToken(ctx context.Context, userId string) (account.VerifyEmailToken, error)
-	DeleteVerifyEmailToken(ctx context.Context, userId string) error
+	DeleteVerifyEmailToken(ctx context.Context, tokenId string) error
 
 	// workspace
 	CreateWorkspace(ctx context.Context, w adding.Workspace) error

@@ -14,6 +14,7 @@ type Service interface {
 	GetUserByUserId(ctx context.Context, userId string) (UserDetail, error)
 	UpdateUser(ctx context.Context, param UpdateUserParam) error
 	DeleteUser(ctx context.Context, userId string) error
+	ValidateVerifyEmailToken(ctx context.Context, tokenId string) error
 }
 
 type service struct {
@@ -36,8 +37,8 @@ func (us *service) Register(ctx context.Context, params CreateUserParam) error {
 		return err
 	}
 	params.Password = hashedPassword
-	params.Role = "USER"
-	params.Status = "VERIFYING"
+	params.Role = RoleUser
+	params.Status = StatusVerifying
 	params.CreatedDate = time.Now()
 	err = us.ur.CreateUser(ctx, params)
 	if err != nil {

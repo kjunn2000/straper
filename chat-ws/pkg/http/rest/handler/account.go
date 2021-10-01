@@ -22,6 +22,7 @@ func (server *Server) SetUpAccountRouter(mr *mux.Router, as account.Service) {
 	pr.HandleFunc("/read/{user_id}", server.GetAccount(as)).Methods("GET")
 	pr.HandleFunc("/update", server.UpdateAccount(as)).Methods("POST")
 	pr.HandleFunc("/delete/{user_id}", server.DeleteAccount(as)).Methods("POST")
+	ar.HandleFunc("/email/verify/{token_id}", server.ValidateVerifyEmailToken(as)).Methods("POST")
 	pr.Use(middleware.TokenVerifier(server.tokenMaker))
 }
 
@@ -72,6 +73,23 @@ func (server *Server) UpdateAccount(as account.Service) func(http.ResponseWriter
 			return
 		}
 		err = as.UpdateUser(r.Context(), user)
+		if err != nil {
+			rest.AddResponseToResponseWritter(w, nil, err.Error())
+			return
+		}
+		rest.AddResponseToResponseWritter(w, nil, "")
+	}
+}
+
+func (server *Server) ValidateVerifyEmailToken(as account.Service) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		tokenId, ok := vars["token_id"]
+		if !ok {
+			rest.AddResponseToResponseWritter(w, nil, "invalid.token.id")
+			return
+		}
+		err := as.ValidateVerifyEmailToken(r.Context(), tokenId)
 		if err != nil {
 			rest.AddResponseToResponseWritter(w, nil, err.Error())
 			return

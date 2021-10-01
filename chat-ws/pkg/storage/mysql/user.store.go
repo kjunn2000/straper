@@ -99,3 +99,22 @@ func (s *SQLStore) DeleteUser(ctx context.Context, userId string) error {
 	}
 	return nil
 }
+
+func (s *SQLStore) ValidateAccountEmail(ctx context.Context, userId, tokenId string) error {
+	err := s.execTx(func(q *Queries) error {
+		err := q.DeleteVerifyEmailToken(ctx, tokenId)
+		if err != nil {
+			return err
+		}
+		err = q.UpdateAccountStatus(ctx, userId, account.StatusActive)
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		s.log.Info("Failed to validate account email.", zap.Error(err))
+		return err
+	}
+	return nil
+}
