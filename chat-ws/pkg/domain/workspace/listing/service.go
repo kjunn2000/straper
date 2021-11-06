@@ -9,6 +9,7 @@ import (
 
 type Service interface {
 	GetWorkspaceData(ctx context.Context, userId string) ([]Workspace, error)
+	GetWorkspaceByWorkspaceId(ctx context.Context, workspaceId string) (Workspace, error)
 }
 
 type service struct {
@@ -50,10 +51,24 @@ func (s *service) generateWorkspaceWithChannelData(workspaceList []Workspace, ch
 			return nil, errors.New("workspace.and.channel.data.not.match")
 		}
 		c.ChannelList = append(c.ChannelList, channel)
+		workspaceMap[channel.WorkspaceId] = c
 	}
-	workspaceData := make([]Workspace, len(workspaceMap))
+	workspaceData := make([]Workspace, 0)
 	for _, workspace := range workspaceMap {
 		workspaceData = append(workspaceData, workspace)
 	}
 	return workspaceData, nil
+}
+
+func (s *service) GetWorkspaceByWorkspaceId(ctx context.Context, workspaceId string) (Workspace, error) {
+	w, err := s.r.GetWorkspaceByWorkspaceId(ctx, workspaceId)
+	if err != nil {
+		return Workspace{}, err
+	}
+	c, err := s.r.GetDefaultChannel(ctx, workspaceId)
+	if err != nil {
+		return Workspace{}, err
+	}
+	w.ChannelList = []Channel{c}
+	return w, nil
 }

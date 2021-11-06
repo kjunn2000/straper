@@ -1,26 +1,34 @@
-import './App.scss';
-import { Route, BrowserRouter as Router, Switch, Redirect } from 'react-router-dom';
-import Chat from './page/Chat';
-import Login from './page/Login';
-import Register from './page/Register';
+import "./App.scss";
+import {
+  Route,
+  BrowserRouter as Router,
+  Switch,
+  Redirect,
+} from "react-router-dom";
+import Channel from "./page/Workspace";
+import Login from "./page/Login";
+import Register from "./page/Register";
+import EmailVerify from "./page/EmailVerify";
+import UserAuthGuard from "./utils/guards/UserAuthGuard";
+import NoAuthGuard from "./utils/guards/NoAuthGuard";
 
 function App() {
-
   return (
     <div className="App">
       <Router>
         <Switch>
-          <Route path="/workspace">
-            <Chat/>
-          </Route>
-          <Route path="/login">
-            <Login/>
-          </Route>
-          <Route path="/register">
-            <Register/>
+          <UserAuthGuard
+            path="/channels/:workspaceId/:channelId"
+            component={Channel}
+          />
+          <UserAuthGuard path="/channels" component={Channel} />
+          <NoAuthGuard path="/login" component={Login} />
+          <NoAuthGuard path="/register" component={Register} />
+          <Route path="/account/opening/verify">
+            <EmailVerify />
           </Route>
           <Route path="/">
-            <Redirect to="/login"/>
+            <Redirect to="/login" />
           </Route>
         </Switch>
       </Router>

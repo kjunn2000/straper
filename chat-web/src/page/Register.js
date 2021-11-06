@@ -4,6 +4,7 @@ import { Link, useHistory } from "react-router-dom";
 import PasswordStrengthBar from "react-password-strength-bar";
 import { useForm } from "react-hook-form";
 import SimpleDialog from "../components/dialog/SimpleDialog";
+import { ErrorMessage } from "@hookform/error-message";
 
 const Register = () => {
   const history = useHistory();
@@ -11,25 +12,64 @@ const Register = () => {
     handleSubmit,
     register,
     watch,
-    getValues,
     formState: { errors },
   } = useForm();
   const passwordStrength = useRef();
-  const watchPassword = watch("loginform.password");
+  const watchPassword = watch("password");
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [showFailDialog, setShowFailDialog] = useState(false);
+  const [dialogErrMsg, setDialogErrMsg] = useState("");
 
-  const onRegister = () => {
+  const onRegister = (data) => {
     axios
-      .post(
-        "http://localhost:8080/api/v1/account/opening",
-        getValues("loginform")
-      )
+      .post("http://localhost:8080/api/v1/account/create", data)
       .then((res) => {
         if (res.data.Success) {
           setShowSuccessDialog(true);
+        } else {
+          switch (res.data.ErrorMessage) {
+            case "username.registered": {
+              setDialogErrMsg(
+                "Username is registered. Please try other username."
+              );
+              break;
+            }
+            case "email.registered": {
+              setDialogErrMsg("Email is registered. Please try other email.");
+              break;
+            }
+            case "phone.no.registered": {
+              setDialogErrMsg(
+                "Phone number is registered. Please try other phone number."
+              );
+              break;
+            }
+            case "invalid.username.format": {
+              setDialogErrMsg(
+                "Phone number format incorrect. Please try again."
+              );
+              break;
+            }
+            case "invalid.email.format": {
+              setDialogErrMsg("Email format incorrect. Please try again.");
+              break;
+            }
+            case "invalid.phone.no.format": {
+              setDialogErrMsg(
+                "Phone number format incorrect. Please try again."
+              );
+              break;
+            }
+            case "password.too.weak": {
+              setDialogErrMsg("Password too weak. Please try again.");
+              break;
+            }
+            default: {
+              setDialogErrMsg("Something went wrong. Please try again.");
+            }
+          }
+          setShowFailDialog(true);
         }
-        setShowFailDialog(true);
       })
       .catch((err) => {
         setShowFailDialog(true);
@@ -56,51 +96,48 @@ const Register = () => {
           <div>Username</div>
           <input
             className="bg-gray-800 p-2 rounded-lg"
-            {...register("loginform.username", {
-              required: true,
-              minLength: 4,
+            {...register("username", {
+              required: "Username is required.",
+              minLength: { value: 4, message: "Username at least 4 digits." },
             })}
           />
-          {errors?.loginform?.username?.type === "required" && (
-            <div className="text-red-500">Username cannot be empty</div>
-          )}
-          {errors?.loginform?.username?.type === "minLength" && (
-            <div className="text-red-500">Username at least 4 digits</div>
-          )}
+          <ErrorMessage errors={errors} name="username" as="p" />
         </div>
         <div className="self-center">
           <div>Email</div>
           <input
             className="bg-gray-800 p-2 rounded-lg"
-            {...register("loginform.email", {
-              required: true,
-              pattern: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+.[A-Z]{2,4}$/i,
+            {...register("email", {
+              required: "Email is required.",
+              pattern: {
+                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+.[A-Z]{2,4}$/i,
+                message: "Invalid email format.",
+              },
             })}
           />
-          {errors?.loginform?.email && (
-            <div className="text-red-500">Incorrect email format</div>
-          )}
+          <ErrorMessage errors={errors} name="email" as="p" />
         </div>
         <div className="self-center">
           <div>Phone No</div>
           <input
             className="bg-gray-800 p-2 rounded-lg"
             type="number"
-            {...register("loginform.phone_no", {
-              required: true,
-              pattern: /^[0-9]{10,11}$/,
+            {...register("phone_no", {
+              required: "Phone number is required.",
+              pattern: {
+                value: /^[0-9]{10,11}$/,
+                message: "Invalid phone number.",
+              },
             })}
           />
-          {errors?.loginform?.phone_no && (
-            <div className="text-red-500">Invalid phone no</div>
-          )}
+          <ErrorMessage errors={errors} name="phone_no" as="p" />
         </div>
         <div className="self-center">
           <div>Password</div>
           <input
             type="password"
             className="bg-gray-800 p-2 rounded-lg"
-            {...register("loginform.password", {
+            {...register("password", {
               required: true,
               validate: () => isPasswordValid(),
             })}
@@ -110,15 +147,11 @@ const Register = () => {
             password={watchPassword}
             className="pt-3"
           />
-          {errors?.loginform?.password && (
+          {errors?.password && (
             <div className="text-red-500">Password is too weak</div>
           )}
         </div>
-        <button
-          type="submit"
-          className="bg-indigo-400 self-center w-48 p-1"
-          onClick={() => console.log(errors)}
-        >
+        <button type="submit" className="bg-indigo-400 self-center w-48 p-1">
           REGISTER NOW
         </button>
         <Link
@@ -130,9 +163,10 @@ const Register = () => {
       </form>
       <SimpleDialog
         isOpen={showSuccessDialog}
-        setIsOpen={setShowFailDialog}
+        setIsOpen={setShowSuccessDialog}
         title="Register Successfully"
-        content="Thank you for create an account in Straper, hope you enjoy all the features that we provided."
+        content="Thank you for registering account in Straper, please verify your 
+          email in your email inbox to complete the registration."
         buttonText="Close"
         buttonAction={() => history.push("/login")}
         buttonStatus="success"
@@ -142,7 +176,7 @@ const Register = () => {
         isOpen={showFailDialog}
         setIsOpen={setShowFailDialog}
         title="Registered Fail"
-        content="Thank you for create an account in Straper, please try again later."
+        content={dialogErrMsg}
         buttonText="Close"
         buttonStatus="fail"
       />

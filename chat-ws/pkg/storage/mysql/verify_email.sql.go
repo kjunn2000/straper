@@ -32,7 +32,7 @@ func (q *Queries) GetVerifyEmailToken(ctx context.Context, tokenId string) (acco
 	var token account.VerifyEmailToken
 	err = q.db.Get(&token, sql, args...)
 	if err != nil {
-		q.log.Warn("Fail to get verify email token", zap.Error(err))
+		q.log.Info("Fail to get verify email token", zap.Error(err))
 		return account.VerifyEmailToken{}, err
 	}
 	return token, nil

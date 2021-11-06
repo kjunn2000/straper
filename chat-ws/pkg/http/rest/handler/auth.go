@@ -25,8 +25,8 @@ func (server *Server) Login(as auth.Service) func(http.ResponseWriter, *http.Req
 	return func(w http.ResponseWriter, r *http.Request) {
 		user := auth.LoginRequest{}
 		json.NewDecoder(r.Body).Decode(&user)
-		if user.Username == "" || user.Password == "" {
-			rest.AddResponseToResponseWritter(w, nil, "Invalid credential.")
+		if user.Username == "" || len(user.Username) < 4 || user.Password == "" {
+			rest.AddResponseToResponseWritter(w, nil, "invalid.credential")
 			return
 		}
 		loginResponse, err := as.Login(r.Context(), user)

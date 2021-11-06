@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -15,6 +16,7 @@ import (
 
 func (server *Server) SetUpAccountRouter(mr *mux.Router, as account.Service) {
 	validate := validator.New()
+
 	validate.RegisterValidation("password", validatePassword)
 	ar := mr.PathPrefix("/account").Subrouter()
 	pr := mr.PathPrefix("/protected/account").Subrouter()
@@ -30,9 +32,18 @@ func (server *Server) Register(as account.Service, validate *validator.Validate)
 	return func(w http.ResponseWriter, r *http.Request) {
 		var user account.CreateUserParam
 		json.NewDecoder(r.Body).Decode(&user)
-		fmt.Println(user)
 		err := validate.Struct(user)
 		if err != nil {
+			switch ExtractFieldFromValidationMsg(err.Error()) {
+			case "Username":
+				err = errors.New("invalid.username.format")
+			case "Email":
+				err = errors.New("invalid.email.format")
+			case "PhoneNo":
+				err = errors.New("invalid.phone.no.format")
+			case "Password":
+				err = errors.New("password.too.weak")
+			}
 			rest.AddResponseToResponseWritter(w, nil, err.Error())
 			return
 		}
@@ -118,5 +129,6 @@ func (server *Server) DeleteAccount(as account.Service) func(http.ResponseWriter
 func validatePassword(fl validator.FieldLevel) bool {
 	password := fl.Field().String()
 	score := zxcvbn.PasswordStrength(password, []string{})
-	return score.Score >= 3
+	fmt.Println(score.Score)
+	return score.Score >= 2
 }

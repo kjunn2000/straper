@@ -1,4 +1,4 @@
-package mysql 
+package mysql
 
 import (
 	"context"
@@ -18,17 +18,11 @@ func (q *Queries) CreateUserDetail(ctx context.Context, params CreateUserDetailP
 		q.log.Warn("Failed to create insert user detail query.")
 		return err
 	}
-	res, err := q.db.Exec(sql, arg...)
+	_, err = q.db.Exec(sql, arg...)
 	if err != nil {
 		q.log.Info("Failed to insert record to db.", zap.String("error", err.Error()))
 		return err
 	}
-	r, err := res.RowsAffected()
-	if err != nil {
-		q.log.Warn("Failed to read result data.")
-		return err
-	}
-	q.log.Info("Successful create a new user detail.", zap.Int64("count", r))
 	return nil
 }
 
@@ -40,17 +34,11 @@ func (q *Queries) CreateUserCredential(ctx context.Context, params CreateUserCre
 		q.log.Warn("Failed to create insert user credential query.")
 		return err
 	}
-	res, err := q.db.Exec(sql, arg...)
+	_, err = q.db.Exec(sql, arg...)
 	if err != nil {
 		q.log.Warn("Failed to insert record to db.", zap.Error(err))
 		return err
 	}
-	r, err := res.RowsAffected()
-	if err != nil {
-		q.log.Warn("Failed to read result data.")
-		return err
-	}
-	q.log.Info("Successful create a new user credential.", zap.Int64("count", r))
 	return nil
 }
 
@@ -62,17 +50,11 @@ func (q *Queries) CreateUserAccessInfo(ctx context.Context, params CreateUserAcc
 		q.log.Warn("Failed to create insert user access info query.")
 		return err
 	}
-	res, err := q.db.Exec(sql, arg...)
+	_, err = q.db.Exec(sql, arg...)
 	if err != nil {
 		q.log.Warn("Failed to insert record to db.", zap.Error(err))
 		return err
 	}
-	r, err := res.RowsAffected()
-	if err != nil {
-		q.log.Warn("Failed to read result data.")
-		return err
-	}
-	q.log.Info("Successful create a new user access info.", zap.Int64("count", r))
 	return nil
 }
 
@@ -103,7 +85,6 @@ func (q *Queries) GetUserDetailByUserId(ctx context.Context, userId string) (acc
 	if err != nil {
 		return account.UserDetail{}, err
 	}
-	q.log.Info("Successful select user ID: ", zap.String("user ID", userId))
 	return user, nil
 }
 
@@ -120,13 +101,12 @@ func (q *Queries) GetUserCredentialByUserId(ctx context.Context, userId string) 
 	if err != nil {
 		return auth.User{}, err
 	}
-	q.log.Info("Successful select user id: ", zap.String("user id", userId))
 	return user, nil
 }
 
 func (q *Queries) GetUserCredentialByUsername(ctx context.Context, username string) (auth.User, error) {
 	var user auth.User
-	sta, arg, err := sq.Select("credential_id", "user_credential.user_id", "username", "password", "role", "status",
+	sta, arg, err := sq.Select("credential_id", "user_credential.user_id", "username", "email", "phone_no", "password", "role", "status",
 		"user_credential.created_date", "user_credential.updated_date").
 		From("user_credential").InnerJoin("user_detail ud on user_credential.user_id = ud.user_id").
 		Where(sq.Eq{"username": username}).Limit(1).ToSql()
@@ -138,7 +118,6 @@ func (q *Queries) GetUserCredentialByUsername(ctx context.Context, username stri
 	if err != nil {
 		return auth.User{}, err
 	}
-	q.log.Info("Successful select username : ", zap.String("username", username))
 	return user, nil
 }
 

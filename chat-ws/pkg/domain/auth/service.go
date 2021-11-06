@@ -29,6 +29,8 @@ type LoginResponse struct {
 type LoginResponseUser struct {
 	UserId   string `json:"user_id" db:"user_id"`
 	Username string `json:"username" db:"username"`
+	Email    string `json:"email" db:"email" validate:"email"`
+	PhoneNo  string `json:"phone_no" db:"phone_no"`
 	Role     string `json:"role" db:"role"`
 }
 
@@ -53,13 +55,10 @@ func (as *service) Login(ctx context.Context, req LoginRequest) (LoginResponse, 
 	u, err := as.ar.GetUserCredentialByUsername(ctx, req.Username)
 
 	if err == sql.ErrNoRows {
-		as.log.Info("User not found")
 		return LoginResponse{}, errors.New("user.not.found")
 	} else if err = as.comparePassword(u.Password, req.Password); err != nil {
-		as.log.Info("Invalid credential")
 		return LoginResponse{}, errors.New("invalid.credential")
 	} else if u.Status != "ACTIVE" {
-		as.log.Info("Invalid account status")
 		return LoginResponse{}, errors.New("invalid.account.status")
 	}
 
@@ -76,6 +75,8 @@ func (as *service) Login(ctx context.Context, req LoginRequest) (LoginResponse, 
 	loginResponseUser := LoginResponseUser{
 		UserId:   u.UserId,
 		Username: u.Username,
+		Email:    u.Email,
+		PhoneNo:  u.PhoneNo,
 		Role:     u.Role,
 	}
 

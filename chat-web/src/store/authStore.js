@@ -1,12 +1,18 @@
-import create from "zustand"
+import create from "zustand";
 
-const useAuthStore = create(set => ({
-	accessToken : "",
-	setAccessToken: (accessToken) => {
-		set((state) => ({
-			accessToken: accessToken
-		}))
-	}
-}))
+const useAuthStore = create((set) => ({
+  accessToken: window.localStorage.getItem("accessToken") || "",
+  setAccessToken: (accessToken) => {
+    window.localStorage.setItem("accessToken", accessToken);
+    set((state) => ({
+      accessToken: accessToken,
+    }));
+  },
+  clearAccessToken: () => {
+    set((state) => ({
+      accessToken: "",
+    }));
+  },
+}));
 
-export default useAuthStore
+export default useAuthStore;

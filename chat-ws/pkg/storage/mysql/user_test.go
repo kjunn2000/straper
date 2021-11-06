@@ -1,4 +1,4 @@
-package mysql 
+package mysql
 
 import (
 	"context"
@@ -18,7 +18,7 @@ func createRandomUser(t *testing.T) account.CreateUserParam {
 		Username:    storage.RandomUsername(),
 		Password:    hashedPassword,
 		Role:        "USER",
-		Status:      "ACTIVE",
+		Status:      "VERIFYING",
 		Email:       storage.RandomEmail(),
 		PhoneNo:     storage.RandomPhoneNumber(),
 		CreatedDate: time.Now(),
@@ -101,6 +101,24 @@ func TestUpdateUser(t *testing.T) {
 		UpdatedDate: time.Now(),
 	}
 	err := store.UpdateUser(context.Background(), params)
+	require.NoError(t, err)
+}
+
+func TestUpdateAccountStatus(t *testing.T) {
+	createUserParams := createRandomUser(t)
+	u, err := store.GetUserDetailByUsername(context.Background(), createUserParams.Username)
+	require.NoError(t, err)
+	err = store.UpdateAccountStatus(context.Background(), u.UserId, "ACTIVE")
+	require.NoError(t, err)
+}
+
+func TestUpdateAccountPassword(t *testing.T) {
+	createUserParams := createRandomUser(t)
+	u, err := store.GetUserDetailByUsername(context.Background(), createUserParams.Username)
+	require.NoError(t, err)
+	hashedPassword, err := account.BcrptHashPassword(storage.RandomPassword())
+	require.NoError(t, err)
+	err = store.UpdateAccountPassword(context.Background(), u.UserId, hashedPassword)
 	require.NoError(t, err)
 }
 

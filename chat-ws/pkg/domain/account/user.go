@@ -30,7 +30,7 @@ type UserAccessInfo struct {
 
 type CreateUserParam struct {
 	Username    string `json:"username" db:"username" validate:"required,min=3"`
-	Password    string `json:"password" db:"password" validate:"required,password"`
+	Password    string `json:"password" db:"password" validate:"required"`
 	Role        string `db:"role"`
 	Status      string
 	Email       string    `json:"email" db:"email" validate:"required,email"`

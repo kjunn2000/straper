@@ -104,13 +104,23 @@ func (server *Server) UpdateChannel(es editing.Service) func(w http.ResponseWrit
 
 func (server *Server) DeleteChannel(ds deleting.Service) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
+		payloadVal := r.Context().Value(middleware.TokenPayload{})
+		if payloadVal == nil {
+			rest.AddResponseToResponseWritter(w, nil, "payload.not.found.in.context")
+			return
+		}
+		payload, ok := payloadVal.(*auth.Payload)
+		if !ok {
+			rest.AddResponseToResponseWritter(w, nil, "invalid.payload.in.context")
+			return
+		}
 		vars := mux.Vars(r)
 		channelId, ok := vars["channel_id"]
 		if !ok {
 			rest.AddResponseToResponseWritter(w, nil, "channel.id.not.found")
 			return
 		}
-		err := ds.DeleteChannel(r.Context(), channelId)
+		err := ds.DeleteChannel(r.Context(), channelId, payload.UserId)
 		if err != nil {
 			rest.AddResponseToResponseWritter(w, nil, err.Error())
 			return
