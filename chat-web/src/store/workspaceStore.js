@@ -39,7 +39,6 @@ const useWorkspaceStore = create((set) => ({
   },
   resetCurrWorkspace: () => {
     set((state) => {
-      console.log(state.workspaces);
       let newCurrWorkspace =
         state.workspaces.length > 0 ? state.workspaces[0] : {};
       setLocalStorage("currWorkspace", newCurrWorkspace);

@@ -30,6 +30,11 @@ type Querier interface {
 	GetVerifyEmailToken(ctx context.Context, userId string) (account.VerifyEmailToken, error)
 	DeleteVerifyEmailToken(ctx context.Context, tokenId string) error
 
+	// reset_passwd
+	CreateResetPasswordToken(ctx context.Context, params account.ResetPasswdToken) error
+	GetResetPasswordToken(ctx context.Context, userId string) (account.ResetPasswdToken, error)
+	DeleteResetPasswordToken(ctx context.Context, tokenId string) error
+
 	// workspace
 	CreateWorkspace(ctx context.Context, w adding.Workspace) error
 	AddUserToWorkspace(ctx context.Context, workspaceId string, userIdList []string) error

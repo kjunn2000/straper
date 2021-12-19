@@ -3,60 +3,51 @@ import { useParams } from "react-router";
 import ChatRoom from "../components/ChatRoom";
 import Sidebar from "../components/sideBar/Sidebar";
 import useWorkspaceStore from "../store/workspaceStore";
+import {ReactComponent as Welcome} from "../asset/img/welcome.svg";
+import {ReactComponent as NotFound} from "../asset/img/notfound.svg";
 
 function Workspace() {
   const { workspaceId, channelId } = useParams();
   const setCurrWorkspace = useWorkspaceStore((state) => state.setCurrWorkspace);
   const setCurrChannel = useWorkspaceStore((state) => state.setCurrChannel);
-  const resetCurrWorkspace = useWorkspaceStore(
-    (state) => state.resetCurrWorkspace
-  );
-  const resetCurrChannel = useWorkspaceStore((state) => state.resetCurrChannel);
-  const selectedChannelIds = useWorkspaceStore(
-    (state) => state.selectedChannelIds
-  );
-  const setSelectedChannelIds = useWorkspaceStore(
-    (state) => state.setSelectedChannelIds
-  );
+  const setSelectedChannelIds = useWorkspaceStore((state) => state.setSelectedChannelIds);
+  const currWorkspace = useWorkspaceStore((state) => state.currWorkspace);
+
   useEffect(() => {
     updateWorkspaceState();
   }, []);
 
   const updateWorkspaceState = () => {
-    console.log(workspaceId);
-    console.log(channelId);
     if (workspaceId && workspaceId != "") {
-      console.log("Has workspace id");
       setCurrWorkspace(workspaceId);
-    } else {
-      console.log("No workspace id");
-      resetCurrWorkspace();
-      selectPrevChannel();
-      return;
-    }
-    if (channelId && channelId != "") {
-      console.log("Has channel id");
-      setCurrChannel(channelId);
-      setSelectedChannelIds(channelId);
-    } else {
-      console.log("No channel id");
-      selectPrevChannel();
+      if (channelId && channelId != "") {
+        setCurrChannel(channelId);
+        setSelectedChannelIds(channelId);
+      } 
     }
   };
 
-  const selectPrevChannel = (workspaceId) => {
-    const selectedChannelId = selectedChannelIds.get(workspaceId);
-    if (selectedChannelId) {
-      setCurrChannel(selectedChannelId);
-    } else {
-      resetCurrChannel();
-    }
-  };
+  const emptyComponent = (Image, text) => (
+    <div className="flex flex-col items-center p-5 text-white">
+        <div>{text}</div>
+        <Image className="w-80 h-80"/>
+    </div>
+  )
 
   return (
-    <div className="flex flex-row">
-      <Sidebar />
-      <ChatRoom />
+    <div className="flex" 
+      style={{ background: "rgb(54,57,63)" }}
+    >
+      <div className="flex-none">
+        <Sidebar/>
+      </div>
+      <div className="flex-auto self-center">
+      {
+        !workspaceId ? emptyComponent(Welcome, "WELCOME TO STRAPER, LET'S STRENGTHEN YOUR COLLABORATION") 
+        : (!currWorkspace || currWorkspace == {} ? emptyComponent(NotFound, "WORKSPACE NOT FOUND") 
+        : <ChatRoom/>)
+      }
+      </div>
     </div>
   );
 }

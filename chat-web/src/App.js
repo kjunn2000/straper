@@ -11,6 +11,7 @@ import Register from "./page/Register";
 import EmailVerify from "./page/EmailVerify";
 import UserAuthGuard from "./utils/guards/UserAuthGuard";
 import NoAuthGuard from "./utils/guards/NoAuthGuard";
+import ResetPassword from "./page/ResetPassword";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
           <UserAuthGuard path="/channels" component={Channel} />
           <NoAuthGuard path="/login" component={Login} />
           <NoAuthGuard path="/register" component={Register} />
+          <NoAuthGuard path="/reset-password" component={ResetPassword} />
           <Route path="/account/opening/verify">
             <EmailVerify />
           </Route>

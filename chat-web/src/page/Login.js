@@ -60,23 +60,21 @@ const Login = ({ location }) => {
 
   const fetchWorkspaceData = async () => {
     const res = await api.get("/protected/workspace/list");
-    if (res.data?.Success) {
+    if (res.data?.Success && res.data?.Data) {
       setWorkspaces(res.data?.Data);
     }
     return res.data?.Data;
   };
 
   const redirectToWorkspacePage = (workspaces) => {
-    let selectedWorkspace = workspaces.length > 0 ? workspaces[0] : null;
-    let selectedChannel =
-      selectedWorkspace && selectedWorkspace?.channel_list.length > 0
-        ? selectedWorkspace?.channel_list[0]
-        : {};
-    history.push(
-      `/channels/${selectedWorkspace && selectedWorkspace.workspace_id}/${
-        selectedChannel.channel_id
-      }`
-    );
+    let redirectLink = "/channels";
+    if (workspaces.length > 0) {
+      redirectLink += "/" + workspaces[0];
+      if (workspaces[0]?.channel_list.length > 0) {
+        redirectLink += "/" + workspaces[0].channel_list[0].channel_id;
+      }
+    }
+    history.push(redirectLink);
   };
 
   const updateErrMsg = (msg) => {
@@ -132,6 +130,12 @@ const Login = ({ location }) => {
           className="text-indigo-300 self-center cursor-pointer hover:text-indigo-500"
         >
           Register an account
+        </Link>
+        <Link
+          to="/reset-password"
+          className="text-indigo-300 self-center cursor-pointer hover:text-indigo-500"
+        >
+          Forget password ?
         </Link>
       </form>
       <SimpleDialog
