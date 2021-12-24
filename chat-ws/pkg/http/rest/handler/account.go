@@ -14,6 +14,10 @@ import (
 	zxcvbn "github.com/nbutton23/zxcvbn-go"
 )
 
+type ResetPasswordRequest struct {
+	Email string `json:"email" db:"email" validate:"email"`
+}
+
 func (server *Server) SetUpAccountRouter(mr *mux.Router, as account.Service) {
 	validate := validator.New()
 
@@ -25,6 +29,8 @@ func (server *Server) SetUpAccountRouter(mr *mux.Router, as account.Service) {
 	pr.HandleFunc("/update", server.UpdateAccount(as)).Methods("POST")
 	pr.HandleFunc("/delete/{user_id}", server.DeleteAccount(as)).Methods("POST")
 	ar.HandleFunc("/email/verify/{token_id}", server.ValidateVerifyEmailToken(as)).Methods("POST")
+	ar.HandleFunc("/password/reset/request", server.ResetPasswordRequest(as)).Methods("POST")
+	ar.HandleFunc("/password/update", server.UpdatePassword(as)).Methods("POST")
 	pr.Use(middleware.TokenVerifier(server.tokenMaker))
 }
 
@@ -119,6 +125,30 @@ func (server *Server) DeleteAccount(as account.Service) func(http.ResponseWriter
 		}
 		err := as.DeleteUser(r.Context(), userId)
 		if err != nil {
+			rest.AddResponseToResponseWritter(w, nil, err.Error())
+			return
+		}
+		rest.AddResponseToResponseWritter(w, nil, "")
+	}
+}
+
+func (server *Server) ResetPasswordRequest(as account.Service) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var resetPasswordRequest ResetPasswordRequest
+		json.NewDecoder(r.Body).Decode(&resetPasswordRequest)
+		if err := as.ResetAccountPassword(r.Context(), resetPasswordRequest.Email); err != nil {
+			rest.AddResponseToResponseWritter(w, nil, err.Error())
+			return
+		}
+		rest.AddResponseToResponseWritter(w, nil, "")
+	}
+}
+
+func (server *Server) UpdatePassword(as account.Service) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var updatePasswordParam account.UpdatePasswordParam
+		json.NewDecoder(r.Body).Decode(&updatePasswordParam)
+		if err := as.ResetAccountPassword(r.Context(), updatePasswordParam.Password); err != nil {
 			rest.AddResponseToResponseWritter(w, nil, err.Error())
 			return
 		}

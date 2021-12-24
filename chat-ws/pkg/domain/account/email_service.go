@@ -17,7 +17,9 @@ func (us *service) CreateAndSendVerifyEmailToken(ctx context.Context, user UserD
 	if err != nil {
 		return err
 	}
-	err = us.SendVerifyEmailToken(ctx, user, token.TokenId)
+	err = us.sendEmail(ctx, user,
+		"template/email/accountVerificationEmail.html",
+		"Straper Account Opening Verificataion", token.TokenId)
 	if err != nil {
 		return err
 	}
@@ -38,11 +40,23 @@ func (us *service) CreateVerifyEmailToken(ctx context.Context, userId string) (V
 	return token, nil
 }
 
-func (us *service) SendVerifyEmailToken(ctx context.Context, userDetail UserDetail, tokenId string) error {
+func (s *service) ValidateVerifyEmailToken(ctx context.Context, tokenId string) error {
+	token, err := s.ur.GetVerifyEmailToken(ctx, tokenId)
+	if err != nil {
+		return err
+	}
+	err = s.ur.ValidateAccountEmail(ctx, token.UserId, tokenId)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (us *service) sendEmail(ctx context.Context, userDetail UserDetail, templatePath, subject, tokenId string) error {
 
 	auth := smtp.PlainAuth("", us.config.SenderEmail, us.config.SenderPassword, us.config.SMTPHost)
 
-	t, err := template.ParseFiles("template/email/accountVerificationEmail.html")
+	t, err := template.ParseFiles(templatePath)
 	if err != nil {
 		us.log.Warn("Email template file cannot fetch", zap.Error(err))
 		return err
@@ -52,7 +66,7 @@ func (us *service) SendVerifyEmailToken(ctx context.Context, userDetail UserDeta
 
 	from := fmt.Sprintf("From: %s", us.config.SenderEmail)
 	to := fmt.Sprintf("To: %s", userDetail.Email)
-	subject := "Subject: Straper Account Opening Verificataion"
+	subject = "Subject " + subject
 
 	mimeHeaders := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
 	body.Write([]byte(fmt.Sprintf("%s\n%s\n%s\n%s\n\n", from, to, subject, mimeHeaders)))
@@ -72,17 +86,5 @@ func (us *service) SendVerifyEmailToken(ctx context.Context, userDetail UserDeta
 		return err
 	}
 
-	return nil
-}
-
-func (s *service) ValidateVerifyEmailToken(ctx context.Context, tokenId string) error {
-	token, err := s.ur.GetVerifyEmailToken(ctx, tokenId)
-	if err != nil {
-		return err
-	}
-	err = s.ur.ValidateAccountEmail(ctx, token.UserId, tokenId)
-	if err != nil {
-		return err
-	}
 	return nil
 }

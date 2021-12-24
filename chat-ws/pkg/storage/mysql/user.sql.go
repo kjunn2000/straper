@@ -88,6 +88,21 @@ func (q *Queries) GetUserDetailByUserId(ctx context.Context, userId string) (acc
 	return user, nil
 }
 
+func (q *Queries) GetUserDetailByEmail(ctx context.Context, email string) (account.UserDetail, error) {
+	var user account.UserDetail
+	sta, arg, err := sq.Select("user_id", "username", "email", "phone_no", "created_date", "updated_date").
+		From("user_detail").Where(sq.Eq{"email": email}).Limit(1).ToSql()
+	if err != nil {
+		q.log.Warn("Failed to create select sql.")
+		return account.UserDetail{}, err
+	}
+	err = q.db.Get(&user, sta, arg...)
+	if err != nil {
+		return account.UserDetail{}, err
+	}
+	return user, nil
+}
+
 func (q *Queries) GetUserCredentialByUserId(ctx context.Context, userId string) (auth.User, error) {
 	var user auth.User
 	sta, arg, err := sq.Select("credential_id", "user_id", "password", "role", "status", "created_date", "updated_date").

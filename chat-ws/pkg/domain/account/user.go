@@ -45,8 +45,3 @@ type UpdateUserParam struct {
 	PhoneNo     string    `json:"phone_no" db:"phone_no" validate:"required,numeric,min=10"`
 	UpdatedDate time.Time `db:"updated_date"`
 }
-
-type UpdatePasswdParam struct {
-	UserId   string `json:"user_id" db:"user_id"`
-	Password string `json:"password" db:"password" validate:"required"`
-}

@@ -18,6 +18,7 @@ type Querier interface {
 	CreateUserAccessInfo(ctx context.Context, params CreateUserAccessInfo) error
 	GetUserDetailByUsername(ctx context.Context, username string) (account.UserDetail, error)
 	GetUserDetailByUserId(ctx context.Context, userId string) (account.UserDetail, error)
+	GetUserDetailByEmail(ctx context.Context, email string) (account.UserDetail, error)
 	GetUserCredentialByUsername(ctx context.Context, username string) (auth.User, error)
 	GetUserCredentialByUserId(ctx context.Context, userId string) (auth.User, error)
 	UpdateUser(ctx context.Context, params account.UpdateUserParam) error
@@ -31,8 +32,9 @@ type Querier interface {
 	DeleteVerifyEmailToken(ctx context.Context, tokenId string) error
 
 	// reset_passwd
-	CreateResetPasswordToken(ctx context.Context, params account.ResetPasswdToken) error
-	GetResetPasswordToken(ctx context.Context, userId string) (account.ResetPasswdToken, error)
+	CreateResetPasswordToken(ctx context.Context, params account.ResetPasswordToken) error
+	GetResetPasswordToken(ctx context.Context, tokenId string) (account.ResetPasswordToken, error)
+	GetResetPasswordTokenByUserId(ctx context.Context, userId string) (account.ResetPasswordToken, error)
 	DeleteResetPasswordToken(ctx context.Context, tokenId string) error
 
 	// workspace

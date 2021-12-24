@@ -15,6 +15,10 @@ type Service interface {
 	Register(ctx context.Context, params CreateUserParam) error
 	GetUserByUserId(ctx context.Context, userId string) (UserDetail, error)
 	UpdateUser(ctx context.Context, param UpdateUserParam) error
+
+	ResetAccountPassword(ctx context.Context, email string) error
+	UpdateAccountPassword(ctx context.Context, params UpdatePasswordParam) error
+
 	DeleteUser(ctx context.Context, userId string) error
 	ValidateVerifyEmailToken(ctx context.Context, tokenId string) error
 }
