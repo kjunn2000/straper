@@ -21,8 +21,12 @@ const Login = ({ location }) => {
 
   const setAccessToken = useAuthStore((state) => state.setAccessToken);
   const setWorkspaces = useWorkspaceStore((state) => state.setWorkspaces);
-  const setCurrWorkspace = useWorkspaceStore((state) => state.setCurrWorkspace);
+  const setDefaultSelectedChannelIds= useWorkspaceStore((state) => state.setDefaultSelectedChannelIds);
   const setIdentity = useIdentifyStore((state) => state.setIdentity);
+
+  const setCurrWorkspace = useWorkspaceStore((state) => state.setCurrWorkspace);
+  const setCurrChannel = useWorkspaceStore((state) => state.setCurrChannel);
+  const selectedChannelIds = useWorkspaceStore((state) => state.selectedChannelIds);
 
   const [errMsg, setErrMsg] = useState("");
   const [showTimeoutDialog, setShowTimeoutDialog] = useState(false);
@@ -62,15 +66,21 @@ const Login = ({ location }) => {
     const res = await api.get("/protected/workspace/list");
     if (res.data?.Success && res.data?.Data) {
       setWorkspaces(res.data?.Data);
+      setDefaultSelectedChannelIds();
+      const selectedIds = [...selectedChannelIds]
+      if (selectedIds.length > 0) {
+        setCurrWorkspace(selectedIds[0][0])
+        setCurrChannel(selectedIds[0][1])
+      }
     }
     return res.data?.Data;
   };
 
   const redirectToWorkspacePage = (workspaces) => {
-    let redirectLink = "/channels";
+    let redirectLink = "/channel";
     if (workspaces.length > 0) {
-      redirectLink += "/" + workspaces[0];
-      if (workspaces[0]?.channel_list.length > 0) {
+      redirectLink += "/" + workspaces[0].workspace_id;
+      if (workspaces[0].channel_list.length > 0) {
         redirectLink += "/" + workspaces[0].channel_list[0].channel_id;
       }
     }

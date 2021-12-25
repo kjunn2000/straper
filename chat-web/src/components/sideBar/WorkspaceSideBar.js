@@ -10,12 +10,9 @@ import { logOut } from "../../service/logout";
 
 function WorkspaceSidebar() {
   const workspaces = useWorkspaceStore((state) => state.workspaces);
-
-  const clearToken = useAuthStore((state) => state.clearAccessToken);
-  const clearIdentity = useIdentifyStore((state) => state.clearIdentity);
-  const clearWorkspaceState = useWorkspaceStore(
-    (state) => state.clearWorkspaceState
-  );
+  const selectedChannelIds = useWorkspaceStore((state) => state.selectedChannelIds);
+  const setCurrWorkspace = useWorkspaceStore((state) => state.setCurrWorkspace);
+  const setCurrChannel = useWorkspaceStore((state) => state.setCurrChannel);
 
   const history = useHistory();
 
@@ -24,7 +21,10 @@ function WorkspaceSidebar() {
     useState(false);
 
   const changeWorkspace = (workspaceId) => {
-    history.push(`/channels/${workspaceId}`);
+    const channelId = selectedChannelIds.get(workspaceId);
+    setCurrWorkspace(workspaceId);
+    setCurrChannel(channelId);
+    history.push(`/channel/${workspaceId}/${channelId}`);
   };
 
   const toggleDialog = () => {

@@ -11,7 +11,7 @@ const AdminAuthGuard = ({ component: Component, ...rest }) => {
         identity?.role == "ADMIN" ? (
           <Component {...props} />
         ) : identity?.role == "USER" ? (
-          <Redirect to="/channels" />
+          <Redirect to="/channel" />
         ) : (
           <Redirect to="/login" />
         )

@@ -6,17 +6,21 @@ import useIdentifyStore from "../store/identityStore";
 import useWorkspaceStore from "../store/workspaceStore";
 import api from "../axios/api";
 import MenuItem from "./Menu/MenuItem";
+import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
+import { set } from "react-hook-form";
 
 export default function WorkspaceMenu() {
   const [isCreator, setIsCreator] = useState(false);
   const identity = useIdentifyStore((state) => state.identity);
   const workspace = useWorkspaceStore((state) => state.currWorkspace);
-  const deleteWorkspaceAtStore = useWorkspaceStore(
-    (state) => state.deleteWorkspace
-  );
-  const resetCurrWorkspace = useWorkspaceStore(
-    (state) => state.resetCurrWorkspace
-  );
+  const deleteWorkspaceAtStore = useWorkspaceStore((state) => state.deleteWorkspace);
+  const setCurrWorkspace = useWorkspaceStore((state) => state.setCurrWorkspace);
+  const setCurrChannel = useWorkspaceStore((state) => state.setCurrChannel);
+  const selectedChannelIds = useWorkspaceStore((state) => state.selectedChannelIds);
+  const deleteSelectedChannelIds = useWorkspaceStore((state) => state.deleteSelectedChannelIds);
+  const clearWorkspaceState = useWorkspaceStore((state) => state.clearWorkspaceState);
+
+  const history = useHistory();
 
   useEffect(() => {
     if (identity.user_id === workspace?.creator_id) {
@@ -31,8 +35,7 @@ export default function WorkspaceMenu() {
       .post(`/protected/workspace/delete/${workspace.workspace_id}`)
       .then((res) => {
         if (res.data.Success) {
-          deleteWorkspaceAtStore(workspace.workspace_id);
-          resetCurrWorkspace();
+          updateWorkspaceState();
         }
       });
   };
@@ -42,11 +45,24 @@ export default function WorkspaceMenu() {
       .post(`/protected/workspace/leave/${workspace.workspace_id}`)
       .then((res) => {
         if (res.data.Success) {
-          deleteWorkspaceAtStore(workspace.workspace_id);
-          resetCurrWorkspace();
+          updateWorkspaceState();
         }
       });
   };
+
+  const updateWorkspaceState = () => {
+      deleteWorkspaceAtStore(workspace.workspace_id);
+      deleteSelectedChannelIds(workspace.workspace_id);
+      const selectedIds = [...selectedChannelIds];
+      if (selectedIds.length > 0) {
+        setCurrWorkspace(selectedIds[0][0]);
+        setCurrChannel(selectedIds[0][1]);
+        history.push(`/channel/${selectedIds[0][0]}/${selectedIds[0][1]}`);
+      }else {
+        clearWorkspaceState();
+        history.push("/channel");
+      }
+  }
 
   return (
     <div>

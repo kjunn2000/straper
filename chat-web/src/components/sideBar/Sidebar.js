@@ -5,15 +5,10 @@ import useWorkspaceStore from "../../store/workspaceStore";
 
 function Sidebar() {
 
-  const workspace = useWorkspaceStore((state) => state.currWorkspace);
-
   return (
     <div className="flex flex-row">
       <WorkspaceSidebar />
-      { workspace == {} ? 
-        <ChannelSidebar />
-        :  <></>
-      }
+      <ChannelSidebar />
     </div>
   );
 }
