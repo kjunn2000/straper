@@ -11,7 +11,7 @@ const NoAuthGuard = ({ component: Component, ...rest }) => {
       {...rest}
       render={(props) =>
         identity?.role == "USER" ? (
-          <Redirect to="/channels" />
+          <Redirect to="/channel" />
         ) : identity?.role == "ADMIN" ? (
           <Redirect to="/dashboard" />
         ) : (

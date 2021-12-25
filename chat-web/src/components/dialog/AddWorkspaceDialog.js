@@ -2,6 +2,7 @@ import { Dialog, Transition } from "@headlessui/react";
 import { ErrorMessage } from "@hookform/error-message";
 import React, { useRef } from "react";
 import { useForm } from "react-hook-form";
+import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import { Fragment } from "react/cjs/react.production.min";
 import api from "../../axios/api";
 import useWorkspaceStore from "../../store/workspaceStore";
@@ -15,13 +16,23 @@ const AddWorkspaceDialog = ({ isOpen, close, toggleDialog }) => {
   } = useForm();
   const addWorkspace = useWorkspaceStore((state) => state.addWorkspace);
   const setCurrWorkspace = useWorkspaceStore((state) => state.setCurrWorkspace);
+  const setCurrChannel = useWorkspaceStore((state) => state.setCurrChannel);
+  const setSelectedChannelIds = useWorkspaceStore((state) => state.setSelectedChannelIds);
+
   let addWorkspaceBtn = useRef(null);
+
+  const history = useHistory();
+
   const addNewWorkspace = (data) => {
     api.post("/protected/workspace/create", data).then((res) => {
       if (res.data.Success) {
         const newWorkspace = res.data.Data;
         addWorkspace(newWorkspace);
-        setCurrWorkspace(newWorkspace);
+        setCurrWorkspace(newWorkspace.workspace_id)
+        const channelId = newWorkspace.channel_list[0].channel_id
+        setCurrChannel(channelId)
+        setSelectedChannelIds(newWorkspace.workspace_id, channelId)
+        history.push(`/channel/${newWorkspace.workspace_id}/${channelId}`)
       }
     });
     closeDialog();

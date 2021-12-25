@@ -10,7 +10,9 @@ function ChannelSidebar() {
       className="flex flex-col w-64 h-screen "
       style={{ background: "rgb(47,49,54)" }}
     >
-      <WorkspaceMenu />
+      {
+        workspace?.workspace_id? <WorkspaceMenu /> : <></>
+      }
       <div className="px-3">
         {workspace?.channel_list &&
           workspace.channel_list.map((channel) => (

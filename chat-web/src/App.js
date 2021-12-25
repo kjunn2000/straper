@@ -5,7 +5,6 @@ import {
   Switch,
   Redirect,
 } from "react-router-dom";
-import Channel from "./page/Workspace";
 import Login from "./page/Login";
 import Register from "./page/Register";
 import EmailVerify from "./page/EmailVerify";
@@ -13,6 +12,7 @@ import UserAuthGuard from "./utils/guards/UserAuthGuard";
 import NoAuthGuard from "./utils/guards/NoAuthGuard";
 import ResetPasswordRequest from "./page/ResetPasswordRequest";
 import ResetPassword from "./page/ResetPassword";
+import Workspace from "./page/Workspace";
 
 function App() {
   return (
@@ -20,10 +20,10 @@ function App() {
       <Router>
         <Switch>
           <UserAuthGuard
-            path="/channels/:workspaceId/:channelId"
-            component={Channel}
+            path="/channel/:workspaceId/:channelId"
+            component={Workspace}
           />
-          <UserAuthGuard path="/channels" component={Channel} />
+          <UserAuthGuard path="/channel" component={Workspace} />
           <NoAuthGuard path="/login" component={Login} />
           <NoAuthGuard path="/register" component={Register} />
           <NoAuthGuard path="/reset-password" component={ResetPasswordRequest} />

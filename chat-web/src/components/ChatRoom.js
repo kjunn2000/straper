@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import ChatInput from "./ChatInput";
 import Message from "./Message";
 
-const ChatRoom = ({ channel }) => {
+const ChatRoom = () => {
   const [msgs, setMsgs] = useState([
     {
       messasge_id: "M00001",
@@ -27,12 +27,13 @@ const ChatRoom = ({ channel }) => {
     >
       <div className="flex flex-col items-stretch h-full">
         <div className="text-xl p-3 mb-6 border border-gray-800">
-          # {channel.channel_name}
+          {/* # {channel.channel_name} */}
+          # EXAMPLE CHANNEL
         </div>
         <div className="flex flex-col h-full justify-between">
           <div>{loadMessages}</div>
           <div className="p-3 w-full flex">
-            <ChatInput channel={channel} />
+            <ChatInput />
           </div>
         </div>
       </div>
