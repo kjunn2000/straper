@@ -17,7 +17,7 @@ import (
 func (server *Server) SetUpWorkspaceRouter(mr *mux.Router, as adding.Service, ls listing.Service, es editing.Service, ds deleting.Service) {
 	wr := mr.PathPrefix("/protected/workspace").Subrouter()
 	wr.HandleFunc("/create", server.CreateWorkspace(as)).Methods("POST")
-	wr.HandleFunc("/join/{workspace_id}", server.JoinWorkspace(as)).Methods("POST")
+	wr.HandleFunc("/join/{workspace_id}", server.JoinWorkspace(as, ls)).Methods("POST")
 	wr.HandleFunc("/list", server.GetWorkspaces(ls)).Methods("GET")
 	wr.HandleFunc("/update", server.UpdateWorkspace(es)).Methods("POST")
 	wr.HandleFunc("/delete/{workspace_id}", server.DeleteWorkspace(ds)).Methods("POST")
@@ -25,9 +25,13 @@ func (server *Server) SetUpWorkspaceRouter(mr *mux.Router, as adding.Service, ls
 	wr.Use(middleware.TokenVerifier(server.tokenMaker))
 }
 
+type AddWorkspaceParam struct {
+	Name string `json:"workspace_name" db:"workspace_name"`
+}
+
 func (server *Server) CreateWorkspace(as adding.Service) func(http.ResponseWriter, *http.Request) {
 	return func(rw http.ResponseWriter, r *http.Request) {
-		var workspace adding.Workspace
+		var workspace AddWorkspaceParam
 		err := json.NewDecoder(r.Body).Decode(&workspace)
 		if err != nil {
 			rest.AddResponseToResponseWritter(rw, nil, err.Error())
@@ -43,16 +47,16 @@ func (server *Server) CreateWorkspace(as adding.Service) func(http.ResponseWrite
 			rest.AddResponseToResponseWritter(rw, nil, "invalid.payload.in.context")
 			return
 		}
-		_, err = as.CreateWorkspace(r.Context(), workspace, payload.UserId)
+		w, err := as.CreateWorkspace(r.Context(), workspace.Name, payload.UserId)
 		if err != nil {
 			rest.AddResponseToResponseWritter(rw, nil, err.Error())
 			return
 		}
-		rest.AddResponseToResponseWritter(rw, nil, "")
+		rest.AddResponseToResponseWritter(rw, w, "")
 	}
 }
 
-func (server *Server) JoinWorkspace(as adding.Service) func(http.ResponseWriter, *http.Request) {
+func (server *Server) JoinWorkspace(as adding.Service, ls listing.Service) func(http.ResponseWriter, *http.Request) {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		workspaceId, ok := vars["workspace_id"]
@@ -75,7 +79,12 @@ func (server *Server) JoinWorkspace(as adding.Service) func(http.ResponseWriter,
 			rest.AddResponseToResponseWritter(rw, nil, err.Error())
 			return
 		}
-		rest.AddResponseToResponseWritter(rw, nil, "")
+		w, err := ls.GetWorkspaceByWorkspaceId(r.Context(), workspaceId)
+		if err != nil {
+			rest.AddResponseToResponseWritter(rw, nil, err.Error())
+			return
+		}
+		rest.AddResponseToResponseWritter(rw, w, "")
 	}
 }
 
@@ -119,6 +128,16 @@ func (server *Server) UpdateWorkspace(as editing.Service) func(http.ResponseWrit
 
 func (server *Server) DeleteWorkspace(ds deleting.Service) func(http.ResponseWriter, *http.Request) {
 	return func(rw http.ResponseWriter, r *http.Request) {
+		payloadVal := r.Context().Value(middleware.TokenPayload{})
+		if payloadVal == nil {
+			rest.AddResponseToResponseWritter(rw, nil, "payload.not.found.in.context")
+			return
+		}
+		payload, ok := payloadVal.(*auth.Payload)
+		if !ok {
+			rest.AddResponseToResponseWritter(rw, nil, "invalid.payload.in.context")
+			return
+		}
 		vars := mux.Vars(r)
 		id, ok := vars["workspace_id"]
 		if !ok {
@@ -126,7 +145,7 @@ func (server *Server) DeleteWorkspace(ds deleting.Service) func(http.ResponseWri
 			rest.AddResponseToResponseWritter(rw, nil, "Id not found.")
 			return
 		}
-		err := ds.DeleteWorkspace(r.Context(), id)
+		err := ds.DeleteWorkspace(r.Context(), id, payload.UserId)
 		if err != nil {
 			rw.WriteHeader(http.StatusBadRequest)
 			rest.AddResponseToResponseWritter(rw, nil, err.Error())

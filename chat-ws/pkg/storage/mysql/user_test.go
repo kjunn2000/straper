@@ -18,6 +18,7 @@ func createRandomUser(t *testing.T) account.CreateUserParam {
 		Username:    storage.RandomUsername(),
 		Password:    hashedPassword,
 		Role:        "USER",
+		Status:      "VERIFYING",
 		Email:       storage.RandomEmail(),
 		PhoneNo:     storage.RandomPhoneNumber(),
 		CreatedDate: time.Now(),
@@ -32,52 +33,98 @@ func TestCreateUser(t *testing.T) {
 	createRandomUser(t)
 }
 
-func TestGetUserByUsername(t *testing.T) {
+func TestGetUserDetailByUsername(t *testing.T) {
 	createUserParams := createRandomUser(t)
-	user, err := store.GetUserByUsername(context.Background(), createUserParams.Username)
+	user, err := store.GetUserDetailByUsername(context.Background(), createUserParams.Username)
 	require.NoError(t, err)
 	require.Equal(t, createUserParams.Username, user.Username)
-	require.Equal(t, createUserParams.Password, user.Password)
-	require.Equal(t, createUserParams.Role, user.Role)
 	require.Equal(t, createUserParams.Email, user.Email)
 	require.Equal(t, createUserParams.PhoneNo, user.PhoneNo)
+	require.Equal(t, createUserParams.CreatedDate.Day(), user.CreatedDate.Day())
+	require.Equal(t, createUserParams.CreatedDate.Hour(), user.CreatedDate.Hour())
+	require.Equal(t, createUserParams.CreatedDate.Minute(), user.CreatedDate.Minute())
 
 	require.NotZero(t, user.UserId)
 }
 
-func TestGetUserByUserId(t *testing.T) {
+func TestGetUserDetailByUserId(t *testing.T) {
 	createUserParams := createRandomUser(t)
-	u, err := store.GetUserByUsername(context.Background(), createUserParams.Username)
+	user, _ := store.GetUserDetailByUsername(context.Background(), createUserParams.Username)
+	user, err := store.GetUserDetailByUserId(context.Background(), user.UserId)
 	require.NoError(t, err)
-	user, err := store.GetUserByUserId(context.Background(), u.UserId)
+	require.Equal(t, createUserParams.Username, user.Username)
+	require.Equal(t, createUserParams.Email, user.Email)
+	require.Equal(t, createUserParams.PhoneNo, user.PhoneNo)
+	require.Equal(t, createUserParams.CreatedDate.Day(), user.CreatedDate.Day())
+	require.Equal(t, createUserParams.CreatedDate.Hour(), user.CreatedDate.Hour())
+	require.Equal(t, createUserParams.CreatedDate.Minute(), user.CreatedDate.Minute())
+
+	require.NotZero(t, user.UserId)
+}
+
+func TestGetUserCredentialByUsername(t *testing.T) {
+	createUserParams := createRandomUser(t)
+	user, err := store.GetUserCredentialByUsername(context.Background(), createUserParams.Username)
 	require.NoError(t, err)
 	require.Equal(t, createUserParams.Username, user.Username)
 	require.Equal(t, createUserParams.Password, user.Password)
-	require.Equal(t, createUserParams.Role, user.Role)
-	require.Equal(t, createUserParams.Email, user.Email)
-	require.Equal(t, createUserParams.PhoneNo, user.PhoneNo)
+	require.Equal(t, createUserParams.Status, user.Status)
+	require.Equal(t, createUserParams.CreatedDate.Day(), user.CreatedDate.Day())
+	require.Equal(t, createUserParams.CreatedDate.Hour(), user.CreatedDate.Hour())
+	require.Equal(t, createUserParams.CreatedDate.Minute(), user.CreatedDate.Minute())
 
 	require.NotZero(t, user.UserId)
-	require.NotZero(t, user.CreatedDate)
+}
+
+func TestGetUserCredentialByUserId(t *testing.T) {
+	createUserParams := createRandomUser(t)
+	u, _ := store.GetUserDetailByUsername(context.Background(), createUserParams.Username)
+	user, err := store.GetUserCredentialByUserId(context.Background(), u.UserId)
+	require.NoError(t, err)
+	require.Equal(t, createUserParams.Password, user.Password)
+	require.Equal(t, createUserParams.Status, user.Status)
+	require.Equal(t, createUserParams.CreatedDate.Day(), user.CreatedDate.Day())
+	require.Equal(t, createUserParams.CreatedDate.Hour(), user.CreatedDate.Hour())
+	require.Equal(t, createUserParams.CreatedDate.Minute(), user.CreatedDate.Minute())
+
+	require.NotZero(t, user.UserId)
 }
 
 func TestUpdateUser(t *testing.T) {
 	createUserParams := createRandomUser(t)
-	u, err := store.GetUserByUsername(context.Background(), createUserParams.Username)
-	require.NoError(t, err)
+	user, _ := store.GetUserDetailByUsername(context.Background(), createUserParams.Username)
 	params := account.UpdateUserParam{
-		UserId:   u.UserId,
-		Username: storage.RandomString(8),
-		Email:    storage.RandomEmail(),
-		PhoneNo:  storage.RandomPhoneNumber(),
+		UserId:      user.UserId,
+		Username:    storage.RandomString(8),
+		Email:       storage.RandomEmail(),
+		PhoneNo:     storage.RandomPhoneNumber(),
+		UpdatedDate: time.Now(),
 	}
-	err = store.UpdateUser(context.Background(), params)
+	err := store.UpdateUser(context.Background(), params)
+	require.NoError(t, err)
+}
+
+func TestUpdateAccountStatus(t *testing.T) {
+	createUserParams := createRandomUser(t)
+	u, err := store.GetUserDetailByUsername(context.Background(), createUserParams.Username)
+	require.NoError(t, err)
+	err = store.UpdateAccountStatus(context.Background(), u.UserId, "ACTIVE")
+	require.NoError(t, err)
+}
+
+func TestUpdateAccountPassword(t *testing.T) {
+	createUserParams := createRandomUser(t)
+	u, err := store.GetUserDetailByUsername(context.Background(), createUserParams.Username)
+	require.NoError(t, err)
+	hashedPassword, err := account.BcrptHashPassword(storage.RandomPassword())
+	require.NoError(t, err)
+	err = store.UpdateAccountPassword(context.Background(), u.UserId, hashedPassword)
 	require.NoError(t, err)
 }
 
 func TestDeleteUser(t *testing.T) {
 	createUserParams := createRandomUser(t)
-	u, err := store.GetUserByUsername(context.Background(), createUserParams.Username)
+	u, err := store.GetUserDetailByUsername(context.Background(), createUserParams.Username)
 	require.NoError(t, err)
 	err = store.DeleteUser(context.Background(), u.UserId)
 	require.NoError(t, err)

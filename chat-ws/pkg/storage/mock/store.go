@@ -15,6 +15,7 @@ import (
 	adding "github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/adding"
 	editing "github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/editing"
 	listing "github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/listing"
+	mysql "github.com/kjunn2000/straper/chat-ws/pkg/storage/mysql"
 )
 
 // MockStore is a mock of Store interface.
@@ -140,6 +141,48 @@ func (mr *MockStoreMockRecorder) CreateUser(arg0, arg1 interface{}) *gomock.Call
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateUser", reflect.TypeOf((*MockStore)(nil).CreateUser), arg0, arg1)
 }
 
+// CreateUserAccessInfo mocks base method.
+func (m *MockStore) CreateUserAccessInfo(arg0 context.Context, arg1 mysql.CreateUserAccessInfo) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateUserAccessInfo", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateUserAccessInfo indicates an expected call of CreateUserAccessInfo.
+func (mr *MockStoreMockRecorder) CreateUserAccessInfo(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateUserAccessInfo", reflect.TypeOf((*MockStore)(nil).CreateUserAccessInfo), arg0, arg1)
+}
+
+// CreateUserCredential mocks base method.
+func (m *MockStore) CreateUserCredential(arg0 context.Context, arg1 mysql.CreateUserCredentialParam) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateUserCredential", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateUserCredential indicates an expected call of CreateUserCredential.
+func (mr *MockStoreMockRecorder) CreateUserCredential(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateUserCredential", reflect.TypeOf((*MockStore)(nil).CreateUserCredential), arg0, arg1)
+}
+
+// CreateUserDetail mocks base method.
+func (m *MockStore) CreateUserDetail(arg0 context.Context, arg1 mysql.CreateUserDetailParam) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "CreateUserDetail", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// CreateUserDetail indicates an expected call of CreateUserDetail.
+func (mr *MockStoreMockRecorder) CreateUserDetail(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateUserDetail", reflect.TypeOf((*MockStore)(nil).CreateUserDetail), arg0, arg1)
+}
+
 // CreateWorkspace mocks base method.
 func (m *MockStore) CreateWorkspace(arg0 context.Context, arg1 adding.Workspace) error {
 	m.ctrl.T.Helper()
@@ -211,34 +254,49 @@ func (mr *MockStoreMockRecorder) GetChannelsByUserId(arg0, arg1 interface{}) *go
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetChannelsByUserId", reflect.TypeOf((*MockStore)(nil).GetChannelsByUserId), arg0, arg1)
 }
 
-// GetUserByUserId mocks base method.
-func (m *MockStore) GetUserByUserId(arg0 context.Context, arg1 string) (account.User, error) {
+// GetUserCredentialByUsername mocks base method.
+func (m *MockStore) GetUserCredentialByUsername(arg0 context.Context, arg1 string) (auth.User, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetUserByUserId", arg0, arg1)
-	ret0, _ := ret[0].(account.User)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetUserByUserId indicates an expected call of GetUserByUserId.
-func (mr *MockStoreMockRecorder) GetUserByUserId(arg0, arg1 interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByUserId", reflect.TypeOf((*MockStore)(nil).GetUserByUserId), arg0, arg1)
-}
-
-// GetUserByUsername mocks base method.
-func (m *MockStore) GetUserByUsername(arg0 context.Context, arg1 string) (auth.User, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetUserByUsername", arg0, arg1)
+	ret := m.ctrl.Call(m, "GetUserCredentialByUsername", arg0, arg1)
 	ret0, _ := ret[0].(auth.User)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// GetUserByUsername indicates an expected call of GetUserByUsername.
-func (mr *MockStoreMockRecorder) GetUserByUsername(arg0, arg1 interface{}) *gomock.Call {
+// GetUserCredentialByUsername indicates an expected call of GetUserCredentialByUsername.
+func (mr *MockStoreMockRecorder) GetUserCredentialByUsername(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByUsername", reflect.TypeOf((*MockStore)(nil).GetUserByUsername), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserCredentialByUsername", reflect.TypeOf((*MockStore)(nil).GetUserCredentialByUsername), arg0, arg1)
+}
+
+// GetUserDetailByUserId mocks base method.
+func (m *MockStore) GetUserDetailByUserId(arg0 context.Context, arg1 string) (account.UserDetail, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUserDetailByUserId", arg0, arg1)
+	ret0, _ := ret[0].(account.UserDetail)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUserDetailByUserId indicates an expected call of GetUserDetailByUserId.
+func (mr *MockStoreMockRecorder) GetUserDetailByUserId(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserDetailByUserId", reflect.TypeOf((*MockStore)(nil).GetUserDetailByUserId), arg0, arg1)
+}
+
+// GetUserDetailByUsername mocks base method.
+func (m *MockStore) GetUserDetailByUsername(arg0 context.Context, arg1 string) (account.UserDetail, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUserDetailByUsername", arg0, arg1)
+	ret0, _ := ret[0].(account.UserDetail)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetUserDetailByUsername indicates an expected call of GetUserDetailByUsername.
+func (mr *MockStoreMockRecorder) GetUserDetailByUsername(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserDetailByUsername", reflect.TypeOf((*MockStore)(nil).GetUserDetailByUsername), arg0, arg1)
 }
 
 // GetUserListByChannelId mocks base method.

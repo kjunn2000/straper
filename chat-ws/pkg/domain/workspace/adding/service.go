@@ -9,7 +9,7 @@ import (
 )
 
 type Service interface {
-	CreateWorkspace(ctx context.Context, w Workspace, userId string) (Workspace, error)
+	CreateWorkspace(ctx context.Context, newWorkspaceName, userId string) (Workspace, error)
 	AddUserToWorkspace(ctx context.Context, workspaceId string, userIdList []string) error
 	CreateChannel(ctx context.Context, workspaceId, channelName, userId string) (Channel, error)
 	AddUserToChannel(ctx context.Context, channelId string, userIdList []string) error
@@ -27,11 +27,16 @@ func NewService(log *zap.Logger, r Repository) *service {
 	}
 }
 
-func (s *service) CreateWorkspace(ctx context.Context, w Workspace, userId string) (Workspace, error) {
-	w.Id = uuid.New().String()
-	w.CreatorId = userId
-	w.CreatedDate = time.Now()
+func (s *service) CreateWorkspace(ctx context.Context, newWorkspaceName, userId string) (Workspace, error) {
+	id, _ := uuid.NewRandom()
+	w := Workspace{
+		Id:          id.String(),
+		Name:        newWorkspaceName,
+		CreatorId:   userId,
+		CreatedDate: time.Now(),
+	}
 	c := NewChannel(uuid.New().String(), "General", w.Id, userId, time.Now())
+	w.ChannelList = []Channel{c}
 	w, err := s.r.CreateNewWorkspace(ctx, w, c, userId)
 	if err != nil {
 		return Workspace{}, err

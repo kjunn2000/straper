@@ -1,26 +1,40 @@
-import './App.scss';
-import { Route, BrowserRouter as Router, Switch, Redirect } from 'react-router-dom';
-import Chat from './page/Chat';
-import Login from './page/Login';
-import Register from './page/Register';
+import "./App.scss";
+import {
+  Route,
+  BrowserRouter as Router,
+  Switch,
+  Redirect,
+} from "react-router-dom";
+import Channel from "./page/Workspace";
+import Login from "./page/Login";
+import Register from "./page/Register";
+import EmailVerify from "./page/EmailVerify";
+import UserAuthGuard from "./utils/guards/UserAuthGuard";
+import NoAuthGuard from "./utils/guards/NoAuthGuard";
+import ResetPasswordRequest from "./page/ResetPasswordRequest";
+import ResetPassword from "./page/ResetPassword";
 
 function App() {
-
   return (
     <div className="App">
       <Router>
         <Switch>
-          <Route path="/workspace">
-            <Chat/>
+          <UserAuthGuard
+            path="/channels/:workspaceId/:channelId"
+            component={Channel}
+          />
+          <UserAuthGuard path="/channels" component={Channel} />
+          <NoAuthGuard path="/login" component={Login} />
+          <NoAuthGuard path="/register" component={Register} />
+          <NoAuthGuard path="/reset-password" component={ResetPasswordRequest} />
+          <Route path="/account/opening/verify">
+            <EmailVerify />
           </Route>
-          <Route path="/login">
-            <Login/>
-          </Route>
-          <Route path="/register">
-            <Register/>
+          <Route path="/account/password/update">
+            <ResetPassword/>
           </Route>
           <Route path="/">
-            <Redirect to="/login"/>
+            <Redirect to="/login" />
           </Route>
         </Switch>
       </Router>

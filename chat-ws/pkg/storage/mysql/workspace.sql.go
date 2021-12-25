@@ -2,7 +2,6 @@ package mysql
 
 import (
 	"context"
-	"errors"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/adding"
@@ -20,10 +19,9 @@ func (q *Queries) CreateWorkspace(ctx context.Context, w adding.Workspace) error
 	}
 	_, err = q.db.Exec(sql, args...)
 	if err != nil {
-		q.log.Warn("Unable to execute insert workspace query.", zap.Error(err))
+		q.log.Info("Unable to execute insert workspace query.", zap.Error(err))
 		return err
 	}
-	q.log.Info("Successfully create new workspace")
 	return nil
 }
 
@@ -37,24 +35,16 @@ func (q *Queries) AddUserToWorkspace(ctx context.Context, workspaceId string, us
 		q.log.Warn("Fail to create add user to workspace query.", zap.Error(err))
 		return err
 	}
-	res, err := q.db.Exec(sql, args...)
+	_, err = q.db.Exec(sql, args...)
 	if err != nil {
 		q.log.Info("Unable to execute add user to workspace query.", zap.Error(err))
 		return err
 	}
-	roq, err := res.RowsAffected()
-	if err != nil {
-		q.log.Info("Unabel to extract affected roq.", zap.Error(err))
-		return err
-	}
-	q.log.Info("Sucessful added new user to workspace.",
-		zap.String("WorkspaceId", workspaceId),
-		zap.Int64("RoqAffected", roq))
 	return nil
 }
 
 func (q *Queries) GetWorkspaceByWorkspaceId(ctx context.Context, workspaceId string) (listing.Workspace, error) {
-	sql, args, err := sq.Select("workspace_id", "workspace_name, creator_id").
+	sql, args, err := sq.Select("workspace_id", "workspace_name, creator_id, created_date").
 		From("workspace").
 		Where(sq.Eq{"workspace_id": workspaceId}).
 		OrderBy("created_date").
@@ -67,7 +57,7 @@ func (q *Queries) GetWorkspaceByWorkspaceId(ctx context.Context, workspaceId str
 	var workspace listing.Workspace
 	err = q.db.Get(&workspace, sql, args...)
 	if err != nil {
-		q.log.Warn("Unable to select workspace from db")
+		q.log.Info("Unable to select workspace from db")
 		return listing.Workspace{}, err
 	}
 	return workspace, nil
@@ -86,7 +76,7 @@ func (q *Queries) GetWorkspacesByUserId(ctx context.Context, userId string) ([]l
 	var Workspaces []listing.Workspace
 	err = q.db.Select(&Workspaces, sql, args...)
 	if err != nil {
-		q.log.Warn("Unable to select workspace list from db")
+		q.log.Info("Unable to select workspace list from db")
 		return nil, err
 	}
 	return Workspaces, nil
@@ -98,17 +88,11 @@ func (q *Queries) UpdateWorkspace(ctx context.Context, workspace editing.Workspa
 		q.log.Warn("Failed to create update workspace query.")
 		return err
 	}
-	res, err := q.db.Exec(sql, args...)
+	_, err = q.db.Exec(sql, args...)
 	if err != nil {
-		q.log.Warn("Failed to update workspace.", zap.Error(err))
+		q.log.Info("Failed to update workspace.", zap.Error(err))
 		return err
 	}
-	rowAffected, err := res.RowsAffected()
-	if rowAffected == 0 || err != nil {
-		q.log.Info("Workspace Id not found.", zap.Error(err))
-		return errors.New("workspace.not.found")
-	}
-	q.log.Info("Successfully update workspace", zap.String("id", workspace.Id))
 	return nil
 }
 
@@ -118,17 +102,11 @@ func (q *Queries) DeleteWorkspace(ctx context.Context, id string) error {
 		q.log.Warn("Unable to create delete workspace query.")
 		return err
 	}
-	res, err := q.db.Exec(sql, args...)
+	_, err = q.db.Exec(sql, args...)
 	if err != nil {
-		q.log.Warn("Unable to delete workspace.", zap.Error(err))
+		q.log.Info("Unable to delete workspace.", zap.Error(err))
 		return err
 	}
-	rowAffected, err := res.RowsAffected()
-	if rowAffected == 0 || err != nil {
-		q.log.Warn("Workspace Id not found.", zap.Error(err))
-		return err
-	}
-	q.log.Info("Successfully delete workspace.", zap.String("id", id))
 	return nil
 }
 
@@ -144,6 +122,5 @@ func (q *Queries) RemoveUserFromWorkspace(ctx context.Context, workspaceId, user
 		q.log.Info("Failed to remove user from workspace", zap.Error(err))
 		return err
 	}
-	q.log.Info("Successfully remove 1 user from workspace.", zap.String("user_id", userId))
 	return nil
 }

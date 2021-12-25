@@ -1,95 +1,153 @@
-import axios from '../axios/api'
-import React,{useState} from 'react'
-import { Link, useHistory } from 'react-router-dom'
-import useAuthStore from '../store/authStore'
-import useIdentifyStore from '../store/identityStore'
-import useWorkspaceStore from '../store/workspaceStore'
+import axios from "../axios/api";
+import React, { useEffect, useState } from "react";
+import { Link, useHistory } from "react-router-dom";
+import useAuthStore from "../store/authStore";
+import useIdentifyStore from "../store/identityStore";
+import useWorkspaceStore from "../store/workspaceStore";
+import { useForm } from "react-hook-form";
+import { ErrorMessage } from "@hookform/error-message";
+import "./login.scss";
+import api from "../axios/api";
+import SimpleDialog from "../components/dialog/SimpleDialog";
 
-const Login = () => {
+const Login = ({ location }) => {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
 
-	const history = useHistory()
+  const history = useHistory();
 
-	const [LoginForm, setLoginForm] = useState({username:"", password:""})
+  const setAccessToken = useAuthStore((state) => state.setAccessToken);
+  const setWorkspaces = useWorkspaceStore((state) => state.setWorkspaces);
+  const setCurrWorkspace = useWorkspaceStore((state) => state.setCurrWorkspace);
+  const setIdentity = useIdentifyStore((state) => state.setIdentity);
 
-	const setAccessToken = useAuthStore(state => state.setAccessToken)
+  const [errMsg, setErrMsg] = useState("");
+  const [showTimeoutDialog, setShowTimeoutDialog] = useState(false);
 
-	const setWorkspaces = useWorkspaceStore(state => state.setWorkspaces)
-	const setCurrWorkspace = useWorkspaceStore(state => state.setCurrWorkspace)
+  useEffect(() => {
+    const url = location.pathname.split("/");
+    const timeOut = url[url.length - 1];
+    if (timeOut === "timeout") {
+      setShowTimeoutDialog(true);
+    }
+  }, []);
 
-	const setIdentity = useIdentifyStore(state => state.setIdentity)
+  const onLogin = async (data) => {
+    const res = await api.post("/auth/login", data, { withCredentials: true });
+    if (res.data?.Success) {
+      await updateAuthAndIdentityState(
+        res.data?.Data.access_token,
+        res.data?.Data.user
+      );
+      const workspaces = await fetchWorkspaceData();
+      redirectToWorkspacePage(workspaces);
+    } else if (res.data?.ErrorMessage == "invalid.credential") {
+      updateErrMsg("Invalid credenital.");
+    } else if (res.data?.ErrorMessage == "user.not.found") {
+      updateErrMsg("User not found.");
+    } else if (res.data?.ErrorMessage == "invalid.account.status") {
+      updateErrMsg("Invalid account status.");
+    }
+  };
 
-	const [errMsg , setErrMsg ] = useState("")
-	
-	const updateForm = (e) => {
-		setLoginForm({...LoginForm,[e.target.name]:e.target.value})
-	}
+  const updateAuthAndIdentityState = async (accessToken, identity) => {
+    setIdentity(identity);
+    setAccessToken(accessToken);
+  };
 
-	const onLogin = () => {
-		axios.post("http://localhost:8080/api/v1/auth/login",LoginForm,{withCredentials:true})
-			.then(res =>{
-				if(res.data.Success){
-					setAccessToken(res.data.Data?.access_token)
-					setIdentity(res.data.Data?.identity)
-					fetchWorkspaceData()
-				}else if (res.data.ErrorMessage == "invalid.credential"){
-					updateErrMsg("Invalid credenital.")
-				}else if (res.data.ErrorMessage == "user.not.found"){
-					updateErrMsg("User not found.")
-				}
-			})
-	}
+  const fetchWorkspaceData = async () => {
+    const res = await api.get("/protected/workspace/list");
+    if (res.data?.Success && res.data?.Data) {
+      setWorkspaces(res.data?.Data);
+    }
+    return res.data?.Data;
+  };
 
-	const fetchWorkspaceData = () => {
-		axios.get("http://localhost:8080/api/v1/protected/workspace/list")
-			.then(res => {
-				if (res.data.Success){
-					const workspaces = res.data.Data
-					if (workspaces && workspaces.length >0 ){
-						setWorkspaces(workspaces)
-						setCurrWorkspace(workspaces[0])
-					}
-					history.push("/workspace")
-				}
-			})
-	}
+  const redirectToWorkspacePage = (workspaces) => {
+    let redirectLink = "/channels";
+    if (workspaces.length > 0) {
+      redirectLink += "/" + workspaces[0];
+      if (workspaces[0]?.channel_list.length > 0) {
+        redirectLink += "/" + workspaces[0].channel_list[0].channel_id;
+      }
+    }
+    history.push(redirectLink);
+  };
 
-	const updateErrMsg = (msg) => {
-		setErrMsg(msg)
-		setTimeout(()=> {
-			setErrMsg("")
-		}, 5000)
-	}
+  const updateErrMsg = (msg) => {
+    setErrMsg(msg);
+    setTimeout(() => {
+      setErrMsg("");
+    }, 5000);
+  };
 
-	return (
-		<div className="bg-gradient-to-r from-purple-600 to-gray-900 w-full h-screen flex justify-center content-center">
-			<form className="bg-gray-700 rounded-lg text-white flex flex-col space-y-5 w-96 h-auto justify-center self-center py-5">
-				<div className="self-center">
-					<div className="text-xl font-medium text-center">
-						WELCOME BACK
-					</div>
-					<div className="self-center text-gray-500 text-center">
-						Good To See You Again, Friends!
-					</div>
-				</div>
-				<div className="self-center">
-					<div>Username</div>
-					<input className="bg-gray-800 p-2 rounded-lg" name="username" onChange={(e)=>updateForm(e)}/>
-				</div>
-				<div className="self-center">
-					<div>Password</div>
-					<input type="password" className="bg-gray-800 p-2 rounded-lg" name="password" onChange={(e)=>updateForm(e)}/>
-				</div>
-				{
-					errMsg != "" && 
-					<div className="text-red-600 self-center">{errMsg}</div>
-				}
-				<button type="button" className="bg-indigo-400 self-center w-48 p-1" onClick={()=>onLogin()}>
-					LET'S GO
-				</button>
-				<Link to="/register" className="text-indigo-300 self-center cursor-pointer hover:text-indigo-500">Register an account</Link>
-			</form>
-		</div>
-	)
-}
+  return (
+    <div className="bg-gradient-to-r from-purple-600 to-gray-900 w-full h-screen flex justify-center content-center">
+      <form
+        onSubmit={handleSubmit(onLogin)}
+        className="bg-gray-700 rounded-lg text-white flex flex-col space-y-5 w-96 h-auto justify-center self-center py-5"
+      >
+        <div className="self-center">
+          <div className="text-xl font-medium text-center">WELCOME BACK</div>
+          <div className="self-center text-gray-500 text-center">
+            Good To See You Again, Friends!
+          </div>
+        </div>
+        <div className="self-center">
+          <div>Username</div>
+          <input
+            className="bg-gray-800 p-2 rounded-lg"
+            {...register("username", {
+              required: "Username is required.",
+              minLength: { value: 4, message: "Username at leat 4 digits." },
+            })}
+          />
+          <ErrorMessage errors={errors} name="username" as="p" />
+        </div>
+        <div className="self-center">
+          <div>Password</div>
+          <input
+            type="password"
+            className="bg-gray-800 p-2 rounded-lg"
+            {...register("password", {
+              required: "Password is required.",
+            })}
+          />
+          <ErrorMessage errors={errors} name="password" as="p" />
+        </div>
 
-export default Login
+        {errMsg != "" && (
+          <div className="text-red-600 self-center">{errMsg}</div>
+        )}
+        <button type="submit" className="bg-indigo-400 self-center w-48 p-1">
+          LET'S GO
+        </button>
+        <Link
+          to="/register"
+          className="text-indigo-300 self-center cursor-pointer hover:text-indigo-500"
+        >
+          Register an account
+        </Link>
+        <Link
+          to="/reset-password"
+          className="text-indigo-300 self-center cursor-pointer hover:text-indigo-500"
+        >
+          Forget password ?
+        </Link>
+      </form>
+      <SimpleDialog
+        isOpen={showTimeoutDialog}
+        setIsOpen={setShowTimeoutDialog}
+        title="Time Out"
+        content="Session is timeout. Please login one more time."
+        buttonText="Close"
+        buttonStatus="fail"
+      />
+    </div>
+  );
+};
+
+export default Login;

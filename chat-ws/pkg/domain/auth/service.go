@@ -29,9 +29,9 @@ type LoginResponse struct {
 type LoginResponseUser struct {
 	UserId   string `json:"user_id" db:"user_id"`
 	Username string `json:"username" db:"username"`
-	Role     string `json:"role" db:"role"`
 	Email    string `json:"email" db:"email" validate:"email"`
 	PhoneNo  string `json:"phone_no" db:"phone_no"`
+	Role     string `json:"role" db:"role"`
 }
 
 type service struct {
@@ -52,14 +52,14 @@ func NewService(log *zap.Logger, ar Repository, tokenMaker Maker, config configs
 
 func (as *service) Login(ctx context.Context, req LoginRequest) (LoginResponse, error) {
 
-	u, err := as.ar.GetUserByUsername(ctx, req.Username)
+	u, err := as.ar.GetUserCredentialByUsername(ctx, req.Username)
 
 	if err == sql.ErrNoRows {
-		as.log.Info("User not found")
 		return LoginResponse{}, errors.New("user.not.found")
 	} else if err = as.comparePassword(u.Password, req.Password); err != nil {
-		as.log.Info("Invalid credential")
 		return LoginResponse{}, errors.New("invalid.credential")
+	} else if u.Status != "ACTIVE" {
+		return LoginResponse{}, errors.New("invalid.account.status")
 	}
 
 	accessToken, err := as.tokenMaker.CreateToken(u.UserId, u.Username, as.config.AccessTokenDuration)
@@ -75,9 +75,9 @@ func (as *service) Login(ctx context.Context, req LoginRequest) (LoginResponse, 
 	loginResponseUser := LoginResponseUser{
 		UserId:   u.UserId,
 		Username: u.Username,
-		Role:     u.Role,
 		Email:    u.Email,
 		PhoneNo:  u.PhoneNo,
+		Role:     u.Role,
 	}
 
 	return LoginResponse{
