@@ -148,7 +148,7 @@ func (server *Server) UpdatePassword(as account.Service) func(http.ResponseWrite
 	return func(w http.ResponseWriter, r *http.Request) {
 		var updatePasswordParam account.UpdatePasswordParam
 		json.NewDecoder(r.Body).Decode(&updatePasswordParam)
-		if err := as.ResetAccountPassword(r.Context(), updatePasswordParam.Password); err != nil {
+		if err := as.UpdateAccountPassword(r.Context(), updatePasswordParam); err != nil {
 			rest.AddResponseToResponseWritter(w, nil, err.Error())
 			return
 		}

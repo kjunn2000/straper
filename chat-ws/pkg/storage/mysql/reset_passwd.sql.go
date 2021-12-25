@@ -2,6 +2,7 @@ package mysql
 
 import (
 	"context"
+	"database/sql"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/account"
@@ -10,7 +11,7 @@ import (
 
 func (q *Queries) CreateResetPasswordToken(ctx context.Context, params account.ResetPasswordToken) error {
 	sql, arg, err := sq.Insert("reset_password_token").
-		Columns("tokenId", "userId", "created_date").
+		Columns("token_id", "user_id", "created_date").
 		Values(params.TokenId, params.UserId, params.CreatedDate).ToSql()
 	if err != nil {
 		q.log.Warn("Failed to create reset passwd token query.")
@@ -40,15 +41,17 @@ func (q *Queries) GetResetPasswordToken(ctx context.Context, tokenId string) (ac
 }
 
 func (q *Queries) GetResetPasswordTokenByUserId(ctx context.Context, userId string) (account.ResetPasswordToken, error) {
-	sql, args, err := sq.Select("token_id", "user_id", "created_date").From("reset_password_token").Where(sq.Eq{"user_id": userId}).ToSql()
+	query, args, err := sq.Select("token_id", "user_id", "created_date").From("reset_password_token").Where(sq.Eq{"user_id": userId}).ToSql()
 	if err != nil {
 		q.log.Warn("Fail to get reset password token query", zap.Error(err))
 		return account.ResetPasswordToken{}, err
 	}
 	var token account.ResetPasswordToken
-	err = q.db.Get(&token, sql, args...)
+	err = q.db.Get(&token, query, args...)
 	if err != nil {
-		q.log.Info("Fail to get reset password token", zap.Error(err))
+		if err != sql.ErrNoRows {
+			q.log.Info("Fail to get reset password token", zap.Error(err))
+		}
 		return account.ResetPasswordToken{}, err
 	}
 	return token, nil

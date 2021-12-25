@@ -66,7 +66,7 @@ func (us *service) sendEmail(ctx context.Context, userDetail UserDetail, templat
 
 	from := fmt.Sprintf("From: %s", us.config.SenderEmail)
 	to := fmt.Sprintf("To: %s", userDetail.Email)
-	subject = "Subject " + subject
+	subject = "Subject: " + subject
 
 	mimeHeaders := "MIME-version: 1.0;\nContent-Type: text/html; charset=\"UTF-8\";\n\n"
 	body.Write([]byte(fmt.Sprintf("%s\n%s\n%s\n%s\n\n", from, to, subject, mimeHeaders)))
