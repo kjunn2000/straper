@@ -44,7 +44,6 @@ func (us *service) UpdateAccountPassword(ctx context.Context, params UpdatePassw
 	if err != nil {
 		return err
 	}
-	params.Password = hashedPassword
 
 	if err = us.ur.UpdateAccountPassword(ctx, token.UserId, hashedPassword); err != nil {
 		return err
