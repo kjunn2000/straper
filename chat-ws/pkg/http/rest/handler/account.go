@@ -29,7 +29,7 @@ func (server *Server) SetUpAccountRouter(mr *mux.Router, as account.Service) {
 	pr.HandleFunc("/update", server.UpdateAccount(as)).Methods("POST")
 	pr.HandleFunc("/delete/{user_id}", server.DeleteAccount(as)).Methods("POST")
 	ar.HandleFunc("/email/verify/{token_id}", server.ValidateVerifyEmailToken(as)).Methods("POST")
-	ar.HandleFunc("/password/reset/request", server.ResetPasswordRequest(as)).Methods("POST")
+	ar.HandleFunc("/reset-password/create", server.ResetPasswordRequest(as)).Methods("POST")
 	ar.HandleFunc("/password/update", server.UpdatePassword(as)).Methods("POST")
 	pr.Use(middleware.TokenVerifier(server.tokenMaker))
 }

@@ -11,6 +11,7 @@ import Register from "./page/Register";
 import EmailVerify from "./page/EmailVerify";
 import UserAuthGuard from "./utils/guards/UserAuthGuard";
 import NoAuthGuard from "./utils/guards/NoAuthGuard";
+import ResetPasswordRequest from "./page/ResetPasswordRequest";
 import ResetPassword from "./page/ResetPassword";
 
 function App() {
@@ -25,9 +26,12 @@ function App() {
           <UserAuthGuard path="/channels" component={Channel} />
           <NoAuthGuard path="/login" component={Login} />
           <NoAuthGuard path="/register" component={Register} />
-          <NoAuthGuard path="/reset-password" component={ResetPassword} />
+          <NoAuthGuard path="/reset-password" component={ResetPasswordRequest} />
           <Route path="/account/opening/verify">
             <EmailVerify />
+          </Route>
+          <Route path="/account/password/update">
+            <ResetPassword/>
           </Route>
           <Route path="/">
             <Redirect to="/login" />

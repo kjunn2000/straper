@@ -58,7 +58,7 @@ func (q *Queries) GetResetPasswordTokenByUserId(ctx context.Context, userId stri
 }
 
 func (q *Queries) DeleteResetPasswordToken(ctx context.Context, tokenId string) error {
-	sql, args, err := sq.Delete("verify_email_token").Where(sq.Eq{"token_id": tokenId}).ToSql()
+	sql, args, err := sq.Delete("reset_password_token").Where(sq.Eq{"token_id": tokenId}).ToSql()
 	if err != nil {
 		q.log.Warn("Fail to create get verify email token query.", zap.Error(err))
 		return err

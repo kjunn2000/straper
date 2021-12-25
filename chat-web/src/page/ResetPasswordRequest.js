@@ -1,47 +1,40 @@
 import axios from "../axios/api";
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import { Link, useHistory } from "react-router-dom";
-import PasswordStrengthBar from "react-password-strength-bar";
 import { useForm } from "react-hook-form";
 import SimpleDialog from "../components/dialog/SimpleDialog";
+import { ErrorMessage } from "@hookform/error-message";
 
-const ResetPassword = () => {
+const ResetPassword= () => {
   const history = useHistory();
   const {
     handleSubmit,
     register,
     watch,
-    getValues,
     formState: { errors },
   } = useForm();
-  const passwordStrength = useRef();
-  const watchPassword = watch("password");
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [showFailDialog, setShowFailDialog] = useState(false);
   const [dialogErrMsg, setDialogErrMsg] = useState("");
 
   const onReset = (data) => {
-    var requestData = {
-      "token_id" : history.location.pathname.split("/").pop(),
-      "password" : data.password
-    }
     axios
-      .post("http://localhost:8080/api/v1/account/password/update", requestData)
+      .post("http://localhost:8080/api/v1/account/reset-password/create", data)
       .then((res) => {
         if (res.data.Success) {
           setShowSuccessDialog(true);
         } else {
           switch (res.data.ErrorMessage) {
-            case "reset.password.token.not.found": {
-              setDialogErrMsg("Invalid reset password token. Please try again.");
+            case "email.not.found": {
+              setDialogErrMsg("Email not found. Please try again.");
               break;
             }
-            case "reset.password.token.expired": {
-              setDialogErrMsg("Reset password token expired. Please send the request again.");
+            case "invalid.email.format": {
+              setDialogErrMsg("Email format incorrect. Please try again.");
               break;
             }
-            case "password.too.weak": {
-              setDialogErrMsg("Password too weak. Please try again.");
+            case "password_reset_attempt_in_past_15_min": {
+              setDialogErrMsg("Password reset request has been sent to your email inbox in the past 15 minutes. Please check it out.")
               break;
             }
             default: {
@@ -56,14 +49,6 @@ const ResetPassword = () => {
       });
   };
 
-  const isPasswordValid = () => {
-    return passwordStrength.current.state.score >= 3;
-  };
-
-  const isPasswordMatch = () => {
-    return getValues("password") == getValues("confirmedPassword")
-  }
-
   return (
     <div className="bg-gradient-to-r from-purple-600 to-gray-900 w-full h-screen flex justify-center content-center">
       <form
@@ -71,46 +56,27 @@ const ResetPassword = () => {
         onSubmit={handleSubmit(onReset)}
       >
         <div className="self-center">
-          <div className="text-xl font-medium text-center">WELCOME BACK</div>
+          <div className="text-xl font-medium text-center">RESET PASSWORD</div>
           <div className="self-center text-gray-500 text-center">
-            Please enter your new password for your account.
+            Do not worries, one minute to reset it!
           </div>
         </div>
         <div className="self-center">
-          <div>Password</div>
+          <div>Email</div>
           <input
-            type="password"
             className="bg-gray-800 p-2 rounded-lg"
-            {...register("password", {
-              required: true,
-              validate: () => isPasswordValid(),
+            {...register("email", {
+              required: "Email is required.",
+              pattern: {
+                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+.[A-Z]{2,4}$/i,
+                message: "Invalid email format.",
+              },
             })}
           />
-          {errors?.password && (
-            <div className="text-red-500">Password is too weak</div>
-          )}
+          <ErrorMessage errors={errors} name="email" as="p" />
         </div>
-        <div className="self-center">
-          <div>Confirmed Password</div>
-          <input
-            type="password"
-            className="bg-gray-800 p-2 rounded-lg"
-            {...register("confirmedPassword", {
-              required: true,
-              validate: () => isPasswordMatch()
-            })}
-          />
-          {errors?.confirmedPassword && (
-            <div className="text-red-500">Password not match</div>
-          )}
-        </div>
-        <PasswordStrengthBar
-          ref={passwordStrength}
-          password={watchPassword}
-          className="pt-3"
-        />
         <button type="submit" className="bg-indigo-400 self-center w-48 p-1">
-          CONFIRM RESET
+          RESET
         </button>
         <Link
           to="/login"
@@ -122,8 +88,8 @@ const ResetPassword = () => {
       <SimpleDialog
         isOpen={showSuccessDialog}
         setIsOpen={setShowSuccessDialog}
-        title="Password Reset Successfully"
-        content="Thank you for trusting Straper, you are free to login using your new password."
+        title="Reset Email Sent"
+        content="Please verify in your email inbox for resetting your account password."
         buttonText="Close"
         buttonAction={() => history.push("/login")}
         buttonStatus="success"
@@ -132,7 +98,7 @@ const ResetPassword = () => {
       <SimpleDialog
         isOpen={showFailDialog}
         setIsOpen={setShowFailDialog}
-        title="Passord Reset Fail"
+        title="Reset Email Request Fail"
         content={dialogErrMsg}
         buttonText="Close"
         buttonStatus="fail"
