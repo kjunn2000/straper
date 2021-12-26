@@ -7,7 +7,7 @@ import useWorkspaceStore from "../store/workspaceStore";
 import api from "../axios/api";
 import MenuItem from "./Menu/MenuItem";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
-import { set } from "react-hook-form";
+import ActionDialog from "./dialog/ActionDialog";
 
 export default function WorkspaceMenu() {
   const [isCreator, setIsCreator] = useState(false);
@@ -19,6 +19,7 @@ export default function WorkspaceMenu() {
   const selectedChannelIds = useWorkspaceStore((state) => state.selectedChannelIds);
   const deleteSelectedChannelIds = useWorkspaceStore((state) => state.deleteSelectedChannelIds);
   const clearWorkspaceState = useWorkspaceStore((state) => state.clearWorkspaceState);
+  const [deleteWarningDialogOpen, setDeleteWarningDialogOpen] = useState(false);
 
   const history = useHistory();
 
@@ -92,13 +93,23 @@ export default function WorkspaceMenu() {
               <MenuItem content="Workspace settings" icon={FiSettings} />
               <MenuItem
                 content={isCreator ? "Delete workspace" : "Leave workspace"}
-                click={isCreator ? deleteWorkspace : leaveWorkspace}
+                click={()=>setDeleteWarningDialogOpen(true)}
                 icon={AiFillDelete}
               />
             </div>
           </Menu.Items>
         </Transition>
       </Menu>
+      <ActionDialog
+        isOpen={deleteWarningDialogOpen}
+        setIsOpen={setDeleteWarningDialogOpen}
+        title="Delete Workspace Confirmation"
+        content="Please confirm that the deleted workspace will not able to be recovered."
+        buttonText="Delete Anyway"
+        buttonStatus="fail"
+        buttonAction={isCreator ? deleteWorkspace : leaveWorkspace}
+        closeButtonText="Close"
+      />
     </div>
   );
 }

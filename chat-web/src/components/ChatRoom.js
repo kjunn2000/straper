@@ -1,8 +1,11 @@
 import React, { useState } from "react";
 import ChatInput from "./ChatInput";
 import Message from "./Message";
+import useWorkspaceStore from "../store/workspaceStore"
 
 const ChatRoom = () => {
+  const currChannel = useWorkspaceStore((state) => state.currChannel);
+
   const [msgs, setMsgs] = useState([
     {
       messasge_id: "M00001",
@@ -22,13 +25,12 @@ const ChatRoom = () => {
 
   return (
     <div
-      className="text-white w-full font-medium"
+      className="text-white w-full h-full font-medium"
       style={{ background: "rgb(54,57,63)" }}
     >
       <div className="flex flex-col items-stretch h-full">
         <div className="text-xl p-3 mb-6 border border-gray-800">
-          {/* # {channel.channel_name} */}
-          # EXAMPLE CHANNEL
+          # {currChannel.channel_name}
         </div>
         <div className="flex flex-col h-full justify-between">
           <div>{loadMessages}</div>

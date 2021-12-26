@@ -45,6 +45,30 @@ const useWorkspaceStore = create((set) => ({
       return { currWorkspace: newCurrWorkspace };
     });
   },
+  addChannelToWorkspace: (workspaceId, channel) => {
+    set((state) => {
+      const workspaces = state.workspaces.map(workspace=> {
+        if (workspace.workspace_id == workspaceId){
+          workspace.channel_list.push(channel)
+        }
+        return workspace;
+      })
+      setLocalStorage("workspaces", workspaces);
+      return { workspaces: workspaces};
+    });
+  },
+  deleteChannelFromWorkspace: (channelId) => {
+    set((state) => {
+      const workspaces = state.workspaces.map(workspace=> {
+        if (workspace.workspace_id == state.currWorkspace.workspace_id){
+          workspace.channel_list = workspace.channel_list.filter(channel => channel.channel_id != channelId);
+        }
+        return workspace;
+      })
+      setLocalStorage("workspaces", workspaces);
+      return { workspaces: workspaces};
+    });
+  },
   setCurrChannel: (channelId) => {
     set((state) => {
       const currChannel = state.currWorkspace?.channel_list.find(
