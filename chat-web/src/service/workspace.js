@@ -10,8 +10,10 @@ export const fetchWorkspaceData = async () => {
         workspaceState.setDefaultSelectedChannelIds();
         const selectedIds = [...workspaceState.selectedChannelIds]
         if (selectedIds.length > 0) {
-        workspaceState.setCurrWorkspace(selectedIds[0][0])
-        workspaceState.setCurrChannel(selectedIds[0][1])
+            workspaceState.setCurrWorkspace(selectedIds[0][0])
+            workspaceState.setCurrChannel(selectedIds[0][1])
+        }else {
+            workspaceState.clearWorkspaceState();
         }
     }
     return res.data?.Data;

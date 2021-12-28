@@ -2,6 +2,7 @@ package deleting
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 
 	"go.uber.org/zap"
@@ -55,6 +56,9 @@ func (s *service) LeaveWorkspace(ctx context.Context, workspaceId, userId string
 
 func (s *service) DeleteChannel(ctx context.Context, channelId, userId string) error {
 	channel, err := s.r.GetChannelByChannelId(ctx, channelId)
+	if err == sql.ErrNoRows {
+		return errors.New("invalid.channel.id")
+	}
 	if err != nil {
 		return err
 	}

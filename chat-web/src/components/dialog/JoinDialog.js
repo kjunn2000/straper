@@ -9,6 +9,7 @@ const JoinDialog = ({ isOpen, close, toggleDialog, joinAction, type}) => {
     register,
     handleSubmit,
     reset,
+    setError,
     formState: { errors },
   } = useForm();
 
@@ -24,9 +25,16 @@ const JoinDialog = ({ isOpen, close, toggleDialog, joinAction, type}) => {
     toggleDialog();
   };
 
-  const executeJoinActoin = (data) => {
-    joinAction(data);
-    closeDialog();
+  const executeJoinActoin = async (data) => {
+    const errMsg = await joinAction(data);
+    if (!errMsg || errMsg == ""){
+      closeDialog();
+      return;
+    }
+    setError(type=="workspace" ? "workspace_id" : "channel_id",{
+      type: "bad_request",
+      message: errMsg,
+    });
   };
 
   return (
@@ -102,7 +110,11 @@ const JoinDialog = ({ isOpen, close, toggleDialog, joinAction, type}) => {
                       />
                   }
                 </div>
-                <ErrorMessage errors={errors} name="workspace_id" as="p" />
+                {type=="workspace" ? 
+                  <ErrorMessage errors={errors} name="workspace_id" as="p" />
+                  :
+                  <ErrorMessage errors={errors} name="channel_id" as="p" />
+                }
                 <div
                   className="text-indigo-500 self-center cursor-pointer hover:text-indigo-300"
                   onClick={toggle}

@@ -10,6 +10,7 @@ const AddDialog = ({ isOpen, close, toggleDialog, addAction, type}) => {
     register,
     handleSubmit,
     reset,
+    setError,
     formState: { errors },
   } = useForm();
 
@@ -27,10 +28,17 @@ const AddDialog = ({ isOpen, close, toggleDialog, addAction, type}) => {
     toggleDialog();
   };
 
-  const executeAddAction = (data) => {
-    addAction(data);
-    closeDialog();
-  }
+  const executeAddAction = async (data) => {
+    const errMsg = await addAction(data);
+    if (!errMsg || errMsg == ""){
+      closeDialog();
+      return;
+    }
+    setError(type=="workspace" ? "workspace_name" : "channel_name",{
+      type: "bad_request",
+      message: errMsg,
+    });
+  };
 
   return (
     <Transition appear show={isOpen} as={Fragment}>
@@ -105,7 +113,12 @@ const AddDialog = ({ isOpen, close, toggleDialog, addAction, type}) => {
                       />
                     </div>}
                 </div>
-                <ErrorMessage errors={errors} name="workspace_name" as="p" />
+                {
+                  type=="workspace" ? 
+                    <ErrorMessage errors={errors} name="workspace_name" as="p" />
+                    :
+                    <ErrorMessage errors={errors} name="channel_name" as="p" />
+                }
                 <div
                   className="text-indigo-500 self-center cursor-pointer hover:text-indigo-300"
                   onClick={toggle}

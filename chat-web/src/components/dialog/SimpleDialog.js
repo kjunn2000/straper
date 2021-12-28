@@ -1,5 +1,5 @@
 import { Dialog, Transition } from "@headlessui/react";
-import { Fragment } from "react";
+import { Fragment, useRef } from "react";
 
 export default function SimpleDialog({
   isOpen,
@@ -10,6 +10,9 @@ export default function SimpleDialog({
   buttonAction,
   buttonStatus,
 }) {
+
+  const cancelButtonRef = useRef();
+
   function closeModal() {
     setIsOpen(false);
     if (buttonAction) {
@@ -23,6 +26,7 @@ export default function SimpleDialog({
         as="div"
         className="fixed inset-0 z-10 overflow-y-auto"
         onClose={closeModal}
+        initialFocus={cancelButtonRef}
       >
         <div className="min-h-screen px-4 text-center">
           <Transition.Child
@@ -65,6 +69,7 @@ export default function SimpleDialog({
 
               <div className="mt-4 flex justify-end">
                 <button
+                  ref={cancelButtonRef}
                   type="button"
                   className={`inline-flex justify-center px-4 py-2 text-sm font-medium 
                   ${

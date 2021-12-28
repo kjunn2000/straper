@@ -34,6 +34,7 @@ function ChannelSidebar() {
   const [isJoinChannelDialogOpen, setJoinChannelDialogOpen] =
     useState(false);
   const [successCopyLinkDialogOpen, setSuccessCopyLinkDialogOpen] = useState(false);
+  const [invalidChannelDialogOpen, setInvalidChannelDialogOpen] = useState(false);
 
   const changeChannel = (channelId) => {
     setCurrChannel(channelId);
@@ -62,6 +63,8 @@ function ChannelSidebar() {
         setSelectedChannelIds(currWorkspace.workspace_id, nextChannelId)  
         history.push(`/channel/${currWorkspace.workspace_id}/${nextChannelId}`)
       }
+    }else {
+      setInvalidChannelDialogOpen(true);
     }
   }
 
@@ -75,24 +78,48 @@ function ChannelSidebar() {
     }
   };
 
-  const addNewChannel= (data) => {
+  const addNewChannel= async (data) => {
     const dto = {
       "workspace_id" : currWorkspace.workspace_id,
       "channel_name" : data?.channel_name
     }
-    api.post("/protected/channel/create", dto).then((res) => {
-      if (res.data.Success) {
-        updateNewChannel(res.data.Data);
+
+    const res = await api.post("/protected/channel/create", dto)
+    if (res.data.Success) {
+      updateNewChannel(res.data.Data);
+      return;
+    }else {
+      switch (res.data.ErrorMessage) {
+        case "workspace.id.not.found": {
+          return "Workspace may be deleted, please refresh the page."
+        }
       }
-    });
+    }
   };
 
-  const joinNewChannel = (data) => {
-    api.post(`/protected/channel/join/${data?.channel_id}`).then((res) => {
-      if (res.data.Success) {
-        updateNewChannel(res.data.Data);
+  const joinNewChannel = async (data) => {
+    const dto = {
+      "workspace_id" : currWorkspace.workspace_id,
+      "channel_id" : data?.channel_id
+    }
+
+    const res = await api.post("/protected/channel/join", dto)
+    if (res.data.Success) {
+      updateNewChannel(res.data.Data);
+      return;
+    }else {
+      switch (res.data.ErrorMessage) {
+        case "channel.user.record.exist": {
+          return "You has been joined to this channel."
+        }
+        case "workspace.id.not.found": {
+          return "Workspace may be deleted, please refresh the page."
+        }
+        case "channel.id.not.found": {
+          return "Invalid channel id."
+        }
       }
-    });
+    }
   };
 
   const updateNewChannel = (channel) => {
@@ -168,6 +195,14 @@ function ChannelSidebar() {
         setIsOpen={setFailDeleteDialogOpen}
         title="Fail To Delete Last Channel"
         content="Unfortunately to tell you that one workspace should has at least one channel."
+        buttonText="Close"
+        buttonStatus="fail"
+      />
+      <SimpleDialog
+        isOpen={invalidChannelDialogOpen}
+        setIsOpen={setInvalidChannelDialogOpen}
+        title="Channel Not Found"
+        content="The workspace may be deleted by the creator, please refresh your page."
         buttonText="Close"
         buttonStatus="fail"
       />

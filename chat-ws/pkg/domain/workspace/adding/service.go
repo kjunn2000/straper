@@ -2,6 +2,8 @@ package adding
 
 import (
 	"context"
+	"errors"
+	"strings"
 	"time"
 
 	"github.com/google/uuid"
@@ -62,5 +64,12 @@ func (s *service) CreateChannel(ctx context.Context, workspaceId, channelName, u
 }
 
 func (s *service) AddUserToChannel(ctx context.Context, channelId string, userIdList []string) error {
-	return s.r.AddUserToChannel(ctx, channelId, userIdList)
+	err := s.r.AddUserToChannel(ctx, channelId, userIdList)
+	if err != nil {
+		if strings.HasPrefix(err.Error(), "Error 1062") {
+			return errors.New("channel.user.record.exist")
+		}
+		return errors.New("invalid.channel.id")
+	}
+	return nil
 }

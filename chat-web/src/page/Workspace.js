@@ -6,10 +6,11 @@ import {ReactComponent as Welcome} from "../asset/img/welcome.svg";
 import {ReactComponent as NotFound} from "../asset/img/notfound.svg";
 import { useEffect } from "react";
 import { fetchWorkspaceData, redirectToLatestWorkspace } from "../service/workspace";
+import { isEmpty } from "../service/object";
 
 function Workspace() {
-  const { workspaceId, channelId } = useParams();
   const currWorkspace = useWorkspaceStore((state) => state.currWorkspace);
+  const currChannel = useWorkspaceStore((state) => state.currChannel);
 
   useEffect(() => {
       fetchWorkspaceData().then(data => redirectToLatestWorkspace(data));
@@ -31,9 +32,9 @@ function Workspace() {
       </div>
       <div className="flex-auto">
       {
-        !workspaceId ? emptyComponent(Welcome, "WELCOME TO STRAPER, LET'S STRENGTHEN YOUR COLLABORATION") 
-        : (!currWorkspace || currWorkspace == {} ? emptyComponent(NotFound, "WORKSPACE NOT FOUND") 
-        : <ChatRoom/>)
+        isEmpty(currWorkspace) || isEmpty(currChannel) ? 
+        emptyComponent(Welcome, "WELCOME TO STRAPER, LET'S STRENGTHEN YOUR COLLABORATION") 
+        : <ChatRoom/>
       }
       </div>
     </div>

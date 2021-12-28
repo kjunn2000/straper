@@ -20,6 +20,7 @@ function WorkspaceSidebar() {
   const [isAddWorkspaceDialogOpen, setAddWorkspaceDialogOpen] = useState(false);
   const [isJoinWorkspaceDialogOpen, setJoinWorkspaceDialogOpen] =
     useState(false);
+  const [errMsg, setErrMsg] = useState("");
 
   const changeWorkspace = (workspaceId) => {
     const channelId = selectedChannelIds.get(workspaceId);
@@ -46,12 +47,21 @@ function WorkspaceSidebar() {
     });
   };
 
-  const joinNewWorkspace = (data) => {
-    api.post(`/protected/workspace/join/${data?.workspace_id}`).then((res) => {
-      if (res.data.Success) {
-        updateNewWorkspace(res.data.Data);
+  const joinNewWorkspace = async (data) => {
+    const res = await api.post(`/protected/workspace/join/${data?.workspace_id}`)
+    if (res.data.Success) {
+      updateNewWorkspace(res.data.Data);
+      return;
+    }else {
+      switch (res.data.ErrorMessage) {
+        case "workspace.user.record.exist": {
+          return "You has been joined to this workspace."
+        }
+        case "invalid.workspace.id": {
+          return "Invalid workspace id."
+        }
       }
-    });
+    }
   };
 
   const updateNewWorkspace = (newWorkspace) => {
@@ -107,6 +117,7 @@ function WorkspaceSidebar() {
         toggleDialog={toggleDialog}
         joinAction={joinNewWorkspace}
         type="workspace"
+        errMsg={errMsg}
       />
     </div>
   );

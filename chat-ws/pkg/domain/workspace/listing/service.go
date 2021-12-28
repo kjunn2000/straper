@@ -2,6 +2,7 @@ package listing
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 
 	"go.uber.org/zap"
@@ -63,7 +64,9 @@ func (s *service) generateWorkspaceWithChannelData(workspaceList []Workspace, ch
 
 func (s *service) GetWorkspaceByWorkspaceId(ctx context.Context, workspaceId string) (Workspace, error) {
 	w, err := s.r.GetWorkspaceByWorkspaceId(ctx, workspaceId)
-	if err != nil {
+	if err == sql.ErrNoRows {
+		return Workspace{}, errors.New("workspace.id.not.found")
+	} else if err != nil {
 		return Workspace{}, err
 	}
 	c, err := s.r.GetDefaultChannel(ctx, workspaceId)
@@ -75,5 +78,11 @@ func (s *service) GetWorkspaceByWorkspaceId(ctx context.Context, workspaceId str
 }
 
 func (s *service) GetChannelByChannelId(ctx context.Context, channelId string) (Channel, error) {
-	return s.r.GetChannelByChannelId(ctx, channelId)
+	c, err := s.r.GetChannelByChannelId(ctx, channelId)
+	if err == sql.ErrNoRows {
+		return Channel{}, errors.New("channel.id.not.found")
+	} else if err != nil {
+		return Channel{}, err
+	}
+	return c, nil
 }
