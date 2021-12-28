@@ -8,4 +8,5 @@ type Repository interface {
 	GetChannelsByUserId(ctx context.Context, userId string) ([]Channel, error)
 	GetDefaultChannel(ctx context.Context, workspaceId string) (Channel, error)
 	GetChannelByChannelId(ctx context.Context, channelId string) (Channel, error)
+	GetChannelListByWorkspaceId(ctx context.Context, workspaceId string) ([]Channel, error)
 }

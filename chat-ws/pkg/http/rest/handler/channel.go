@@ -85,11 +85,7 @@ func (server *Server) JoinChannel(as adding.Service, ls listing.Service, cs chat
 			rest.AddResponseToResponseWritter(w, nil, "invalid.payload.in.context")
 			return
 		}
-		if _, err := ls.GetWorkspaceByWorkspaceId(r.Context(), cq.WorkspaceId); err != nil {
-			rest.AddResponseToResponseWritter(w, nil, err.Error())
-			return
-		}
-		c, err := ls.GetChannelByChannelId(r.Context(), cq.ChannelId)
+		channel, err := ls.VerifyAndGetChannel(r.Context(), cq.WorkspaceId, cq.ChannelId)
 		if err != nil {
 			rest.AddResponseToResponseWritter(w, nil, err.Error())
 			return
@@ -98,7 +94,7 @@ func (server *Server) JoinChannel(as adding.Service, ls listing.Service, cs chat
 			rest.AddResponseToResponseWritter(w, nil, err.Error())
 			return
 		}
-		rest.AddResponseToResponseWritter(w, c, "")
+		rest.AddResponseToResponseWritter(w, channel, "")
 	}
 }
 

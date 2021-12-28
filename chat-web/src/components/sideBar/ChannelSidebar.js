@@ -110,13 +110,13 @@ function ChannelSidebar() {
     }else {
       switch (res.data.ErrorMessage) {
         case "channel.user.record.exist": {
-          return "You has been joined to this channel."
+          return "You has been joined to this channel.";
         }
         case "workspace.id.not.found": {
-          return "Workspace may be deleted, please refresh the page."
+          return "Workspace may be deleted, please refresh the page.";
         }
         case "channel.id.not.found": {
-          return "Invalid channel id."
+          return "Invalid channel id.";
         }
       }
     }

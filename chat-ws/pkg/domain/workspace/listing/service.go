@@ -12,6 +12,7 @@ type Service interface {
 	GetWorkspaceData(ctx context.Context, userId string) ([]Workspace, error)
 	GetWorkspaceByWorkspaceId(ctx context.Context, workspaceId string) (Workspace, error)
 	GetChannelByChannelId(ctx context.Context, channelId string) (Channel, error)
+	VerifyAndGetChannel(ctx context.Context, workspaceId string, channelId string) (Channel, error)
 }
 
 type service struct {
@@ -85,4 +86,30 @@ func (s *service) GetChannelByChannelId(ctx context.Context, channelId string) (
 		return Channel{}, err
 	}
 	return c, nil
+}
+
+func (s *service) VerifyAndGetChannel(ctx context.Context, workspaceId string, channelId string) (Channel, error) {
+	_, err := s.GetWorkspaceByWorkspaceId(ctx, workspaceId)
+	if err != nil {
+		return Channel{}, err
+	}
+	channel, err := s.GetChannelByChannelId(ctx, channelId)
+	if err != nil {
+		return Channel{}, err
+	}
+	channelList, err := s.r.GetChannelListByWorkspaceId(ctx, workspaceId)
+	if err != nil {
+		return Channel{}, err
+	}
+	exist := false
+	for _, c := range channelList {
+		if channelId == c.ChannelId {
+			exist = true
+			break
+		}
+	}
+	if !exist {
+		return Channel{}, errors.New("channel.id.not.found")
+	}
+	return channel, nil
 }

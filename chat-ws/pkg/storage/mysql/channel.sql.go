@@ -76,6 +76,28 @@ func (q *Queries) GetChannelsByUserId(ctx context.Context, userId string) ([]lis
 	var channels []listing.Channel
 	err = q.db.Select(&channels, sql, args...)
 	if err != nil {
+		q.log.Info("Failed to select channel by user id.", zap.Error(err))
+		return nil, err
+	}
+	return channels, nil
+}
+
+func (q *Queries) GetChannelListByWorkspaceId(ctx context.Context, workspaceId string) ([]listing.Channel, error) {
+
+	sql, args, err := sq.Select("channel_id, channel_name, workspace_id, creator_id,created_date").
+		From("channel").
+		Where(sq.Eq{"workspace_id": workspaceId}).
+		OrderBy("created_date").
+		ToSql()
+
+	if err != nil {
+		q.log.Info("Unable to create select channel sql.", zap.Error(err))
+		return nil, err
+	}
+
+	var channels []listing.Channel
+	err = q.db.Select(&channels, sql, args...)
+	if err != nil {
 		q.log.Info("Failed to select channel by workspace id.", zap.Error(err))
 		return nil, err
 	}
