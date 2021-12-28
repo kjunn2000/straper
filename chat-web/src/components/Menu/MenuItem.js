@@ -1,5 +1,6 @@
 import { Menu } from "@headlessui/react";
 import React from "react";
+import { iconStyle } from "../../utils/style/icon";
 
 const MenuItem = ({ content, click, icon: Icon }) => {
   return (
@@ -12,7 +13,7 @@ const MenuItem = ({ content, click, icon: Icon }) => {
           onClick={() => click()}
         >
           <div className="flex justify-between items-center">
-            <Icon />
+            <Icon style={iconStyle}/>
             <span>{content}</span>
           </div>
         </button>

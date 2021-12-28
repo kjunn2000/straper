@@ -19,7 +19,7 @@ func (server *Server) SetUpChannelRouter(mr *mux.Router, as adding.Service, ls l
 	ds deleting.Service, cs chatting.Service) {
 	cr := mr.PathPrefix("/protected/channel").Subrouter()
 	cr.HandleFunc("/create", server.CreateChannel(as, cs)).Methods("POST")
-	cr.HandleFunc("/join/{channel_id}", server.JoinChannel(as, cs)).Methods("POST")
+	cr.HandleFunc("/join/{channel_id}", server.JoinChannel(as, ls, cs)).Methods("POST")
 	cr.HandleFunc("/update", server.UpdateChannel(es)).Methods("POST")
 	cr.HandleFunc("/delete/{channel_id}", server.DeleteChannel(ds)).Methods("POST")
 	cr.HandleFunc("/leave/{channel_id}", server.LeaveChannel(ds)).Methods("POST")
@@ -58,7 +58,7 @@ func (server *Server) CreateChannel(as adding.Service, cs chatting.Service) func
 	}
 }
 
-func (server *Server) JoinChannel(as adding.Service, cs chatting.Service) func(w http.ResponseWriter, r *http.Request) {
+func (server *Server) JoinChannel(as adding.Service, ls listing.Service, cs chatting.Service) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		channelId, ok := vars["channel_id"]
@@ -81,7 +81,12 @@ func (server *Server) JoinChannel(as adding.Service, cs chatting.Service) func(w
 			rest.AddResponseToResponseWritter(w, nil, err.Error())
 			return
 		}
-		rest.AddResponseToResponseWritter(w, nil, "")
+		c, err := ls.GetChannelByChannelId(r.Context(), channelId)
+		if err != nil {
+			rest.AddResponseToResponseWritter(w, nil, err.Error())
+			return
+		}
+		rest.AddResponseToResponseWritter(w, c, "")
 	}
 }
 

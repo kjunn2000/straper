@@ -10,6 +10,7 @@ import (
 type Service interface {
 	GetWorkspaceData(ctx context.Context, userId string) ([]Workspace, error)
 	GetWorkspaceByWorkspaceId(ctx context.Context, workspaceId string) (Workspace, error)
+	GetChannelByChannelId(ctx context.Context, channelId string) (Channel, error)
 }
 
 type service struct {
@@ -71,4 +72,8 @@ func (s *service) GetWorkspaceByWorkspaceId(ctx context.Context, workspaceId str
 	}
 	w.ChannelList = []Channel{c}
 	return w, nil
+}
+
+func (s *service) GetChannelByChannelId(ctx context.Context, channelId string) (Channel, error) {
+	return s.r.GetChannelByChannelId(ctx, channelId)
 }
