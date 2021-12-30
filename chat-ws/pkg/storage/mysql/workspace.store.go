@@ -2,6 +2,8 @@ package mysql
 
 import (
 	"context"
+	"errors"
+	"strings"
 
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/adding"
 	"go.uber.org/zap"
@@ -39,7 +41,10 @@ func (s *SQLStore) AddNewUserToWorkspace(ctx context.Context, workspaceId string
 	err := s.execTx(func(q *Queries) error {
 		err := q.AddUserToWorkspace(ctx, workspaceId, userIdList)
 		if err != nil {
-			return err
+			if strings.HasPrefix(err.Error(), "Error 1062") {
+				return errors.New("workspace.user.record.exist")
+			}
+			return errors.New("invalid.workspace.id")
 		}
 		c, err := q.GetDefaultChannelByWorkspaceId(ctx, workspaceId)
 		if err != nil {

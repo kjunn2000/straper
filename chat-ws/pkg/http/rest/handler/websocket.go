@@ -18,7 +18,7 @@ var Upgrader websocket.Upgrader = websocket.Upgrader{
 	CheckOrigin:     func(r *http.Request) bool { return true },
 }
 
-func (server *Server) SetUpConnectionRouter(mr *mux.Router, cs chatting.Service) {
+func (server *Server) SetUpWebsocketRouter(mr *mux.Router, cs chatting.Service) {
 	cr := mr.PathPrefix("/protected").Subrouter()
 	cr.HandleFunc("/ws", server.HandleUpgrade(cs))
 	cr.Use(middleware.TokenVerifier(server.tokenMaker))
@@ -39,14 +39,10 @@ func (server *Server) HandleUpgrade(cs chatting.Service) func(http.ResponseWrite
 		}
 		payload, ok := payloadVal.(*auth.Payload)
 		if !ok {
-			server.log.Warn("Cannot cast to payload strct.")
+			server.log.Warn("Cannot cast to payload struct.")
 			return
 		}
-		err = cs.SetUpUserConnection(r.Context(), payload.UserId, conn)
-		if err != nil {
-			server.log.Warn("Connection cannot save to redis cache.", zap.Error(err))
-			return
-		}
+		cs.SetUpUserConnection(r.Context(), payload.UserId, conn)
 		server.log.Info("Successful open websocket connection.", zap.String("user_id", payload.UserId))
 	}
 }

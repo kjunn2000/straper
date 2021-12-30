@@ -18,8 +18,8 @@ import (
 func (server *Server) SetUpChannelRouter(mr *mux.Router, as adding.Service, ls listing.Service, es editing.Service,
 	ds deleting.Service, cs chatting.Service) {
 	cr := mr.PathPrefix("/protected/channel").Subrouter()
-	cr.HandleFunc("/create", server.CreateChannel(as, cs)).Methods("POST")
-	cr.HandleFunc("/join/{channel_id}", server.JoinChannel(as, cs)).Methods("POST")
+	cr.HandleFunc("/create", server.CreateChannel(as, ls, cs)).Methods("POST")
+	cr.HandleFunc("/join", server.JoinChannel(as, ls, cs)).Methods("POST")
 	cr.HandleFunc("/update", server.UpdateChannel(es)).Methods("POST")
 	cr.HandleFunc("/delete/{channel_id}", server.DeleteChannel(ds)).Methods("POST")
 	cr.HandleFunc("/leave/{channel_id}", server.LeaveChannel(ds)).Methods("POST")
@@ -31,7 +31,12 @@ type CreateChannelRequest struct {
 	ChannelName string `json:"channel_name"`
 }
 
-func (server *Server) CreateChannel(as adding.Service, cs chatting.Service) func(w http.ResponseWriter, r *http.Request) {
+type JoinChannelRequest struct {
+	WorkspaceId string `json:"workspace_id"`
+	ChannelId   string `json:"channel_id"`
+}
+
+func (server *Server) CreateChannel(as adding.Service, ls listing.Service, cs chatting.Service) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var cq CreateChannelRequest
 		err := json.NewDecoder(r.Body).Decode(&cq)
@@ -49,6 +54,10 @@ func (server *Server) CreateChannel(as adding.Service, cs chatting.Service) func
 			rest.AddResponseToResponseWritter(w, nil, "invalid.payload.in.context")
 			return
 		}
+		if _, err := ls.GetWorkspaceByWorkspaceId(r.Context(), cq.WorkspaceId); err != nil {
+			rest.AddResponseToResponseWritter(w, nil, err.Error())
+			return
+		}
 		channel, err := as.CreateChannel(r.Context(), cq.WorkspaceId, cq.ChannelName, payload.UserId)
 		if err != nil {
 			rest.AddResponseToResponseWritter(w, nil, err.Error())
@@ -58,12 +67,12 @@ func (server *Server) CreateChannel(as adding.Service, cs chatting.Service) func
 	}
 }
 
-func (server *Server) JoinChannel(as adding.Service, cs chatting.Service) func(w http.ResponseWriter, r *http.Request) {
+func (server *Server) JoinChannel(as adding.Service, ls listing.Service, cs chatting.Service) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		vars := mux.Vars(r)
-		channelId, ok := vars["channel_id"]
-		if !ok {
-			rest.AddResponseToResponseWritter(w, nil, "channel.id.not.found")
+		var cq JoinChannelRequest
+		err := json.NewDecoder(r.Body).Decode(&cq)
+		if err != nil {
+			rest.AddResponseToResponseWritter(w, nil, err.Error())
 			return
 		}
 		payloadVal := r.Context().Value(middleware.TokenPayload{})
@@ -76,12 +85,16 @@ func (server *Server) JoinChannel(as adding.Service, cs chatting.Service) func(w
 			rest.AddResponseToResponseWritter(w, nil, "invalid.payload.in.context")
 			return
 		}
-		err := as.AddUserToChannel(r.Context(), channelId, []string{payload.UserId})
+		channel, err := ls.VerifyAndGetChannel(r.Context(), cq.WorkspaceId, cq.ChannelId)
 		if err != nil {
 			rest.AddResponseToResponseWritter(w, nil, err.Error())
 			return
 		}
-		rest.AddResponseToResponseWritter(w, nil, "")
+		if err := as.AddUserToChannel(r.Context(), cq.ChannelId, []string{payload.UserId}); err != nil {
+			rest.AddResponseToResponseWritter(w, nil, err.Error())
+			return
+		}
+		rest.AddResponseToResponseWritter(w, channel, "")
 	}
 }
 

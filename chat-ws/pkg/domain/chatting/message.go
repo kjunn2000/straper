@@ -3,13 +3,13 @@ package chatting
 import "encoding/json"
 
 const (
-	UserJoinedAction = "UserJoined"
-	UserLeaveAction  = "UserLeave"
-	MessageAction    = "Message"
+	UserJoin  = "UserJoin"
+	UserLeave = "UserLeave"
+	Messaging = "Message"
 )
 
 type Message struct {
-	Action    string `json:"action"`
+	Type      string `json:"type"`
 	ChannelId string `json:"channel_id"`
 	Content   string `json:"content"`
 }

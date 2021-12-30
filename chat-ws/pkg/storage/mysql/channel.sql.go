@@ -23,7 +23,6 @@ func (q *Queries) CreateChannel(ctx context.Context, channel adding.Channel) err
 		q.log.Info("Failed to create new channel.", zap.String("workspace_id", channel.WorkspaceId))
 		return err
 	}
-	q.log.Info("Successfully create a new channel.", zap.String("channel_name", channel.ChannelName))
 	return nil
 }
 
@@ -42,7 +41,6 @@ func (q *Queries) AddUserToChannel(ctx context.Context, channelId string, userId
 		q.log.Info("Failed to add user to channel.", zap.Error(err))
 		return err
 	}
-	q.log.Info("Successfully add user to channel.", zap.String("channel_id", channelId))
 	return nil
 }
 
@@ -78,19 +76,41 @@ func (q *Queries) GetChannelsByUserId(ctx context.Context, userId string) ([]lis
 	var channels []listing.Channel
 	err = q.db.Select(&channels, sql, args...)
 	if err != nil {
+		q.log.Info("Failed to select channel by user id.", zap.Error(err))
+		return nil, err
+	}
+	return channels, nil
+}
+
+func (q *Queries) GetChannelListByWorkspaceId(ctx context.Context, workspaceId string) ([]listing.Channel, error) {
+
+	sql, args, err := sq.Select("channel_id, channel_name, workspace_id, creator_id,created_date").
+		From("channel").
+		Where(sq.Eq{"workspace_id": workspaceId}).
+		OrderBy("created_date").
+		ToSql()
+
+	if err != nil {
+		q.log.Info("Unable to create select channel sql.", zap.Error(err))
+		return nil, err
+	}
+
+	var channels []listing.Channel
+	err = q.db.Select(&channels, sql, args...)
+	if err != nil {
 		q.log.Info("Failed to select channel by workspace id.", zap.Error(err))
 		return nil, err
 	}
 	return channels, nil
 }
 
-func (q *Queries) GetUserListByChannelId(ctx context.Context, channelId string) ([]chatting.User, error) {
+func (q *Queries) GetUserListByChannelId(ctx context.Context, channelId string) ([]chatting.UserData, error) {
 	sql, args, err := sq.Select("user_id").From("channel_user").Where(sq.Eq{"channel_id": channelId}).ToSql()
 	if err != nil {
 		q.log.Info("Unable to create select client list sql.", zap.Error(err))
 		return nil, err
 	}
-	var clientList []chatting.User
+	var clientList []chatting.UserData
 	err = q.db.Select(&clientList, sql, args...)
 	if err != nil {
 		q.log.Info("Failed to select client list.", zap.Error(err))
@@ -148,7 +168,6 @@ func (q *Queries) UpdateChannel(ctx context.Context, channel editing.Channel) er
 		q.log.Info("Failed to update channel.", zap.Error(err))
 		return err
 	}
-	q.log.Info("Successfully to update 1 channel.", zap.String("channel_id", channel.ChannelId))
 	return nil
 }
 
@@ -163,7 +182,6 @@ func (q *Queries) DeleteChannel(ctx context.Context, channelId string) error {
 		q.log.Info("Failed to delete channel.", zap.Error(err))
 		return err
 	}
-	q.log.Info("Successfully to delete 1 channel.", zap.String("channel_id", channelId))
 	return nil
 }
 
@@ -181,6 +199,5 @@ func (q *Queries) RemoveUserFromChannel(ctx context.Context, channelId string, u
 		q.log.Info("Failed to remove user from channels.", zap.Error(err))
 		return err
 	}
-	q.log.Info("Successfully remove 1 user from channels.", zap.String("user_id", userId))
 	return nil
 }

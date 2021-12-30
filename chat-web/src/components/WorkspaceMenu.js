@@ -1,6 +1,6 @@
 import { Menu, Transition } from "@headlessui/react";
 import { Fragment, useEffect, useState } from "react";
-import { AiFillCaretDown, AiFillDelete } from "react-icons/ai";
+import { AiFillCaretDown, AiFillDelete, AiOutlineLink } from "react-icons/ai";
 import { FiSettings } from "react-icons/fi";
 import useIdentifyStore from "../store/identityStore";
 import useWorkspaceStore from "../store/workspaceStore";
@@ -8,6 +8,8 @@ import api from "../axios/api";
 import MenuItem from "./Menu/MenuItem";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import ActionDialog from "./dialog/ActionDialog";
+import SimpleDialog from "./dialog/SimpleDialog";
+import { copyTextToClipboard } from "../service/navigator";
 
 export default function WorkspaceMenu() {
   const [isCreator, setIsCreator] = useState(false);
@@ -20,6 +22,7 @@ export default function WorkspaceMenu() {
   const deleteSelectedChannelIds = useWorkspaceStore((state) => state.deleteSelectedChannelIds);
   const clearWorkspaceState = useWorkspaceStore((state) => state.clearWorkspaceState);
   const [deleteWarningDialogOpen, setDeleteWarningDialogOpen] = useState(false);
+  const [successCopyLinkDialogOpen, setSuccessCopyLinkDialogOpen] = useState(false);
 
   const history = useHistory();
 
@@ -65,6 +68,11 @@ export default function WorkspaceMenu() {
       }
   }
 
+  const copyLinkToClipboard = () => {
+    copyTextToClipboard(workspace.workspace_id);
+    setSuccessCopyLinkDialogOpen(true);
+  }
+
   return (
     <div>
       <Menu as="div" className="relative w-full inline-block text-left">
@@ -91,6 +99,7 @@ export default function WorkspaceMenu() {
           <Menu.Items className="absolute left-0 w-56 m-5 p-2 origin-top-right bg-black divide-y divide-gray-100 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
             <div className="px-1 py-1">
               <MenuItem content="Workspace settings" icon={FiSettings} />
+              <MenuItem content="Invitation link" icon={AiOutlineLink} click={()=>{copyLinkToClipboard()}} />
               <MenuItem
                 content={isCreator ? "Delete workspace" : "Leave workspace"}
                 click={()=>setDeleteWarningDialogOpen(true)}
@@ -109,6 +118,14 @@ export default function WorkspaceMenu() {
         buttonStatus="fail"
         buttonAction={isCreator ? deleteWorkspace : leaveWorkspace}
         closeButtonText="Close"
+      />
+      <SimpleDialog
+        isOpen={successCopyLinkDialogOpen}
+        setIsOpen={setSuccessCopyLinkDialogOpen}
+        title="Copied Workspace Link To Clipboard"
+        content="Successfully copied workspace link to clipboard. You are able to send it to your friend for joining this workspace."
+        buttonText="Close"
+        buttonStatus="success"
       />
     </div>
   );

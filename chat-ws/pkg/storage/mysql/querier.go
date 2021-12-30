@@ -51,7 +51,8 @@ type Querier interface {
 	AddUserToChannel(ctx context.Context, channelId string, userIdList []string) error
 	GetChannelByChannelId(ctx context.Context, channelId string) (listing.Channel, error)
 	GetChannelsByUserId(ctx context.Context, userId string) ([]listing.Channel, error)
-	GetUserListByChannelId(ctx context.Context, channelId string) ([]chatting.User, error)
+	GetChannelListByWorkspaceId(ctx context.Context, workspaceId string) ([]listing.Channel, error)
+	GetUserListByChannelId(ctx context.Context, channelId string) ([]chatting.UserData, error)
 	GetDefaultChannel(ctx context.Context, workspaceId string) (listing.Channel, error)
 	GetDefaultChannelByWorkspaceId(ctx context.Context, workspaceId string) (adding.Channel, error)
 	UpdateChannel(ctx context.Context, channel editing.Channel) error

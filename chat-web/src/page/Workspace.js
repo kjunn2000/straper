@@ -1,15 +1,20 @@
-import { useEffect } from "react";
 import { useParams } from "react-router";
 import ChatRoom from "../components/ChatRoom";
 import Sidebar from "../components/sideBar/Sidebar";
 import useWorkspaceStore from "../store/workspaceStore";
 import {ReactComponent as Welcome} from "../asset/img/welcome.svg";
 import {ReactComponent as NotFound} from "../asset/img/notfound.svg";
-import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
+import { useEffect } from "react";
+import { fetchWorkspaceData, redirectToLatestWorkspace } from "../service/workspace";
+import { isEmpty } from "../service/object";
 
 function Workspace() {
-  const { workspaceId, channelId } = useParams();
   const currWorkspace = useWorkspaceStore((state) => state.currWorkspace);
+  const currChannel = useWorkspaceStore((state) => state.currChannel);
+
+  useEffect(() => {
+      fetchWorkspaceData().then(data => redirectToLatestWorkspace(data));
+  },[])
 
   const emptyComponent = (Image, text) => (
     <div className="flex flex-col items-center p-5 text-white">
@@ -27,9 +32,9 @@ function Workspace() {
       </div>
       <div className="flex-auto">
       {
-        !workspaceId ? emptyComponent(Welcome, "WELCOME TO STRAPER, LET'S STRENGTHEN YOUR COLLABORATION") 
-        : (!currWorkspace || currWorkspace == {} ? emptyComponent(NotFound, "WORKSPACE NOT FOUND") 
-        : <ChatRoom/>)
+        isEmpty(currWorkspace) || isEmpty(currChannel) ? 
+        emptyComponent(Welcome, "WELCOME TO STRAPER, LET'S STRENGTHEN YOUR COLLABORATION") 
+        : <ChatRoom/>
       }
       </div>
     </div>

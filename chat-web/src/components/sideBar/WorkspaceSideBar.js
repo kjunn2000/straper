@@ -1,24 +1,26 @@
-import React, { Fragment, useState } from "react";
+import React, { useState } from "react";
 import SidebarIcon from "../SidebarIcon";
 import useWorkspaceStore from "../../store/workspaceStore";
-import AddWorkspaceDialog from "../dialog/AddWorkspaceDialog";
-import JoinWorkspaceDialog from "../dialog/JoinWorkspaceDialog";
-import useAuthStore from "../../store/authStore";
-import useIdentifyStore from "../../store/identityStore";
 import { useHistory } from "react-router";
 import { logOut } from "../../service/logout";
+import AddDialog from "../dialog/AddDialog";
+import api from "../../axios/api";
+import JoinDialog from "../dialog/JoinDialog";
 
 function WorkspaceSidebar() {
   const workspaces = useWorkspaceStore((state) => state.workspaces);
   const selectedChannelIds = useWorkspaceStore((state) => state.selectedChannelIds);
+  const addWorkspace = useWorkspaceStore((state) => state.addWorkspace);
   const setCurrWorkspace = useWorkspaceStore((state) => state.setCurrWorkspace);
   const setCurrChannel = useWorkspaceStore((state) => state.setCurrChannel);
+  const setSelectedChannelIds = useWorkspaceStore((state) => state.setSelectedChannelIds);
 
   const history = useHistory();
 
   const [isAddWorkspaceDialogOpen, setAddWorkspaceDialogOpen] = useState(false);
   const [isJoinWorkspaceDialogOpen, setJoinWorkspaceDialogOpen] =
     useState(false);
+  const [errMsg, setErrMsg] = useState("");
 
   const changeWorkspace = (workspaceId) => {
     const channelId = selectedChannelIds.get(workspaceId);
@@ -36,6 +38,40 @@ function WorkspaceSidebar() {
       setAddWorkspaceDialogOpen(true);
     }
   };
+
+  const addNewWorkspace = (data) => {
+    api.post("/protected/workspace/create", data).then((res) => {
+      if (res.data.Success) {
+        updateNewWorkspace(res.data.Data);
+      }
+    });
+  };
+
+  const joinNewWorkspace = async (data) => {
+    const res = await api.post(`/protected/workspace/join/${data?.workspace_id}`)
+    if (res.data.Success) {
+      updateNewWorkspace(res.data.Data);
+      return;
+    }else {
+      switch (res.data.ErrorMessage) {
+        case "workspace.user.record.exist": {
+          return "You has been joined to this workspace."
+        }
+        case "invalid.workspace.id": {
+          return "Invalid workspace id."
+        }
+      }
+    }
+  };
+
+  const updateNewWorkspace = (newWorkspace) => {
+    addWorkspace(newWorkspace);
+    setCurrWorkspace(newWorkspace.workspace_id)
+    const channelId = newWorkspace.channel_list[0].channel_id
+    setCurrChannel(channelId)
+    setSelectedChannelIds(newWorkspace.workspace_id, channelId)
+    history.push(`/channel/${newWorkspace.workspace_id}/${channelId}`)
+  }
 
   return (
     <div>
@@ -68,16 +104,21 @@ function WorkspaceSidebar() {
           />
         </div>
       </div>
-      <AddWorkspaceDialog
+      <AddDialog
         isOpen={isAddWorkspaceDialogOpen}
         close={() => setAddWorkspaceDialogOpen(false)}
         toggleDialog={toggleDialog}
+        addAction={addNewWorkspace}
+        type="workspace"
       />
-      <JoinWorkspaceDialog
+      <JoinDialog
         isOpen={isJoinWorkspaceDialogOpen}
         close={() => setJoinWorkspaceDialogOpen(false)}
         toggleDialog={toggleDialog}
-      ></JoinWorkspaceDialog>
+        joinAction={joinNewWorkspace}
+        type="workspace"
+        errMsg={errMsg}
+      />
     </div>
   );
 }

@@ -2,6 +2,7 @@ package listing
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 
 	"go.uber.org/zap"
@@ -10,6 +11,8 @@ import (
 type Service interface {
 	GetWorkspaceData(ctx context.Context, userId string) ([]Workspace, error)
 	GetWorkspaceByWorkspaceId(ctx context.Context, workspaceId string) (Workspace, error)
+	GetChannelByChannelId(ctx context.Context, channelId string) (Channel, error)
+	VerifyAndGetChannel(ctx context.Context, workspaceId string, channelId string) (Channel, error)
 }
 
 type service struct {
@@ -62,7 +65,9 @@ func (s *service) generateWorkspaceWithChannelData(workspaceList []Workspace, ch
 
 func (s *service) GetWorkspaceByWorkspaceId(ctx context.Context, workspaceId string) (Workspace, error) {
 	w, err := s.r.GetWorkspaceByWorkspaceId(ctx, workspaceId)
-	if err != nil {
+	if err == sql.ErrNoRows {
+		return Workspace{}, errors.New("workspace.id.not.found")
+	} else if err != nil {
 		return Workspace{}, err
 	}
 	c, err := s.r.GetDefaultChannel(ctx, workspaceId)
@@ -71,4 +76,40 @@ func (s *service) GetWorkspaceByWorkspaceId(ctx context.Context, workspaceId str
 	}
 	w.ChannelList = []Channel{c}
 	return w, nil
+}
+
+func (s *service) GetChannelByChannelId(ctx context.Context, channelId string) (Channel, error) {
+	c, err := s.r.GetChannelByChannelId(ctx, channelId)
+	if err == sql.ErrNoRows {
+		return Channel{}, errors.New("channel.id.not.found")
+	} else if err != nil {
+		return Channel{}, err
+	}
+	return c, nil
+}
+
+func (s *service) VerifyAndGetChannel(ctx context.Context, workspaceId string, channelId string) (Channel, error) {
+	_, err := s.GetWorkspaceByWorkspaceId(ctx, workspaceId)
+	if err != nil {
+		return Channel{}, err
+	}
+	channel, err := s.GetChannelByChannelId(ctx, channelId)
+	if err != nil {
+		return Channel{}, err
+	}
+	channelList, err := s.r.GetChannelListByWorkspaceId(ctx, workspaceId)
+	if err != nil {
+		return Channel{}, err
+	}
+	exist := false
+	for _, c := range channelList {
+		if channelId == c.ChannelId {
+			exist = true
+			break
+		}
+	}
+	if !exist {
+		return Channel{}, errors.New("channel.id.not.found")
+	}
+	return channel, nil
 }

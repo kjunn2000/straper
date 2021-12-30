@@ -19,8 +19,8 @@ import (
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/listing"
 	"go.uber.org/zap"
 
+	rdb "github.com/kjunn2000/straper/chat-ws/pkg/redis"
 	"github.com/kjunn2000/straper/chat-ws/pkg/storage/mysql"
-	rdb "github.com/kjunn2000/straper/chat-ws/pkg/storage/redis"
 )
 
 type Server struct {
@@ -45,7 +45,12 @@ func NewServer(log *zap.Logger, config configs.Config, store mysql.Store) (*Serv
 		DB:       0,
 	})
 
-	redisClient := rdb.NewRedisClient(rc, log)
+	err = rc.Set(context.Background(), "key", "value", 0).Err()
+	if err != nil {
+		panic(err)
+	}
+
+	redisClient := rdb.NewRedisClient(rc)
 
 	srv := &http.Server{
 		Addr:         config.ServerAddress,
@@ -94,7 +99,7 @@ func (server *Server) SetServerRoute() (*mux.Router, error) {
 	server.SetUpAccountRouter(mr, accountService)
 	server.SetUpWorkspaceRouter(mr, addingService, listingService, editingService, deletingService)
 	server.SetUpChannelRouter(mr, addingService, listingService, editingService, deletingService, chattingService)
-	server.SetUpConnectionRouter(mr, chattingService)
+	server.SetUpWebsocketRouter(mr, chattingService)
 
 	server.httpServer.Handler = getCORSHandler()(mr)
 	return mr, nil

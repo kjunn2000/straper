@@ -9,6 +9,7 @@ import { ErrorMessage } from "@hookform/error-message";
 import "./login.scss";
 import api from "../axios/api";
 import SimpleDialog from "../components/dialog/SimpleDialog";
+import { fetchWorkspaceData, redirectToLatestWorkspace } from "../service/workspace";
 
 const Login = ({ location }) => {
   const {
@@ -20,13 +21,8 @@ const Login = ({ location }) => {
   const history = useHistory();
 
   const setAccessToken = useAuthStore((state) => state.setAccessToken);
-  const setWorkspaces = useWorkspaceStore((state) => state.setWorkspaces);
-  const setDefaultSelectedChannelIds= useWorkspaceStore((state) => state.setDefaultSelectedChannelIds);
   const setIdentity = useIdentifyStore((state) => state.setIdentity);
 
-  const setCurrWorkspace = useWorkspaceStore((state) => state.setCurrWorkspace);
-  const setCurrChannel = useWorkspaceStore((state) => state.setCurrChannel);
-  const selectedChannelIds = useWorkspaceStore((state) => state.selectedChannelIds);
 
   const [errMsg, setErrMsg] = useState("");
   const [showTimeoutDialog, setShowTimeoutDialog] = useState(false);
@@ -46,8 +42,7 @@ const Login = ({ location }) => {
         res.data?.Data.access_token,
         res.data?.Data.user
       );
-      const workspaces = await fetchWorkspaceData();
-      redirectToWorkspacePage(workspaces);
+      history.push("/channel");
     } else if (res.data?.ErrorMessage == "invalid.credential") {
       updateErrMsg("Invalid credenital.");
     } else if (res.data?.ErrorMessage == "user.not.found") {
@@ -60,31 +55,6 @@ const Login = ({ location }) => {
   const updateAuthAndIdentityState = async (accessToken, identity) => {
     setIdentity(identity);
     setAccessToken(accessToken);
-  };
-
-  const fetchWorkspaceData = async () => {
-    const res = await api.get("/protected/workspace/list");
-    if (res.data?.Success && res.data?.Data) {
-      setWorkspaces(res.data?.Data);
-      setDefaultSelectedChannelIds();
-      const selectedIds = [...selectedChannelIds]
-      if (selectedIds.length > 0) {
-        setCurrWorkspace(selectedIds[0][0])
-        setCurrChannel(selectedIds[0][1])
-      }
-    }
-    return res.data?.Data;
-  };
-
-  const redirectToWorkspacePage = (workspaces) => {
-    let redirectLink = "/channel";
-    if (workspaces.length > 0) {
-      redirectLink += "/" + workspaces[0].workspace_id;
-      if (workspaces[0].channel_list.length > 0) {
-        redirectLink += "/" + workspaces[0].channel_list[0].channel_id;
-      }
-    }
-    history.push(redirectLink);
   };
 
   const updateErrMsg = (msg) => {
