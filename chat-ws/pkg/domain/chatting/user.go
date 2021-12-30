@@ -21,12 +21,11 @@ func NewUser(userId string, conn *websocket.Conn, wsServer *WSServer) *User {
 	}
 }
 
-func (user *User) setUp(ctx context.Context, log *zap.Logger) error {
-	go user.readMsg(ctx, log)
-	return nil
+type UserData struct {
+	UserId string `db:"user_id"`
 }
 
-func (user *User) readMsg(ctx context.Context, log *zap.Logger) error {
+func (user *User) readMsg(ctx context.Context, log *zap.Logger) {
 	defer func() {
 		user.conn.Close()
 	}()
@@ -35,13 +34,12 @@ func (user *User) readMsg(ctx context.Context, log *zap.Logger) error {
 		err := user.conn.ReadJSON(&msg)
 		log.Info("Received message from user id :", zap.String("user_id", user.UserId))
 		if err != nil {
-			log.Info("Unable to read json message.")
-			continue
+			break
 		}
-		switch msg.Action {
-		case UserLeaveAction:
+		switch msg.Type {
+		case UserLeave:
 			user.wsServer.unregister <- user
-		case MessageAction:
+		case Messaging:
 			user.wsServer.broadcast <- &msg
 		}
 	}

@@ -7,11 +7,11 @@ import (
 )
 
 type Config struct {
+	ServerAddress        string        `mapstructure:"SERVER_ADDRESS"`
 	DBDriver             string        `mapstructure:"DB_DRIVER"`
 	DBUser               string        `mapstructure:"DB_USER"`
 	DBPassword           string        `mapstructure:"DB_PASSWORD"`
 	DBSource             string        `mapstructure:"DB_SOURCE"`
-	ServerAddress        string        `mapstructure:"SERVER_ADDRESS"`
 	TokenSymmetricKey    string        `mapstructure:"TOKEN_SYMMETRIC_KEY"`
 	AccessTokenDuration  time.Duration `mapstructure:"ACCESS_TOKEN_DURATION"`
 	RefreshTokenDuration time.Duration `mapstructure:"REFRESH_TOKEN_DURATION"`
@@ -20,6 +20,7 @@ type Config struct {
 	SenderPassword       string `mapstructure:"SENDER_PASSWORD"`
 	SMTPHost             string `mapstructure:"SMTP_HOST"`
 	SMTPPort             string `mapstructure:"SMTP_PORT"`
+	RedisURL             string `mapstructure:"REDIS_URL"`
 }
 
 func LoadConfig(path string) (Config, error) {
