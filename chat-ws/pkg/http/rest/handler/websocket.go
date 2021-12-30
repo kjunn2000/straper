@@ -5,10 +5,8 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
-	"github.com/kjunn2000/straper/chat-ws/pkg/domain/auth"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/chatting"
 	"github.com/kjunn2000/straper/chat-ws/pkg/http/rest"
-	"github.com/kjunn2000/straper/chat-ws/pkg/http/rest/middleware"
 	"go.uber.org/zap"
 )
 
@@ -20,29 +18,24 @@ var Upgrader websocket.Upgrader = websocket.Upgrader{
 
 func (server *Server) SetUpWebsocketRouter(mr *mux.Router, cs chatting.Service) {
 	cr := mr.PathPrefix("/protected").Subrouter()
-	cr.HandleFunc("/ws", server.HandleUpgrade(cs))
-	cr.Use(middleware.TokenVerifier(server.tokenMaker))
+	cr.HandleFunc("/ws/{userId}", server.HandleUpgrade(cs))
 }
 
 func (server *Server) HandleUpgrade(cs chatting.Service) func(http.ResponseWriter, *http.Request) {
 	return func(rw http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		userId, ok := vars["userId"]
+		if !ok {
+			rest.AddResponseToResponseWritter(rw, nil, "user.id.not.found")
+			return
+		}
 		conn, err := Upgrader.Upgrade(rw, r, nil)
 		if err != nil {
 			server.log.Warn("Cannot upgrade to websocket connection.", zap.Error(err))
 			rest.AddResponseToResponseWritter(rw, nil, err.Error())
 			return
 		}
-		payloadVal := r.Context().Value(middleware.TokenPayload{})
-		if payloadVal == nil {
-			server.log.Warn("Cannot get payload data.")
-			return
-		}
-		payload, ok := payloadVal.(*auth.Payload)
-		if !ok {
-			server.log.Warn("Cannot cast to payload struct.")
-			return
-		}
-		cs.SetUpUserConnection(r.Context(), payload.UserId, conn)
-		server.log.Info("Successful open websocket connection.", zap.String("user_id", payload.UserId))
+		cs.SetUpUserConnection(r.Context(), userId, conn)
+		server.log.Info("Successful open websocket connection.", zap.String("user_id", userId))
 	}
 }

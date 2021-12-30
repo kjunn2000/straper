@@ -58,4 +58,7 @@ type Querier interface {
 	UpdateChannel(ctx context.Context, channel editing.Channel) error
 	DeleteChannel(ctx context.Context, channelId string) error
 	RemoveUserFromChannel(ctx context.Context, channelId string, userId string) error
+
+	// message
+	CreateMessage(ctx context.Context, message *chatting.Message) error
 }

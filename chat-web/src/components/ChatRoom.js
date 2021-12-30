@@ -1,26 +1,26 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import ChatInput from "./ChatInput";
 import Message from "./Message";
 import useWorkspaceStore from "../store/workspaceStore"
+import {ReactComponent as Text} from "../asset/img/text.svg"
+import useMessageStore from "../store/messageStore";
 
 const ChatRoom = () => {
-  const currChannel = useWorkspaceStore((state) => state.currChannel);
 
-  const [msgs, setMsgs] = useState([
-    {
-      messasge_id: "M00001",
-      username: "Juoann",
-      content: "Are you hungry ?",
-    },
-    {
-      messasge_id: "M00002",
-      username: "King King",
-      content: "Yup, I am hungry now.",
-    },
-  ]);
+  const currChannel = useWorkspaceStore((state) => state.currChannel);
+  const msgs = useMessageStore((state) => state.messages);
+
+  const emptyMessage = (
+    <div className="flex flex-col items-center p-3">
+      <span className="pb-5 text-white font-semibold">
+        START THE CONVERSATION
+      </span>
+      <Text/>
+    </div>
+  )
 
   const loadMessages = msgs.map((msg) => (
-    <Message key={msg.messasge_id} msg={msg} />
+    <Message key={msg.message_id} msg={msg} />
   ));
 
   return (
@@ -33,7 +33,9 @@ const ChatRoom = () => {
           # {currChannel.channel_name}
         </div>
         <div className="flex flex-col h-full justify-between">
-          <div>{loadMessages}</div>
+          {
+            msgs.length == 0 ? emptyMessage : <div>{loadMessages}</div>
+          }
           <div className="p-3 w-full flex">
             <ChatInput />
           </div>

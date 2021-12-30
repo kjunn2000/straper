@@ -34,6 +34,7 @@ func (user *User) readMsg(ctx context.Context, log *zap.Logger) {
 		err := user.conn.ReadJSON(&msg)
 		log.Info("Received message from user id :", zap.String("user_id", user.UserId))
 		if err != nil {
+			log.Warn("Receive error.", zap.Error(err))
 			break
 		}
 		switch msg.Type {

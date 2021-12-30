@@ -10,6 +10,8 @@ import "./login.scss";
 import api from "../axios/api";
 import SimpleDialog from "../components/dialog/SimpleDialog";
 import { fetchWorkspaceData, redirectToLatestWorkspace } from "../service/workspace";
+import { connect } from "../service/websocket";
+import useMessageStore from "../store/messageStore";
 
 const Login = ({ location }) => {
   const {
@@ -22,7 +24,6 @@ const Login = ({ location }) => {
 
   const setAccessToken = useAuthStore((state) => state.setAccessToken);
   const setIdentity = useIdentifyStore((state) => state.setIdentity);
-
 
   const [errMsg, setErrMsg] = useState("");
   const [showTimeoutDialog, setShowTimeoutDialog] = useState(false);

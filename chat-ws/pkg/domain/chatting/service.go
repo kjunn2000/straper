@@ -3,8 +3,10 @@ package chatting
 import (
 	"context"
 	"encoding/json"
+	"time"
 
 	"github.com/go-redis/redis/v8"
+	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"go.uber.org/zap"
 )
@@ -50,8 +52,11 @@ func (s *service) SetUpWSServer(ctx context.Context) error {
 			case user := <-s.wsServer.unregister:
 				s.handleUnregister(ctx, user.UserId)
 			case msg := <-s.wsServer.broadcast:
-				err := s.publishPubSub(ctx, msg)
+				newMsg, err := s.saveMessage(ctx, msg)
 				if err != nil {
+					return err
+				}
+				if err := s.publishPubSub(ctx, newMsg); err != nil {
 					return err
 				}
 			}
@@ -84,11 +89,7 @@ func (s *service) handleBroadcast(ctx context.Context, msg *Message) error {
 		if !ok {
 			continue
 		}
-		encodeMsg, err := msg.Encode()
-		if err != nil {
-			return err
-		}
-		err = s.broadcastMessage(ctx, u.UserId, u.conn, encodeMsg)
+		err = s.broadcastMessage(ctx, u.UserId, u.conn, msg)
 		if err != nil {
 			return err
 		}
@@ -96,7 +97,7 @@ func (s *service) handleBroadcast(ctx context.Context, msg *Message) error {
 	return nil
 }
 
-func (s *service) broadcastMessage(ctx context.Context, userId string, conn *websocket.Conn, msg []byte) error {
+func (s *service) broadcastMessage(ctx context.Context, userId string, conn *websocket.Conn, msg *Message) error {
 	err := conn.WriteJSON(msg)
 	if err != nil {
 		s.log.Info("Unable to write json message.")
@@ -104,6 +105,19 @@ func (s *service) broadcastMessage(ctx context.Context, userId string, conn *web
 	}
 	s.log.Info("Sent message to user id : ", zap.String("user_id", userId))
 	return nil
+}
+
+func (s *service) saveMessage(ctx context.Context, msg *Message) (*Message, error) {
+	messageId, err := uuid.NewRandom()
+	if err != nil {
+		return &Message{}, err
+	}
+	msg.MessageId = messageId.String()
+	msg.CreatedDate = time.Now()
+	if err := s.store.CreateMessage(ctx, msg); err != nil {
+		return &Message{}, err
+	}
+	return msg, nil
 }
 
 func (s *service) subscribePubSub(ctx context.Context) error {
