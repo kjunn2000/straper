@@ -2,7 +2,9 @@ package chatting
 
 import (
 	"context"
+	"database/sql"
 	"encoding/json"
+	"errors"
 	"time"
 
 	"github.com/go-redis/redis/v8"
@@ -19,6 +21,7 @@ var (
 type Service interface {
 	SetUpWSServer(ctx context.Context) error
 	SetUpUserConnection(ctx context.Context, userId string, conn *websocket.Conn)
+	GetChannelMessages(ctx context.Context, channelId string, limit, offset uint64) ([]Message, error)
 }
 
 type PubSub interface {
@@ -149,4 +152,14 @@ func (s *service) publishPubSub(ctx context.Context, msg *Message) error {
 		return err
 	}
 	return nil
+}
+
+func (s *service) GetChannelMessages(ctx context.Context, channelId string, limit, offset uint64) ([]Message, error) {
+	msgs, err := s.store.GetChannelMessages(ctx, channelId, limit, offset)
+	if err == sql.ErrNoRows {
+		return []Message{}, errors.New("invalid.channel.id")
+	} else if err != nil {
+		return []Message{}, err
+	}
+	return msgs, nil
 }

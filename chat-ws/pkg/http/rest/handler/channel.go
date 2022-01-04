@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/auth"
@@ -23,6 +24,7 @@ func (server *Server) SetUpChannelRouter(mr *mux.Router, as adding.Service, ls l
 	cr.HandleFunc("/update", server.UpdateChannel(es)).Methods("POST")
 	cr.HandleFunc("/delete/{channel_id}", server.DeleteChannel(ds)).Methods("POST")
 	cr.HandleFunc("/leave/{channel_id}", server.LeaveChannel(ds)).Methods("POST")
+	cr.HandleFunc("/{channel_id}/messages", server.GetChannelMessages(cs)).Methods("GET")
 	cr.Use(middleware.TokenVerifier(server.tokenMaker))
 }
 
@@ -166,5 +168,32 @@ func (server *Server) LeaveChannel(ds deleting.Service) func(w http.ResponseWrit
 			return
 		}
 		rest.AddResponseToResponseWritter(w, nil, "")
+	}
+}
+
+func (server *Server) GetChannelMessages(cs chatting.Service) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		channelId, ok := vars["channel_id"]
+		if !ok {
+			rest.AddResponseToResponseWritter(w, nil, "channel.id.not.found")
+			return
+		}
+		limit, err := strconv.ParseUint(r.URL.Query().Get("limit"), 10, 64)
+		if err != nil {
+			rest.AddResponseToResponseWritter(w, nil, "invalid.limit")
+			return
+		}
+		offset, err := strconv.ParseUint(r.URL.Query().Get("offset"), 10, 64)
+		if err != nil {
+			rest.AddResponseToResponseWritter(w, nil, "invalid.offset")
+			return
+		}
+		msgs, err := cs.GetChannelMessages(r.Context(), channelId, limit, offset)
+		if err != nil {
+			rest.AddResponseToResponseWritter(w, nil, err.Error())
+			return
+		}
+		rest.AddResponseToResponseWritter(w, msgs, "")
 	}
 }

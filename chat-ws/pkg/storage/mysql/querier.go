@@ -61,4 +61,5 @@ type Querier interface {
 
 	// message
 	CreateMessage(ctx context.Context, message *chatting.Message) error
+	GetChannelMessages(ctx context.Context, channelId string, limit, offset uint64) ([]chatting.Message, error)
 }

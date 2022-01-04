@@ -3,7 +3,7 @@ import { sendMsg } from "../service/websocket";
 import useIdentifyStore from "../store/identityStore";
 import useWorkspaceStore from "../store/workspaceStore";
 
-const ChatInput = () => {
+const ChatInput = ({ scrollToBottom }) => {
   const currChannel = useWorkspaceStore((state) => state.currChannel);
   const identity = useIdentifyStore((state) => state.identity);
 
@@ -20,12 +20,12 @@ const ChatInput = () => {
 
   const sendMessage = () => {
     const msg = inputRef.current.value;
-    console.log(msg);
     if (!msg || msg === "") {
       return;
     }
     sendMsg(currChannel.channel_id, identity.username, msg);
     inputRef.current.value = "";
+    scrollToBottom();
   };
 
   return (
