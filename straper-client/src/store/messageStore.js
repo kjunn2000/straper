@@ -6,19 +6,18 @@ const useMessageStore = create((set) => ({
   setMessages: (messages) => {
     setLocalStorage("messages", messages);
     set((state) => ({
-      messages: messages
+      messages: messages,
     }));
   },
   pushMessage: (message) => {
     set((state) => {
-      const newMessages = [...state.messages, message]
+      const newMessages = [...state.messages, message];
       setLocalStorage("messages", newMessages);
       return {
-        messages : newMessages
-      }
-    })
+        messages: newMessages,
+      };
+    });
   },
 }));
-
 
 export default useMessageStore;

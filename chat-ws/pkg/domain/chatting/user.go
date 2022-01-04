@@ -33,13 +33,18 @@ func (user *User) readMsg(ctx context.Context, log *zap.Logger) {
 		var msg Message
 		err := user.conn.ReadJSON(&msg)
 		log.Info("Received message from user id :", zap.String("user_id", user.UserId))
-		if err != nil {
+		if websocket.IsCloseError(err, 1000, 1001, 1005) {
+			log.Info("Websocket Conn Closed.", zap.String("user_id", user.UserId))
+			user.wsServer.unregister <- user
+			return
+		} else if err != nil {
 			log.Warn("Receive error.", zap.Error(err))
-			break
+			return
 		}
 		switch msg.Type {
 		case UserLeave:
 			user.wsServer.unregister <- user
+			return
 		case Messaging:
 			user.wsServer.broadcast <- &msg
 		}

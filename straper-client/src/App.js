@@ -17,6 +17,7 @@ import Workspace from "./page/Workspace";
 function App() {
   return (
     <div className="App">
+      <link href="/dist/output.css" rel="stylesheet"></link>
       <Router>
         <Switch>
           <UserAuthGuard
@@ -26,12 +27,15 @@ function App() {
           <UserAuthGuard path="/channel" component={Workspace} />
           <NoAuthGuard path="/login" component={Login} />
           <NoAuthGuard path="/register" component={Register} />
-          <NoAuthGuard path="/reset-password" component={ResetPasswordRequest} />
+          <NoAuthGuard
+            path="/reset-password"
+            component={ResetPasswordRequest}
+          />
           <Route path="/account/opening/verify">
             <EmailVerify />
           </Route>
           <Route path="/account/password/update">
-            <ResetPassword/>
+            <ResetPassword />
           </Route>
           <Route path="/">
             <Redirect to="/login" />
