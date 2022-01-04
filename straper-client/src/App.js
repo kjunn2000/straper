@@ -17,7 +17,6 @@ import Workspace from "./page/Workspace";
 function App() {
   return (
     <div className="App">
-      <link href="/dist/output.css" rel="stylesheet"></link>
       <Router>
         <Switch>
           <UserAuthGuard

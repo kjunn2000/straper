@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import { sendMsg } from "../service/websocket";
 import useIdentifyStore from "../store/identityStore";
 import useWorkspaceStore from "../store/workspaceStore";
@@ -7,18 +7,25 @@ const ChatInput = () => {
   const currChannel = useWorkspaceStore((state) => state.currChannel);
   const identity = useIdentifyStore((state) => state.identity);
 
+  const inputRef = useRef(null);
+
   const defaultPlaceHolder = "Message #" + currChannel?.channel_name;
 
   const handleKeyDown = (event) => {
     if (event.key !== "Enter") {
       return;
     }
-    sendMessage(event);
+    sendMessage();
   };
 
-  const sendMessage = (event) => {
-    sendMsg(currChannel.channel_id, identity.username, event.target.value);
-    event.target.value = "";
+  const sendMessage = () => {
+    const msg = inputRef.current.value;
+    console.log(msg);
+    if (!msg || msg === "") {
+      return;
+    }
+    sendMsg(currChannel.channel_id, identity.username, msg);
+    inputRef.current.value = "";
   };
 
   return (
@@ -26,7 +33,8 @@ const ChatInput = () => {
       <div className="p-3 w-full flex">
         <div className="bg-gray-800 bg-opacity-40 rounded-lg w-full">
           <input
-            className="bg-transparent p-3 w-full text-white"
+            ref={inputRef}
+            className="bg-transparent p-3 w-full text-white focus:outline-none"
             placeholder={defaultPlaceHolder}
             onKeyDown={(e) => handleKeyDown(e)}
           />
@@ -50,7 +58,7 @@ const ChatInput = () => {
         <button
           type="button"
           className="inline-flex items-center justify-center rounded-full h-12 w-12 transition duration-500 ease-in-out text-white bg-indigo-500 hover:bg-indigo-400 focus:outline-none"
-          onClick={(e) => sendMsg(e)}
+          onClick={() => sendMessage()}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
