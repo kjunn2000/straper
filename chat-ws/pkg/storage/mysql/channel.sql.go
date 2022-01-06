@@ -2,6 +2,7 @@ package mysql
 
 import (
 	"context"
+	"time"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/chatting"
@@ -27,9 +28,9 @@ func (q *Queries) CreateChannel(ctx context.Context, channel adding.Channel) err
 }
 
 func (q *Queries) AddUserToChannel(ctx context.Context, channelId string, userIdList []string) error {
-	sqlBuilder := sq.Insert("channel_user").Columns("channel_id", "user_id")
+	sqlBuilder := sq.Insert("channel_user").Columns("channel_id", "user_id", "last_accessed")
 	for _, id := range userIdList {
-		sqlBuilder = sqlBuilder.Values(channelId, id)
+		sqlBuilder = sqlBuilder.Values(channelId, id, time.Now())
 	}
 	sql, args, err := sqlBuilder.ToSql()
 	if err != nil {
@@ -61,7 +62,7 @@ func (q *Queries) GetChannelByChannelId(ctx context.Context, channelId string) (
 }
 
 func (q *Queries) GetChannelsByUserId(ctx context.Context, userId string) ([]listing.Channel, error) {
-	sql, args, err := sq.Select("channel.channel_id, channel_name, workspace_id, creator_id,created_date").
+	sql, args, err := sq.Select("channel.channel_id, channel_name, workspace_id, creator_id,created_date, cu.last_accessed").
 		From("channel").
 		InnerJoin("channel_user as cu on channel.channel_id = cu.channel_id").
 		Where(sq.Eq{"cu.user_id": userId}).

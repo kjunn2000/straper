@@ -21,7 +21,7 @@ var (
 type Service interface {
 	SetUpWSServer(ctx context.Context) error
 	SetUpUserConnection(ctx context.Context, userId string, conn *websocket.Conn)
-	GetChannelMessages(ctx context.Context, channelId string, limit, offset uint64) ([]Message, error)
+	GetChannelMessages(ctx context.Context, channelId string, userId string, limit, offset uint64) ([]Message, error)
 }
 
 type PubSub interface {
@@ -154,11 +154,14 @@ func (s *service) publishPubSub(ctx context.Context, msg *Message) error {
 	return nil
 }
 
-func (s *service) GetChannelMessages(ctx context.Context, channelId string, limit, offset uint64) ([]Message, error) {
+func (s *service) GetChannelMessages(ctx context.Context, channelId string, userId string, limit, offset uint64) ([]Message, error) {
 	msgs, err := s.store.GetChannelMessages(ctx, channelId, limit, offset)
 	if err == sql.ErrNoRows {
 		return []Message{}, errors.New("invalid.channel.id")
 	} else if err != nil {
+		return []Message{}, err
+	}
+	if err = s.store.UpdateChannelAccessTime(ctx, channelId, userId); err != nil {
 		return []Message{}, err
 	}
 	return msgs, nil

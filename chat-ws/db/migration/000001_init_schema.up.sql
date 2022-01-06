@@ -58,6 +58,7 @@ CREATE TABLE `channel` (
 CREATE TABLE `channel_user` (
   `channel_id` CHAR(36),
   `user_id` VARCHAR(255),
+  `last_accessed` DATETIME NOT NULL DEFAULT (now()),
   PRIMARY KEY (`channel_id`, `user_id`)
 );
 

@@ -18,6 +18,9 @@ const ChatRoom = () => {
   const messagesRef = useRef(null);
   const messagesEndRef = useRef(null);
 
+  const [seenMsgs, setSeenMsgs] = useState([]);
+  const [unSeenMsgs, setUnSeenMsgs] = useState([]);
+
   useEffect(() => {
     setOffset(0);
     setIsTop(false);
@@ -25,7 +28,7 @@ const ChatRoom = () => {
   }, [currChannel]);
 
   const fetchMessages = (firstTime, limit, offset) => {
-    if (isTop) {
+    if (isTop && !firstTime) {
       return;
     }
     api
@@ -34,16 +37,25 @@ const ChatRoom = () => {
       )
       .then((res) => {
         const fetchedData = res.data.Data;
-        if (fetchedData.length == 0) {
+        if (fetchedData.length == 0 && !firstTime) {
           setIsTop(true);
           return;
-        }
-        if (firstTime) {
+        } else if (firstTime) {
           clearMessages();
+          setSeenMsgs([]);
+          setUnSeenMsgs([]);
         }
-        pushMessages(res.data.Data);
+        const data = res.data.Data;
+        pushMessages(data);
+        splitSeenMsgs(data);
         setOffset((offset) => offset + 25);
       });
+  };
+
+  const splitSeenMsgs = (msgs) => {
+    var date = new Date(currChannel.last_accessed);
+    setSeenMsgs(msgs.filter((msg) => new Date(msg.created_date) < date));
+    setUnSeenMsgs(msgs.filter((msg) => new Date(msg.created_date) >= date));
   };
 
   const handleScroll = () => {
@@ -61,10 +73,11 @@ const ChatRoom = () => {
     </div>
   );
 
-  const loadMessages = msgs
-    .slice(0)
-    .reverse()
-    .map((msg) => <Message key={msg.message_id} msg={msg} />);
+  const loadMessages = (msgs) =>
+    msgs
+      .slice(0)
+      .reverse()
+      .map((msg) => <Message key={msg.message_id} msg={msg} />);
 
   const scrollToBottom = () => {
     console.log("execute...");
@@ -100,7 +113,9 @@ const ChatRoom = () => {
             ref={messagesRef}
             onScroll={handleScroll}
           >
-            {loadMessages}
+            {loadMessages(seenMsgs)}
+            <div className="text-center text-gray-300">NEW MESSAGES</div>
+            {loadMessages(unSeenMsgs)}
             <div ref={messagesEndRef} />
           </div>
         )}

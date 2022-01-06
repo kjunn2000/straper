@@ -5,7 +5,8 @@ const useWorkspaceStore = create((set) => ({
   workspaces: getLocalStorage("workspaces") || [],
   currWorkspace: getLocalStorage("currWorkspace") || {},
   currChannel: getLocalStorage("currChannel") || {},
-  selectedChannelIds: new Map(getLocalStorage("selectedChannelIds")) || new Map(),
+  selectedChannelIds:
+    new Map(getLocalStorage("selectedChannelIds")) || new Map(),
   setWorkspaces: (workspaces) => {
     set((state) => {
       setLocalStorage("workspaces", workspaces);
@@ -47,26 +48,28 @@ const useWorkspaceStore = create((set) => ({
   },
   addChannelToWorkspace: (workspaceId, channel) => {
     set((state) => {
-      const workspaces = state.workspaces.map(workspace=> {
-        if (workspace.workspace_id == workspaceId){
-          workspace.channel_list.push(channel)
+      const workspaces = state.workspaces.map((workspace) => {
+        if (workspace.workspace_id == workspaceId) {
+          workspace.channel_list.push(channel);
         }
         return workspace;
-      })
+      });
       setLocalStorage("workspaces", workspaces);
-      return { workspaces: workspaces};
+      return { workspaces: workspaces };
     });
   },
   deleteChannelFromWorkspace: (channelId) => {
     set((state) => {
-      const workspaces = state.workspaces.map(workspace=> {
-        if (workspace.workspace_id == state.currWorkspace.workspace_id){
-          workspace.channel_list = workspace.channel_list.filter(channel => channel.channel_id != channelId);
+      const workspaces = state.workspaces.map((workspace) => {
+        if (workspace.workspace_id == state.currWorkspace.workspace_id) {
+          workspace.channel_list = workspace.channel_list.filter(
+            (channel) => channel.channel_id != channelId
+          );
         }
         return workspace;
-      })
+      });
       setLocalStorage("workspaces", workspaces);
-      return { workspaces: workspaces};
+      return { workspaces: workspaces };
     });
   },
   setCurrChannel: (channelId) => {
@@ -91,12 +94,18 @@ const useWorkspaceStore = create((set) => ({
   setDefaultSelectedChannelIds: () => {
     set((state) => {
       const newSelectedChannelIds = state.selectedChannelIds;
-      state.workspaces.map(workspace => {
-        if (workspace.channel_list.length > 0)  {
-          newSelectedChannelIds.set(workspace.workspace_id, workspace.channel_list[0].channel_id);
+      state.workspaces.map((workspace) => {
+        if (workspace.channel_list.length > 0) {
+          newSelectedChannelIds.set(
+            workspace.workspace_id,
+            workspace.channel_list[0].channel_id
+          );
         }
-      })
-      setLocalStorage("selectedChannelIds", Array.from(newSelectedChannelIds.entries));
+      });
+      setLocalStorage(
+        "selectedChannelIds",
+        Array.from(newSelectedChannelIds.entries)
+      );
       return { selectedChannelIds: newSelectedChannelIds };
     });
   },
@@ -104,7 +113,10 @@ const useWorkspaceStore = create((set) => ({
     set((state) => {
       const newSelectedChannelIds = state.selectedChannelIds;
       newSelectedChannelIds.set(workspaceId, channelId);
-      setLocalStorage("selectedChannelIds", Array.from(newSelectedChannelIds.entries));
+      setLocalStorage(
+        "selectedChannelIds",
+        Array.from(newSelectedChannelIds.entries)
+      );
       return { selectedChannelIds: newSelectedChannelIds };
     });
   },
@@ -112,7 +124,10 @@ const useWorkspaceStore = create((set) => ({
     set((state) => {
       const newSelectedChannelIds = state.selectedChannelIds;
       newSelectedChannelIds.delete(workspaceId);
-      setLocalStorage("selectedChannelIds", Array.from(newSelectedChannelIds.entries));
+      setLocalStorage(
+        "selectedChannelIds",
+        Array.from(newSelectedChannelIds.entries)
+      );
       return { selectedChannelIds: newSelectedChannelIds };
     });
   },
@@ -122,13 +137,27 @@ const useWorkspaceStore = create((set) => ({
       workspaces: [],
       currWorkspace: {},
       currChannel: {},
-      selectedChannelIds: new Map,
+      selectedChannelIds: new Map(),
     }));
-    setLocalStorage("workspaces",[]);
-    setLocalStorage("currWorkspace",{});
-    setLocalStorage("currChannel",{});
-    setLocalStorage("selectedChannelIds",[]);
+    setLocalStorage("workspaces", []);
+    setLocalStorage("currWorkspace", {});
+    setLocalStorage("currChannel", {});
+    setLocalStorage("selectedChannelIds", []);
   },
+
+  // updateLastAccess: (workspaceId, channelId) => {
+  //   set((state) => {
+  //     state.workspaces.map((workspace) => {
+  //       if (workspace.workspace_id == workspaceId) {
+  //         workspace.channel_list.map((channel) => {
+  //           if (channel.channel_id == channelId) {
+  //             channel.last_accessed = new Date().toString();
+  //           }
+  //         });
+  //       }
+  //     });
+  //   });
+  // },
 }));
 
 export default useWorkspaceStore;

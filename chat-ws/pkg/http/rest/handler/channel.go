@@ -189,7 +189,12 @@ func (server *Server) GetChannelMessages(cs chatting.Service) func(w http.Respon
 			rest.AddResponseToResponseWritter(w, nil, "invalid.offset")
 			return
 		}
-		msgs, err := cs.GetChannelMessages(r.Context(), channelId, limit, offset)
+		userId, err := server.getUserIdFromToken(r)
+		if err != nil {
+			rest.AddResponseToResponseWritter(w, nil, err.Error())
+			return
+		}
+		msgs, err := cs.GetChannelMessages(r.Context(), channelId, userId, limit, offset)
 		if err != nil {
 			rest.AddResponseToResponseWritter(w, nil, err.Error())
 			return

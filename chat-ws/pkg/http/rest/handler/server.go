@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"time"
 
@@ -17,6 +18,7 @@ import (
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/deleting"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/editing"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/listing"
+	"github.com/kjunn2000/straper/chat-ws/pkg/http/rest/middleware"
 	"go.uber.org/zap"
 
 	rdb "github.com/kjunn2000/straper/chat-ws/pkg/redis"
@@ -111,4 +113,16 @@ func getCORSHandler() func(http.Handler) http.Handler {
 		handlers.AllowedHeaders([]string{"X-Requested-With", "Origin", "Content-Type", "Accept", "Authorization"}),
 		handlers.AllowCredentials(),
 	)
+}
+
+func (server *Server) getUserIdFromToken(r *http.Request) (string, error) {
+	payloadVal := r.Context().Value(middleware.TokenPayload{})
+	if payloadVal == nil {
+		return "", errors.New("payload.not.found.in.context")
+	}
+	payload, ok := payloadVal.(*auth.Payload)
+	if !ok {
+		return "", errors.New("invalid.payload.in.context")
+	}
+	return payload.UserId, nil
 }
