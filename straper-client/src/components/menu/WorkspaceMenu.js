@@ -2,27 +2,36 @@ import { Menu, Transition } from "@headlessui/react";
 import { Fragment, useEffect, useState } from "react";
 import { AiFillCaretDown, AiFillDelete, AiOutlineLink } from "react-icons/ai";
 import { FiSettings } from "react-icons/fi";
-import useIdentifyStore from "../store/identityStore";
-import useWorkspaceStore from "../store/workspaceStore";
-import api from "../axios/api";
-import MenuItem from "./Menu/MenuItem";
+import useIdentifyStore from "../../store/identityStore";
+import useWorkspaceStore from "../../store/workspaceStore";
+import api from "../../axios/api";
+import MenuItem from "./MenuItem";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
-import ActionDialog from "./dialog/ActionDialog";
-import SimpleDialog from "./dialog/SimpleDialog";
-import { copyTextToClipboard } from "../service/navigator";
+import ActionDialog from "../dialog/ActionDialog";
+import SimpleDialog from "../dialog/SimpleDialog";
+import { copyTextToClipboard } from "../../service/navigator";
 
 export default function WorkspaceMenu() {
   const [isCreator, setIsCreator] = useState(false);
   const identity = useIdentifyStore((state) => state.identity);
   const workspace = useWorkspaceStore((state) => state.currWorkspace);
-  const deleteWorkspaceAtStore = useWorkspaceStore((state) => state.deleteWorkspace);
+  const deleteWorkspaceAtStore = useWorkspaceStore(
+    (state) => state.deleteWorkspace
+  );
   const setCurrWorkspace = useWorkspaceStore((state) => state.setCurrWorkspace);
   const setCurrChannel = useWorkspaceStore((state) => state.setCurrChannel);
-  const selectedChannelIds = useWorkspaceStore((state) => state.selectedChannelIds);
-  const deleteSelectedChannelIds = useWorkspaceStore((state) => state.deleteSelectedChannelIds);
-  const clearWorkspaceState = useWorkspaceStore((state) => state.clearWorkspaceState);
+  const selectedChannelIds = useWorkspaceStore(
+    (state) => state.selectedChannelIds
+  );
+  const deleteSelectedChannelIds = useWorkspaceStore(
+    (state) => state.deleteSelectedChannelIds
+  );
+  const clearWorkspaceState = useWorkspaceStore(
+    (state) => state.clearWorkspaceState
+  );
   const [deleteWarningDialogOpen, setDeleteWarningDialogOpen] = useState(false);
-  const [successCopyLinkDialogOpen, setSuccessCopyLinkDialogOpen] = useState(false);
+  const [successCopyLinkDialogOpen, setSuccessCopyLinkDialogOpen] =
+    useState(false);
 
   const history = useHistory();
 
@@ -55,23 +64,23 @@ export default function WorkspaceMenu() {
   };
 
   const updateWorkspaceState = () => {
-      deleteWorkspaceAtStore(workspace.workspace_id);
-      deleteSelectedChannelIds(workspace.workspace_id);
-      const selectedIds = [...selectedChannelIds];
-      if (selectedIds.length > 0) {
-        setCurrWorkspace(selectedIds[0][0]);
-        setCurrChannel(selectedIds[0][1]);
-        history.push(`/channel/${selectedIds[0][0]}/${selectedIds[0][1]}`);
-      }else {
-        clearWorkspaceState();
-        history.push("/channel");
-      }
-  }
+    deleteWorkspaceAtStore(workspace.workspace_id);
+    deleteSelectedChannelIds(workspace.workspace_id);
+    const selectedIds = [...selectedChannelIds];
+    if (selectedIds.length > 0) {
+      setCurrWorkspace(selectedIds[0][0]);
+      setCurrChannel(selectedIds[0][1]);
+      history.push(`/channel/${selectedIds[0][0]}/${selectedIds[0][1]}`);
+    } else {
+      clearWorkspaceState();
+      history.push("/channel");
+    }
+  };
 
   const copyLinkToClipboard = () => {
     copyTextToClipboard(workspace.workspace_id);
     setSuccessCopyLinkDialogOpen(true);
-  }
+  };
 
   return (
     <div>
@@ -99,10 +108,16 @@ export default function WorkspaceMenu() {
           <Menu.Items className="absolute left-0 w-56 m-5 p-2 origin-top-right bg-black divide-y divide-gray-100 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
             <div className="px-1 py-1">
               <MenuItem content="Workspace settings" icon={FiSettings} />
-              <MenuItem content="Invitation link" icon={AiOutlineLink} click={()=>{copyLinkToClipboard()}} />
+              <MenuItem
+                content="Invitation link"
+                icon={AiOutlineLink}
+                click={() => {
+                  copyLinkToClipboard();
+                }}
+              />
               <MenuItem
                 content={isCreator ? "Delete workspace" : "Leave workspace"}
-                click={()=>setDeleteWarningDialogOpen(true)}
+                click={() => setDeleteWarningDialogOpen(true)}
                 icon={AiFillDelete}
               />
             </div>

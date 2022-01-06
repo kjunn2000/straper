@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
 import ChatInput from "./ChatInput";
 import Message from "./Message";
-import useWorkspaceStore from "../store/workspaceStore";
-import { ReactComponent as Text } from "../asset/img/text.svg";
-import useMessageStore from "../store/messageStore";
+import useWorkspaceStore from "../../store/workspaceStore";
+import { ReactComponent as Text } from "../../asset/img/text.svg";
+import useMessageStore from "../../store/messageStore";
 import { useRef } from "react/cjs/react.development";
-import api from "../axios/api";
+import api from "../../axios/api";
 
 const ChatRoom = () => {
   const [offset, setOffset] = useState(0);
@@ -113,9 +113,10 @@ const ChatRoom = () => {
             ref={messagesRef}
             onScroll={handleScroll}
           >
-            {loadMessages(seenMsgs)}
+            {/* {loadMessages(seenMsgs)}
             <div className="text-center text-gray-300">NEW MESSAGES</div>
-            {loadMessages(unSeenMsgs)}
+            {loadMessages(unSeenMsgs)} */}
+            {loadMessages(msgs)}
             <div ref={messagesEndRef} />
           </div>
         )}

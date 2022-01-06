@@ -11,7 +11,7 @@ import ActionDialog from "../dialog/ActionDialog";
 import AddDialog from "../dialog/AddDialog";
 import JoinDialog from "../dialog/JoinDialog";
 import SimpleDialog from "../dialog/SimpleDialog";
-import WorkspaceMenu from "../WorkspaceMenu";
+import WorkspaceMenu from "../menu/WorkspaceMenu";
 
 function ChannelSidebar() {
   const history = useHistory();

@@ -1,19 +1,23 @@
 import React, { useState } from "react";
-import SidebarIcon from "../SidebarIcon";
 import useWorkspaceStore from "../../store/workspaceStore";
 import { useHistory } from "react-router";
 import { logOut } from "../../service/logout";
 import AddDialog from "../dialog/AddDialog";
 import api from "../../axios/api";
 import JoinDialog from "../dialog/JoinDialog";
+import SidebarIcon from "./SidebarIcon";
 
 function WorkspaceSidebar() {
   const workspaces = useWorkspaceStore((state) => state.workspaces);
-  const selectedChannelIds = useWorkspaceStore((state) => state.selectedChannelIds);
+  const selectedChannelIds = useWorkspaceStore(
+    (state) => state.selectedChannelIds
+  );
   const addWorkspace = useWorkspaceStore((state) => state.addWorkspace);
   const setCurrWorkspace = useWorkspaceStore((state) => state.setCurrWorkspace);
   const setCurrChannel = useWorkspaceStore((state) => state.setCurrChannel);
-  const setSelectedChannelIds = useWorkspaceStore((state) => state.setSelectedChannelIds);
+  const setSelectedChannelIds = useWorkspaceStore(
+    (state) => state.setSelectedChannelIds
+  );
 
   const history = useHistory();
 
@@ -48,17 +52,19 @@ function WorkspaceSidebar() {
   };
 
   const joinNewWorkspace = async (data) => {
-    const res = await api.post(`/protected/workspace/join/${data?.workspace_id}`)
+    const res = await api.post(
+      `/protected/workspace/join/${data?.workspace_id}`
+    );
     if (res.data.Success) {
       updateNewWorkspace(res.data.Data);
       return;
-    }else {
+    } else {
       switch (res.data.ErrorMessage) {
         case "workspace.user.record.exist": {
-          return "You has been joined to this workspace."
+          return "You has been joined to this workspace.";
         }
         case "invalid.workspace.id": {
-          return "Invalid workspace id."
+          return "Invalid workspace id.";
         }
       }
     }
@@ -66,12 +72,12 @@ function WorkspaceSidebar() {
 
   const updateNewWorkspace = (newWorkspace) => {
     addWorkspace(newWorkspace);
-    setCurrWorkspace(newWorkspace.workspace_id)
-    const channelId = newWorkspace.channel_list[0].channel_id
-    setCurrChannel(channelId)
-    setSelectedChannelIds(newWorkspace.workspace_id, channelId)
-    history.push(`/channel/${newWorkspace.workspace_id}/${channelId}`)
-  }
+    setCurrWorkspace(newWorkspace.workspace_id);
+    const channelId = newWorkspace.channel_list[0].channel_id;
+    setCurrChannel(channelId);
+    setSelectedChannelIds(newWorkspace.workspace_id, channelId);
+    history.push(`/channel/${newWorkspace.workspace_id}/${channelId}`);
+  };
 
   return (
     <div>

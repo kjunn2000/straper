@@ -1,5 +1,5 @@
 import React from "react";
-import useIdentifyStore from "../store/identityStore";
+import useIdentifyStore from "../../store/identityStore";
 
 const Message = ({ msg }) => {
   const identity = useIdentifyStore((state) => state.identity);
