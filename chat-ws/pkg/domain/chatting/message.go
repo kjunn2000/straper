@@ -6,9 +6,10 @@ import (
 )
 
 const (
-	UserJoin  = "UserJoin"
-	UserLeave = "UserLeave"
-	Messaging = "Message"
+	UserJoin  = "USER_JOIN"
+	UserLeave = "USER_LEAVE"
+	Messaging = "MESSAGE"
+	File      = "FILE"
 )
 
 type Message struct {
@@ -17,6 +18,7 @@ type Message struct {
 	ChannelId   string    `json:"channel_id" db:"channel_id"`
 	CreatorName string    `json:"creator_name" db:"creator_name"`
 	Content     string    `json:"content" db:"content"`
+	File        []byte    `json:"file"`
 	CreatedDate time.Time `json:"created_date" db:"created_date"`
 }
 

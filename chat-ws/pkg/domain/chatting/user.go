@@ -45,7 +45,7 @@ func (user *User) readMsg(ctx context.Context, log *zap.Logger) {
 		case UserLeave:
 			user.wsServer.unregister <- user
 			return
-		case Messaging:
+		case Messaging, File:
 			user.wsServer.broadcast <- &msg
 		}
 	}

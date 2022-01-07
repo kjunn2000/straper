@@ -30,13 +30,17 @@ const connect = (cb) => {
   };
 };
 
-let sendMsg = (channelId, username, content) => {
+let sendMsg = (type, channelId, username, content) => {
   const payload = {
-    type: "Message",
+    type,
     channel_id: channelId,
     creator_name: username,
-    content,
   };
+  if (type === "Message") {
+    payload.content = content;
+  } else if (type === "File") {
+    payload.file = content;
+  }
   console.log("Sending msg...");
   socket.send(JSON.stringify(payload));
 };

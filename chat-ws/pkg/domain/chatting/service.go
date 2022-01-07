@@ -1,10 +1,13 @@
 package chatting
 
 import (
+	"bytes"
 	"context"
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"io/ioutil"
+	"net/http"
 	"time"
 
 	"github.com/go-redis/redis/v8"
@@ -27,6 +30,19 @@ type Service interface {
 type PubSub interface {
 	SubscribeToChannel(ctx context.Context, channelName string) <-chan *redis.Message
 	PublishToChannel(ctx context.Context, channelName string, payload []byte) error
+}
+
+type WeedMasterResponse struct {
+	Count     int    `json:"count"`
+	Fid       string `json:"fid"`
+	Url       string `json:"url"`
+	PublicUrl string `json:"publicUrl"`
+}
+
+type WeedVolumnResponse struct {
+	Name string `json:"name"`
+	Size int    `json:"size"`
+	ETag string `json:"eTag"`
 }
 
 type service struct {
@@ -117,10 +133,37 @@ func (s *service) saveMessage(ctx context.Context, msg *Message) (*Message, erro
 	}
 	msg.MessageId = messageId.String()
 	msg.CreatedDate = time.Now()
-	if err := s.store.CreateMessage(ctx, msg); err != nil {
-		return &Message{}, err
+	if msg.Type == Messaging {
+		if err := s.store.CreateMessage(ctx, msg); err != nil {
+			return &Message{}, err
+		}
+	} else if msg.Type == File {
+		fid, err := s.saveFile(ctx, msg.File)
+		if err != nil {
+			return &Message{}, err
+		}
+		msg.Content = fid
 	}
 	return msg, nil
+}
+
+func (s *service) saveFile(ctx context.Context, file []byte) (string, error) {
+	resp, err := http.Get("http://localhost:9333/dir/assign")
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+	var weedMasterResponse WeedMasterResponse
+	json.Unmarshal(body, &weedMasterResponse)
+	_, err = http.Post("http://"+weedMasterResponse.Url+"/"+weedMasterResponse.Fid, "multipart/form-data", bytes.NewReader(body))
+	if err != nil {
+		return "", err
+	}
+	return weedMasterResponse.Fid, nil
 }
 
 func (s *service) subscribePubSub(ctx context.Context) error {

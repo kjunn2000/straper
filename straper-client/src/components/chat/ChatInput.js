@@ -4,6 +4,7 @@ import useIdentifyStore from "../../store/identityStore";
 import useWorkspaceStore from "../../store/workspaceStore";
 import UploadButton from "../button/UploadButton";
 import { IoSendSharp } from "react-icons/io5";
+import { isEmpty } from "../../service/object";
 
 const ChatInput = ({ scrollToBottom }) => {
   const currChannel = useWorkspaceStore((state) => state.currChannel);
@@ -17,15 +18,17 @@ const ChatInput = ({ scrollToBottom }) => {
     if (event.key !== "Enter") {
       return;
     }
-    sendMessage();
+    sendMessage("MESSAGE", inputRef.current.value);
   };
 
-  const sendMessage = () => {
-    const msg = inputRef.current.value;
-    if (!msg || msg === "") {
+  const sendMessage = (type, msg) => {
+    if (type === "MESSAGE") {
+      msg = msg.trim();
+    }
+    if (!msg || msg === "" || isEmpty(msg)) {
       return;
     }
-    sendMsg(currChannel.channel_id, identity.username, msg);
+    sendMsg(type, currChannel.channel_id, identity.username, msg);
     inputRef.current.value = "";
     scrollToBottom();
   };
@@ -43,13 +46,11 @@ const ChatInput = ({ scrollToBottom }) => {
         </div>
       </div>
       <div className="absolute right-0 items-center inset-y-0 hidden sm:flex">
-        <UploadButton
-          handleFileAction={(fileUpload) => console.log(fileUpload)}
-        />
+        <UploadButton handleFileAction={(file) => sendMessage("FILE", file)} />
         <button
           type="button"
           className="inline-flex items-center justify-center rounded-full h-12 w-12 transition duration-500 ease-in-out text-white bg-indigo-500 hover:bg-indigo-400 focus:outline-none"
-          onClick={() => sendMessage()}
+          onClick={() => sendMessage("MESSAGE", inputRef.current.value)}
         >
           <IoSendSharp size="25" />
         </button>

@@ -4,7 +4,7 @@ import React, { useRef } from "react";
 import { useForm } from "react-hook-form";
 import { Fragment } from "react/cjs/react.production.min";
 
-const JoinDialog = ({ isOpen, close, toggleDialog, joinAction, type}) => {
+const JoinDialog = ({ isOpen, close, toggleDialog, joinAction, type }) => {
   const {
     register,
     handleSubmit,
@@ -27,11 +27,11 @@ const JoinDialog = ({ isOpen, close, toggleDialog, joinAction, type}) => {
 
   const executeJoinActoin = async (data) => {
     const errMsg = await joinAction(data);
-    if (!errMsg || errMsg == ""){
+    if (!errMsg || errMsg == "") {
       closeDialog();
       return;
     }
-    setError(type=="workspace" ? "workspace_id" : "channel_id",{
+    setError(type == "workspace" ? "workspace_id" : "channel_id", {
       type: "bad_request",
       message: errMsg,
     });
@@ -79,53 +79,53 @@ const JoinDialog = ({ isOpen, close, toggleDialog, joinAction, type}) => {
                 as="h3"
                 className="text-lg font-medium leading-6 text-gray-900"
               >
-                {type == "workspace" ?  "Join a Workspace" : "Join a Channel"}
+                {type == "workspace" ? "Join a Workspace" : "Join a Channel"}
               </Dialog.Title>
               <form className="mt-2" onSubmit={handleSubmit(executeJoinActoin)}>
                 <div className="self-center space-y-5">
                   <div>
-                    {
-                      type == "workspace" ? "Workspace ID" : "Channel ID"
-                    }
+                    {type == "workspace" ? "Workspace ID" : "Channel ID"}
                   </div>
-                  {
-                    type == "workspace" ? 
-                      <input
-                        className="bg-gray-200 p-2 w-full"
-                        {...register("workspace_id", {
-                          required: {
-                            value: true,
-                            message: "Workspace ID cannot be empty.",
-                          },
-                        })}
-                      /> :
-                      <input
-                        className="bg-gray-200 p-2 w-full"
-                        {...register("channel_id", {
-                          required: {
-                            value: true,
-                            message: "Channel ID cannot be empty.",
-                          },
-                        })}
-                      />
-                  }
+                  {type == "workspace" ? (
+                    <input
+                      className="bg-gray-200 p-2 w-full"
+                      {...register("workspace_id", {
+                        required: {
+                          value: true,
+                          message: "Workspace ID cannot be empty.",
+                        },
+                      })}
+                    />
+                  ) : (
+                    <input
+                      className="bg-gray-200 p-2 w-full"
+                      {...register("channel_id", {
+                        required: {
+                          value: true,
+                          message: "Channel ID cannot be empty.",
+                        },
+                      })}
+                    />
+                  )}
                 </div>
-                {type=="workspace" ? 
+                {type == "workspace" ? (
                   <ErrorMessage errors={errors} name="workspace_id" as="p" />
-                  :
+                ) : (
                   <ErrorMessage errors={errors} name="channel_id" as="p" />
-                }
+                )}
                 <div
                   className="text-indigo-500 self-center cursor-pointer hover:text-indigo-300"
                   onClick={toggle}
                 >
-                  {type == "workspace" ? "Create new workspace?" : "Create new channel?"}
+                  {type == "workspace"
+                    ? "Create new workspace?"
+                    : "Create new channel?"}
                 </div>
 
                 <div className="mt-4 flex justify-end">
                   <button
                     type="submit"
-                    className="inline-flex justify-center px-4 py-2 text-sm font-medium text-blue-900 bg-purple-300 border border-transparent rounded-md hover:bg-purple-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-purple-500"
+                    className="inline-flex justify-center px-4 py-2 text-sm font-medium text-white bg-indigo-500 border border-transparent rounded-md hover:bg-purple-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-purple-500"
                     ref={joinBtn}
                   >
                     Join
