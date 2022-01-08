@@ -42,7 +42,7 @@ const Message = ({ msg }) => {
                 : "rounded-bl-none bg-gray-500"
             }`}
           >
-            {msg.content}
+            {msg.type === "MESSAGE" ? msg.content : " oi "}
           </p>
           <span className="invisible text-gray-400 group-hover:visible transition duration-150">
             {convertToDateString(msg.created_date)}

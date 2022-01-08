@@ -81,10 +81,12 @@ const ChatRoom = () => {
 
   const scrollToBottom = () => {
     console.log("execute...");
-    messagesEndRef.current.scrollIntoView({
-      behavior: "smooth",
-      block: "end",
-    });
+    if (messagesEndRef) {
+      messagesEndRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "end",
+      });
+    }
   };
 
   return (

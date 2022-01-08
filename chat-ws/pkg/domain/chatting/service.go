@@ -133,16 +133,15 @@ func (s *service) saveMessage(ctx context.Context, msg *Message) (*Message, erro
 	}
 	msg.MessageId = messageId.String()
 	msg.CreatedDate = time.Now()
-	if msg.Type == Messaging {
-		if err := s.store.CreateMessage(ctx, msg); err != nil {
-			return &Message{}, err
-		}
-	} else if msg.Type == File {
+	if msg.Type == File {
 		fid, err := s.saveFile(ctx, msg.File)
 		if err != nil {
 			return &Message{}, err
 		}
 		msg.Content = fid
+	}
+	if err := s.store.CreateMessage(ctx, msg); err != nil {
+		return &Message{}, err
 	}
 	return msg, nil
 }

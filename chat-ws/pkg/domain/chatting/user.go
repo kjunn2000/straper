@@ -41,6 +41,7 @@ func (user *User) readMsg(ctx context.Context, log *zap.Logger) {
 			log.Warn("Receive error.", zap.Error(err))
 			return
 		}
+
 		switch msg.Type {
 		case UserLeave:
 			user.wsServer.unregister <- user
