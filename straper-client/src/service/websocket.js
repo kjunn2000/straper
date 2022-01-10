@@ -46,12 +46,9 @@ let sendMsg = async (type, channelId, username, content) => {
   } else if (type === "FILE") {
     console.log(content);
     const result = await getAsByteArray(content);
-    const fileMessage = {
-      file_name: content.name,
-      file_type: content.type,
-      bytes: Array.from(result),
-    };
-    payload.file = fileMessage;
+    payload.file_name = content.name;
+    payload.file_type = content.type;
+    payload.file_bytes = Array.from(result);
   }
   console.log("Sending msg...");
   console.log(payload);

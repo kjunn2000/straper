@@ -3,7 +3,6 @@ package handler
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
@@ -159,6 +158,5 @@ func (server *Server) UpdatePassword(as account.Service) func(http.ResponseWrite
 func validatePassword(fl validator.FieldLevel) bool {
 	password := fl.Field().String()
 	score := zxcvbn.PasswordStrength(password, []string{})
-	fmt.Println(score.Score)
 	return score.Score >= 2
 }

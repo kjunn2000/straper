@@ -13,14 +13,9 @@ const Message = ({ msg }) => {
 
   useEffect(() => {
     if (msg.type == "FILE") {
-      const msgFile = msg.file;
-
-      const blob = createBlobFile(
-        base64ToArray(msgFile.bytes),
-        msgFile.file_type
-      );
+      const blob = createBlobFile(base64ToArray(msg.file_bytes), msg.file_type);
       setFile({
-        ...msgFile,
+        ...msg,
         blob,
       });
     }

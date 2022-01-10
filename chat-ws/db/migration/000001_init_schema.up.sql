@@ -68,6 +68,8 @@ CREATE TABLE `message` (
   `channel_id` CHAR(36) NOT NULL,
   `creator_name` VARCHAR(255) NOT NULL,
   `content` LONGTEXT NOT NULL,
+  `file_name` VARCHAR(255),
+  `file_type` VARCHAR(255),
   `created_date` DATETIME NOT NULL DEFAULT (now())
 );
 

@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -199,6 +200,7 @@ func (server *Server) GetChannelMessages(cs chatting.Service) func(w http.Respon
 			rest.AddResponseToResponseWritter(w, nil, err.Error())
 			return
 		}
+		fmt.Println(msgs)
 		rest.AddResponseToResponseWritter(w, msgs, "")
 	}
 }

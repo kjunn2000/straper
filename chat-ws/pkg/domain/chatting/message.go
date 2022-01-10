@@ -13,19 +13,15 @@ const (
 )
 
 type Message struct {
-	MessageId   string      `json:"message_id" db:"message_id"`
-	Type        string      `json:"type" db:"type"`
-	ChannelId   string      `json:"channel_id" db:"channel_id"`
-	CreatorName string      `json:"creator_name" db:"creator_name"`
-	Content     string      `json:"content" db:"content"`
-	FileMessage FileMessage `json:"file"`
-	CreatedDate time.Time   `json:"created_date" db:"created_date"`
-}
-
-type FileMessage struct {
-	FileName string `json:"file_name"`
-	FileType string `json:"file_type"`
-	Bytes    []byte `json:"bytes"`
+	MessageId   string    `json:"message_id" db:"message_id"`
+	Type        string    `json:"type" db:"type"`
+	ChannelId   string    `json:"channel_id" db:"channel_id"`
+	CreatorName string    `json:"creator_name" db:"creator_name"`
+	Content     string    `json:"content" db:"content"`
+	FileName    string    `json:"file_name" db:"file_name"`
+	FileType    string    `json:"file_type" db:"file_type"`
+	FileBytes   []byte    `json:"file_bytes"`
+	CreatedDate time.Time `json:"created_date" db:"created_date"`
 }
 
 func (message *Message) Encode() ([]byte, error) {

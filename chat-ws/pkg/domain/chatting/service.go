@@ -6,7 +6,10 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"io"
 	"io/ioutil"
+	"mime/multipart"
 	"net/http"
 	"strings"
 	"time"
@@ -40,20 +43,26 @@ type WeedMasterResponse struct {
 	PublicUrl string `json:"publicUrl"`
 }
 
-type WeedVolumnResponse struct {
+type WeedVolumeResponse struct {
 	Name string `json:"name"`
 	Size int    `json:"size"`
 	ETag string `json:"eTag"`
 }
 
-type WeedVolumnLoopUpResponse struct {
-	VolumnId  string    `json:"volumnId"`
-	Locations Locations `json:"locations`
+type WeedVolumeLoopUpResponse struct {
+	VolumeOrFileId string     `json:"volumeOrFileId"`
+	Locations      []Location `json:"locations"`
 }
 
-type Locations struct {
-	PublicUrl string `json:"publicUrl"`
+type WeedUploadFileResponse struct {
+	Name string `json:"name"`
+	Size int    `json:"size"`
+	Etag string `json:"eTag"`
+}
+
+type Location struct {
 	Url       string `json:"url"`
+	PublicUrl string `json:"publicUrl"`
 }
 
 type service struct {
@@ -147,7 +156,7 @@ func (s *service) saveMessage(ctx context.Context, msg *Message) (*Message, erro
 	msg.MessageId = messageId.String()
 	msg.CreatedDate = time.Now()
 	if msg.Type == File {
-		fid, err := s.saveFile(ctx, msg.FileMessage)
+		fid, err := s.saveFile(ctx, msg.FileBytes)
 		if err != nil {
 			return &Message{}, err
 		}
@@ -159,7 +168,7 @@ func (s *service) saveMessage(ctx context.Context, msg *Message) (*Message, erro
 	return msg, nil
 }
 
-func (s *service) saveFile(ctx context.Context, file FileMessage) (string, error) {
+func (s *service) saveFile(ctx context.Context, fileBytes []byte) (string, error) {
 	resp, err := http.Get("http://localhost:9333/dir/assign")
 	if err != nil {
 		return "", err
@@ -171,15 +180,46 @@ func (s *service) saveFile(ctx context.Context, file FileMessage) (string, error
 	}
 	var weedMasterResponse WeedMasterResponse
 	json.Unmarshal(body, &weedMasterResponse)
-	fileBytes, err := json.Marshal(file)
 	if err != nil {
 		return "", err
 	}
-	_, err = http.Post("http://"+weedMasterResponse.Url+"/"+weedMasterResponse.Fid, "multipart/form-data", bytes.NewReader(fileBytes))
-	if err != nil {
+	fmt.Println(weedMasterResponse.Fid)
+	url := "http://" + weedMasterResponse.Url + "/" + weedMasterResponse.Fid
+	if err := s.SendMultiPartRequest(fileBytes, url); err != nil {
 		return "", err
 	}
 	return weedMasterResponse.Fid, nil
+}
+
+func (s *service) SendMultiPartRequest(fileBytes []byte, url string) error {
+	client := &http.Client{
+		Timeout: time.Second * 10,
+	}
+
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+	fw, err := writer.CreateFormField("file")
+	if err != nil {
+		return err
+	}
+	_, err = io.Copy(fw, bytes.NewReader(fileBytes))
+	if err != nil {
+		return err
+	}
+	writer.Close()
+	req, err := http.NewRequest("POST", url, bytes.NewReader(body.Bytes()))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+	rsp, err := client.Do(req)
+	fmt.Println(rsp.StatusCode)
+	fmt.Println(rsp.Body)
+	if err != nil {
+		s.log.Warn("Multipart post request to seaweedfs server failed", zap.Error(err))
+		return err
+	}
+	return nil
 }
 
 func (s *service) subscribePubSub(ctx context.Context) error {
@@ -220,12 +260,12 @@ func (s *service) GetChannelMessages(ctx context.Context, channelId string, user
 	} else if err != nil {
 		return []Message{}, err
 	}
-	for _, msg := range msgs {
+	for i, msg := range msgs {
 		if msg.Type == "FILE" {
-			fid := strings.Split(msg.Content, " ")
-			resp, err := http.Get("http://localhost:9333/dir/lookup?volumnId=" + fid[0])
+			fid := strings.Split(msg.Content, ",")
+			resp, err := http.Get("http://localhost:9333/dir/lookup?volumeId=" + fid[0])
 			if err != nil {
-				s.log.Warn("Seaweedfs look up volumn failed", zap.Error(err))
+				s.log.Warn("Seaweedfs look up volume failed", zap.Error(err))
 				return []Message{}, err
 			}
 			defer resp.Body.Close()
@@ -234,10 +274,10 @@ func (s *service) GetChannelMessages(ctx context.Context, channelId string, user
 				s.log.Warn("Read response body failed", zap.Error(err))
 				return []Message{}, err
 			}
-			var weedVaolumnLoopUpResponse WeedVolumnLoopUpResponse
-			json.Unmarshal(body, &weedVaolumnLoopUpResponse)
+			var weedVolumeLoopUpResponse WeedVolumeLoopUpResponse
+			json.Unmarshal(body, &weedVolumeLoopUpResponse)
 
-			resp, err = http.Get("http://" + weedVaolumnLoopUpResponse.Locations.PublicUrl + "/" + msg.Content)
+			resp, err = http.Get("http://" + weedVolumeLoopUpResponse.Locations[0].PublicUrl + "/" + msg.Content)
 			if err != nil {
 				s.log.Warn("Seaweedfs get file failed", zap.Error(err))
 				return []Message{}, err
@@ -248,14 +288,13 @@ func (s *service) GetChannelMessages(ctx context.Context, channelId string, user
 				s.log.Warn("Read response body failed", zap.Error(err))
 				return []Message{}, err
 			}
-			var file FileMessage
-			json.Unmarshal(body, &file)
-
-			msg.FileMessage = file
+			msg.FileBytes = body
+			msgs[i] = msg
 		}
 	}
 	if err = s.store.UpdateChannelAccessTime(ctx, channelId, userId); err != nil {
 		return []Message{}, err
 	}
 	return msgs, nil
+
 }
