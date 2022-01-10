@@ -1,9 +1,9 @@
 import { getLocalStorage } from "../store/localStorage";
 import {
-  convertFileToByteArray,
   getAsByteArray,
   base64ToArray,
-} from "./object";
+  createAndDownloadBlobFile,
+} from "./file";
 
 var socket;
 
@@ -21,8 +21,6 @@ const connect = (cb) => {
   socket.onmessage = (msg) => {
     console.log("Successfully receive message");
     const data = JSON.parse(msg.data);
-    console.log(base64ToArray(data.file));
-    
     cb(data);
   };
 
@@ -46,12 +44,18 @@ let sendMsg = async (type, channelId, username, content) => {
   if (type === "MESSAGE") {
     payload.content = content;
   } else if (type === "FILE") {
+    console.log(content);
     const result = await getAsByteArray(content);
-    payload.filename = content.name;
-    payload.file = Array.from(result);
+    const fileMessage = {
+      file_name: content.name,
+      file_type: content.type,
+      bytes: Array.from(result),
+    };
+    payload.file = fileMessage;
   }
   console.log("Sending msg...");
-  // socket.send(JSON.stringify(payload));
+  console.log(payload);
+  socket.send(JSON.stringify(payload));
 };
 
 export { connect, sendMsg };

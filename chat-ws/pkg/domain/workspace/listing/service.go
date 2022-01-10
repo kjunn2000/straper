@@ -71,10 +71,12 @@ func (s *service) GetWorkspaceByWorkspaceId(ctx context.Context, workspaceId str
 		return Workspace{}, err
 	}
 	c, err := s.r.GetDefaultChannel(ctx, workspaceId)
-	if err != nil {
+	if err != nil && err != sql.ErrNoRows {
 		return Workspace{}, err
 	}
-	w.ChannelList = []Channel{c}
+	if err != sql.ErrNoRows {
+		w.ChannelList = []Channel{c}
+	}
 	return w, nil
 }
 

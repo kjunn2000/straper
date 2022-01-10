@@ -1,8 +1,30 @@
-import React from "react";
+import React, { useState } from "react";
+import { useEffect } from "react/cjs/react.development";
+import {
+  base64ToArray,
+  createBlobFile,
+  downloadBlobFile,
+} from "../../service/file";
 import useIdentifyStore from "../../store/identityStore";
 
 const Message = ({ msg }) => {
   const identity = useIdentifyStore((state) => state.identity);
+  const [file, setFile] = useState({});
+
+  useEffect(() => {
+    if (msg.type == "FILE") {
+      const msgFile = msg.file;
+
+      const blob = createBlobFile(
+        base64ToArray(msgFile.bytes),
+        msgFile.file_type
+      );
+      setFile({
+        ...msgFile,
+        blob,
+      });
+    }
+  }, []);
 
   const isCreator = () => {
     return identity.username === msg.creator_name;
@@ -42,7 +64,15 @@ const Message = ({ msg }) => {
                 : "rounded-bl-none bg-gray-500"
             }`}
           >
-            {msg.type === "MESSAGE" ? msg.content : " oi "}
+            {msg.type === "MESSAGE" ? (
+              msg.content
+            ) : (
+              <button
+                onClick={() => downloadBlobFile(file.blob, file.file_name)}
+              >
+                Download
+              </button>
+            )}
           </p>
           <span className="invisible text-gray-400 group-hover:visible transition duration-150">
             {convertToDateString(msg.created_date)}

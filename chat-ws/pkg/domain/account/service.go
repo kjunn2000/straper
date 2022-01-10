@@ -79,7 +79,22 @@ func (us *service) GetUserByUserId(ctx context.Context, userId string) (UserDeta
 
 func (us *service) UpdateUser(ctx context.Context, params UpdateUserParam) error {
 	params.UpdatedDate = time.Now()
-	return us.ur.UpdateUser(ctx, params)
+	if err := us.ur.UpdateUser(ctx, params); err != nil {
+		return err
+	}
+	if params.Email != "" {
+		if err := us.ur.UpdateAccountStatus(ctx, params.UserId, StatusVerifying); err != nil {
+			return err
+		}
+		userDetail, err := us.GetUserByUserId(ctx, params.UserId)
+		if err != nil {
+			return err
+		}
+		if err := us.CreateAndSendVerifyEmailToken(ctx, userDetail); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 func (us *service) DeleteUser(ctx context.Context, userId string) error {
