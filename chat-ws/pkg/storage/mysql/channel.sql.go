@@ -13,8 +13,8 @@ import (
 )
 
 func (q *Queries) CreateChannel(ctx context.Context, channel adding.Channel) error {
-	sql, args, err := sq.Insert("channel").Columns("channel_id", "channel_name", "workspace_id", "creator_id", "created_date").
-		Values(channel.ChannelId, channel.ChannelName, channel.WorkspaceId, channel.CreatorId, channel.CreatedDate).ToSql()
+	sql, args, err := sq.Insert("channel").Columns("channel_id", "channel_name", "workspace_id", "creator_id", "default", "created_date").
+		Values(channel.ChannelId, channel.ChannelName, channel.WorkspaceId, channel.CreatorId, channel.Default, channel.CreatedDate).ToSql()
 	if err != nil {
 		q.log.Info("Unable to create insert channel sql.", zap.Error(err))
 		return err
@@ -46,7 +46,7 @@ func (q *Queries) AddUserToChannel(ctx context.Context, channelId string, userId
 }
 
 func (q *Queries) GetChannelByChannelId(ctx context.Context, channelId string) (listing.Channel, error) {
-	sql, args, err := sq.Select("channel_id, channel_name, workspace_id, creator_id,created_date").From("channel").
+	sql, args, err := sq.Select("channel_id, channel_name, workspace_id, creator_id, default, created_date").From("channel").
 		Where(sq.Eq{"channel_id": channelId}).ToSql()
 	if err != nil {
 		q.log.Info("Unable to create select channel sql.", zap.Error(err))
@@ -62,7 +62,7 @@ func (q *Queries) GetChannelByChannelId(ctx context.Context, channelId string) (
 }
 
 func (q *Queries) GetChannelsByUserId(ctx context.Context, userId string) ([]listing.Channel, error) {
-	sql, args, err := sq.Select("channel.channel_id, channel_name, workspace_id, creator_id,created_date, cu.last_accessed").
+	sql, args, err := sq.Select("channel.channel_id, channel_name, workspace_id, creator_id, default, created_date, cu.last_accessed").
 		From("channel").
 		InnerJoin("channel_user as cu on channel.channel_id = cu.channel_id").
 		Where(sq.Eq{"cu.user_id": userId}).
@@ -85,7 +85,7 @@ func (q *Queries) GetChannelsByUserId(ctx context.Context, userId string) ([]lis
 
 func (q *Queries) GetChannelListByWorkspaceId(ctx context.Context, workspaceId string) ([]listing.Channel, error) {
 
-	sql, args, err := sq.Select("channel_id, channel_name, workspace_id, creator_id,created_date").
+	sql, args, err := sq.Select("channel_id, channel_name, workspace_id, creator_id, default, created_date").
 		From("channel").
 		Where(sq.Eq{"workspace_id": workspaceId}).
 		OrderBy("created_date").
@@ -121,9 +121,9 @@ func (q *Queries) GetUserListByChannelId(ctx context.Context, channelId string) 
 }
 
 func (q *Queries) GetDefaultChannel(ctx context.Context, workspaceId string) (listing.Channel, error) {
-	sql, args, err := sq.Select("channel_id, channel_name, workspace_id, creator_id, created_date").From("channel").
+	sql, args, err := sq.Select("channel_id, channel_name, workspace_id, creator_id, default, created_date").From("channel").
 		Where(sq.Eq{"workspace_id": workspaceId}).
-		Where(sq.Eq{"channel_name": "General"}).
+		Where(sq.Eq{"default": true}).
 		ToSql()
 	if err != nil {
 		q.log.Info("Unable to create select default channel sql.", zap.Error(err))
@@ -139,9 +139,9 @@ func (q *Queries) GetDefaultChannel(ctx context.Context, workspaceId string) (li
 }
 
 func (q *Queries) GetDefaultChannelByWorkspaceId(ctx context.Context, workspaceId string) (adding.Channel, error) {
-	sql, args, err := sq.Select("channel_id, channel_name, workspace_id, creator_id").From("channel").
+	sql, args, err := sq.Select("channel_id, channel_name, workspace_id, default, creator_id").From("channel").
 		Where(sq.Eq{"workspace_id": workspaceId}).
-		Where(sq.Eq{"channel_name": "General"}).
+		Where(sq.Eq{"default": true}).
 		ToSql()
 	if err != nil {
 		q.log.Info("Unable to create select default channel sql.", zap.Error(err))
