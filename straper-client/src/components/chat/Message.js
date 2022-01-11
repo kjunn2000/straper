@@ -6,6 +6,7 @@ import {
   downloadBlobFile,
 } from "../../service/file";
 import useIdentifyStore from "../../store/identityStore";
+import FileMessage from "./FileMessage";
 
 const Message = ({ msg }) => {
   const identity = useIdentifyStore((state) => state.identity);
@@ -14,9 +15,11 @@ const Message = ({ msg }) => {
   useEffect(() => {
     if (msg.type == "FILE") {
       const blob = createBlobFile(base64ToArray(msg.file_bytes), msg.file_type);
+      const src = URL.createObjectURL(blob);
       setFile({
         ...msg,
         blob,
+        src,
       });
     }
   }, []);
@@ -51,24 +54,29 @@ const Message = ({ msg }) => {
             isCreator() ? "items-end" : "items-start"
           }`}
         >
-          <span className="inline-block text-gray-300">{msg.creator_name}</span>
-          <p
-            className={`px-3 py-2 rounded-lg inline-block text-white max-w-sm break-words ${
-              isCreator()
-                ? "rounded-br-none bg-indigo-500"
-                : "rounded-bl-none bg-gray-500"
-            }`}
-          >
-            {msg.type === "MESSAGE" ? (
-              msg.content
-            ) : (
-              <button
-                onClick={() => downloadBlobFile(file.blob, file.file_name)}
-              >
-                Download
-              </button>
-            )}
-          </p>
+          <span className="inline-block text-gray-300 pb-3">
+            {msg.creator_name}
+          </span>
+
+          {msg.type === "MESSAGE" ? (
+            <p
+              className={`px-3 py-2 rounded-lg inline-block text-white max-w-sm break-words ${
+                isCreator()
+                  ? "rounded-br-none bg-indigo-500"
+                  : "rounded-bl-none bg-gray-500"
+              }`}
+            >
+              {msg.content}
+            </p>
+          ) : (
+            <button onClick={() => downloadBlobFile(file.blob, file.file_name)}>
+              {file.file_type && file.file_type.startsWith("image/") ? (
+                <img src={file.src} alt={file.file_name} className="rounded" />
+              ) : (
+                <FileMessage file={file} />
+              )}
+            </button>
+          )}
           <span className="invisible text-gray-400 group-hover:visible transition duration-150">
             {convertToDateString(msg.created_date)}
           </span>

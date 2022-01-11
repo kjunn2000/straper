@@ -2,7 +2,6 @@ package handler
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 
@@ -23,7 +22,7 @@ func (server *Server) SetUpChannelRouter(mr *mux.Router, as adding.Service, ls l
 	cr.HandleFunc("/create", server.CreateChannel(as, ls, cs)).Methods("POST")
 	cr.HandleFunc("/join", server.JoinChannel(as, ls, cs)).Methods("POST")
 	cr.HandleFunc("/update", server.UpdateChannel(es)).Methods("POST")
-	cr.HandleFunc("/delete/{channel_id}", server.DeleteChannel(ds)).Methods("POST")
+	cr.HandleFunc("/delete/{channel_id}", server.DeleteChannel(ds, cs)).Methods("POST")
 	cr.HandleFunc("/leave/{channel_id}", server.LeaveChannel(ds)).Methods("POST")
 	cr.HandleFunc("/{channel_id}/messages", server.GetChannelMessages(cs)).Methods("GET")
 	cr.Use(middleware.TokenVerifier(server.tokenMaker))
@@ -118,7 +117,7 @@ func (server *Server) UpdateChannel(es editing.Service) func(w http.ResponseWrit
 	}
 }
 
-func (server *Server) DeleteChannel(ds deleting.Service) func(w http.ResponseWriter, r *http.Request) {
+func (server *Server) DeleteChannel(ds deleting.Service, cs chatting.Service) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		payloadVal := r.Context().Value(middleware.TokenPayload{})
 		if payloadVal == nil {
@@ -136,8 +135,11 @@ func (server *Server) DeleteChannel(ds deleting.Service) func(w http.ResponseWri
 			rest.AddResponseToResponseWritter(w, nil, "channel.id.not.found")
 			return
 		}
-		err := ds.DeleteChannel(r.Context(), channelId, payload.UserId)
-		if err != nil {
+		if err := cs.DeleteSeaweedfsMessages(r.Context(), channelId); err != nil {
+			rest.AddResponseToResponseWritter(w, nil, "failed.to.delete.files")
+			return
+		}
+		if err := ds.DeleteChannel(r.Context(), channelId, payload.UserId); err != nil {
 			rest.AddResponseToResponseWritter(w, nil, err.Error())
 			return
 		}
@@ -200,7 +202,6 @@ func (server *Server) GetChannelMessages(cs chatting.Service) func(w http.Respon
 			rest.AddResponseToResponseWritter(w, nil, err.Error())
 			return
 		}
-		fmt.Println(msgs)
 		rest.AddResponseToResponseWritter(w, msgs, "")
 	}
 }

@@ -6,7 +6,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
@@ -29,6 +28,7 @@ type Service interface {
 	SetUpWSServer(ctx context.Context) error
 	SetUpUserConnection(ctx context.Context, userId string, conn *websocket.Conn)
 	GetChannelMessages(ctx context.Context, channelId string, userId string, limit, offset uint64) ([]Message, error)
+	DeleteSeaweedfsMessages(ctx context.Context, channelId string) error
 }
 
 type PubSub interface {
@@ -183,7 +183,6 @@ func (s *service) saveFile(ctx context.Context, fileBytes []byte) (string, error
 	if err != nil {
 		return "", err
 	}
-	fmt.Println(weedMasterResponse.Fid)
 	url := "http://" + weedMasterResponse.Url + "/" + weedMasterResponse.Fid
 	if err := s.SendMultiPartRequest(fileBytes, url); err != nil {
 		return "", err
@@ -212,9 +211,7 @@ func (s *service) SendMultiPartRequest(fileBytes []byte, url string) error {
 		return err
 	}
 	req.Header.Set("Content-Type", writer.FormDataContentType())
-	rsp, err := client.Do(req)
-	fmt.Println(rsp.StatusCode)
-	fmt.Println(rsp.Body)
+	_, err = client.Do(req)
 	if err != nil {
 		s.log.Warn("Multipart post request to seaweedfs server failed", zap.Error(err))
 		return err
@@ -296,5 +293,42 @@ func (s *service) GetChannelMessages(ctx context.Context, channelId string, user
 		return []Message{}, err
 	}
 	return msgs, nil
+}
 
+func (s *service) DeleteSeaweedfsMessages(ctx context.Context, channelId string) error {
+
+	msgs, err := s.store.GetAllChannelMessages(ctx, channelId)
+	if err != nil {
+		return nil
+	}
+	for _, msg := range msgs {
+		if msg.Type == "FILE" {
+			fid := strings.Split(msg.Content, ",")
+			resp, err := http.Get("http://localhost:9333/dir/lookup?volumeId=" + fid[0])
+			if err != nil {
+				s.log.Warn("Seaweedfs look up volume failed", zap.Error(err))
+				return err
+			}
+			defer resp.Body.Close()
+			body, err := ioutil.ReadAll(resp.Body)
+			if err != nil {
+				s.log.Warn("Read response body failed", zap.Error(err))
+				return err
+			}
+			var weedVolumeLoopUpResponse WeedVolumeLoopUpResponse
+			json.Unmarshal(body, &weedVolumeLoopUpResponse)
+
+			client := &http.Client{}
+
+			req, err := http.NewRequest("DELETE", "http://"+weedVolumeLoopUpResponse.Locations[0].PublicUrl+"/"+msg.Content, nil)
+			if err != nil {
+				return err
+			}
+
+			if _, err = client.Do(req); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }

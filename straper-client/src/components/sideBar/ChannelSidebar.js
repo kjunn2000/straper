@@ -6,6 +6,7 @@ import api from "../../axios/api";
 import { copyTextToClipboard } from "../../service/navigator";
 import useIdentifyStore from "../../store/identityStore";
 import useWorkspaceStore from "../../store/workspaceStore";
+import { darkGrayBg } from "../../utils/style/color";
 import { iconStyle } from "../../utils/style/icon";
 import ActionDialog from "../dialog/ActionDialog";
 import AddDialog from "../dialog/AddDialog";
@@ -149,10 +150,7 @@ function ChannelSidebar() {
   };
 
   return currWorkspace.workspace_id ? (
-    <div
-      className="flex flex-col w-64 h-screen "
-      style={{ background: "rgb(47,49,54)" }}
-    >
+    <div className="flex flex-col w-64 h-screen " style={darkGrayBg}>
       <WorkspaceMenu />
       <div className="p-5 text-sm text-gray-400 flex justify-between hover:text-white">
         <span>CHANNELS</span>
