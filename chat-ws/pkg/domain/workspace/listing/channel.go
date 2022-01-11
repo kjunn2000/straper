@@ -8,6 +8,6 @@ type Channel struct {
 	WorkspaceId  string    `json:"workspace_id" db:"workspace_id"`
 	CreatorId    string    `json:"creator_id" db:"creator_id"`
 	CreatedDate  time.Time `json:"created_date" db:"created_date"`
-	Default      bool      `json:"default" db:"default"`
+	IsDefault    bool      `json:"is_default" db:"is_default"`
 	LastAccessed time.Time `json:"last_accessed" db:"last_accessed"`
 }

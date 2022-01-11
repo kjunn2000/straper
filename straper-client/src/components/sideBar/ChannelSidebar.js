@@ -172,23 +172,26 @@ function ChannelSidebar() {
                 >
                   <AiOutlineLink style={iconStyle} />
                 </span>
-                {identity.user_id == channel.creator_id ? (
-                  <span
-                    className="opacity-0 group-hover:opacity-100 cursor-pointer pl-3"
-                    onClick={() =>
-                      onDeleteChannel(channel.channel_id, "delete")
-                    }
-                  >
-                    <AiFillDelete style={iconStyle} />
-                  </span>
-                ) : (
-                  <span
-                    className="opacity-0 group-hover:opacity-100 cursor-pointer pl-3"
-                    onClick={() => onDeleteChannel(channel.channel_id, "leave")}
-                  >
-                    <BsDoorOpen style={iconStyle} />
-                  </span>
-                )}
+                {!channel.is_default &&
+                  (identity.user_id == channel.creator_id ? (
+                    <span
+                      className="opacity-0 group-hover:opacity-100 cursor-pointer pl-3"
+                      onClick={() =>
+                        onDeleteChannel(channel.channel_id, "delete")
+                      }
+                    >
+                      <AiFillDelete style={iconStyle} />
+                    </span>
+                  ) : (
+                    <span
+                      className="opacity-0 group-hover:opacity-100 cursor-pointer pl-3"
+                      onClick={() =>
+                        onDeleteChannel(channel.channel_id, "leave")
+                      }
+                    >
+                      <BsDoorOpen style={iconStyle} />
+                    </span>
+                  ))}
               </div>
             </div>
           ))}
@@ -210,8 +213,8 @@ function ChannelSidebar() {
       <SimpleDialog
         isOpen={failDeleteDialogOpen}
         setIsOpen={setFailDeleteDialogOpen}
-        title="Fail To Delete Last Channel"
-        content="Unfortunately to tell you that one workspace should has at least one channel."
+        title="Fail To Delete Channel"
+        content="Please note that you are not allowed to delete/leave default channel."
         buttonText="Close"
         buttonStatus="fail"
       />

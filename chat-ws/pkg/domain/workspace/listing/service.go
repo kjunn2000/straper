@@ -134,7 +134,7 @@ func (s *service) VerfiyDeleteWorkspace(ctx context.Context, workspaceId string,
 func (s *service) VerfiyDeleteChannel(ctx context.Context, channelId string, userId string) error {
 
 	c, err := s.GetChannelByChannelId(ctx, channelId)
-	if c.Default {
+	if c.IsDefault {
 		return errors.New("failed.to.delete.default.channel")
 	} else if c.CreatorId != userId {
 		return errors.New("invalid.delete.workspace.authority")

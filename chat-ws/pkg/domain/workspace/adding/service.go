@@ -38,6 +38,7 @@ func (s *service) CreateWorkspace(ctx context.Context, newWorkspaceName, userId 
 		CreatedDate: time.Now(),
 	}
 	c := NewChannel(uuid.New().String(), "General", w.Id, userId, true, time.Now())
+	w.ChannelList = []Channel{c}
 	w, err := s.r.CreateNewWorkspace(ctx, w, c, userId)
 	if err != nil {
 		return Workspace{}, err

@@ -52,7 +52,7 @@ CREATE TABLE `channel` (
   `channel_name` VARCHAR(255) NOT NULL,
   `workspace_id` CHAR(36) NOT NULL,
   `creator_id` VARCHAR(255) NOT NULL,
-  `default` BOOLEAN TINYINT NOT NULL,
+  `is_default` BOOLEAN NOT NULL,
   `created_date` DATETIME NOT NULL DEFAULT (now())
 );
 
