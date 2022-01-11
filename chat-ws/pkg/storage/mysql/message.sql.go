@@ -44,6 +44,22 @@ func (q *Queries) GetAllChannelMessages(ctx context.Context, channelId string) (
 	return msgs, nil
 }
 
+func (q *Queries) GetAllChannelMessagesByWorkspaceId(ctx context.Context, workspaceId string) ([]chatting.Message, error) {
+	msgs := make([]chatting.Message, 0)
+	sql, arg, err := sq.Select("message_id", "type", "message.channel_id", "creator_name", "content", "file_name", "file_type", "message.created_date").
+		From("message").Join("channel c on message.channel_id = c.channel_id").
+		Where(sq.Eq{"c.workspace_id": workspaceId}).ToSql()
+	if err != nil {
+		q.log.Warn("Failed to create select sql.")
+		return []chatting.Message{}, err
+	}
+	err = q.db.Select(&msgs, sql, arg...)
+	if err != nil {
+		return []chatting.Message{}, err
+	}
+	return msgs, nil
+}
+
 func (q *Queries) GetChannelMessages(ctx context.Context, channelId string, limit, offset uint64) ([]chatting.Message, error) {
 	msgs := make([]chatting.Message, 0)
 	sql, arg, err := sq.Select("message_id", "type", "channel_id", "creator_name", "content", "file_name", "file_type", "created_date").

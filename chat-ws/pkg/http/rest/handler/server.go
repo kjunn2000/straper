@@ -99,7 +99,7 @@ func (server *Server) SetServerRoute() (*mux.Router, error) {
 
 	server.SetUpAuthRouter(mr, authService)
 	server.SetUpAccountRouter(mr, accountService)
-	server.SetUpWorkspaceRouter(mr, addingService, listingService, editingService, deletingService)
+	server.SetUpWorkspaceRouter(mr, addingService, listingService, editingService, deletingService, chattingService)
 	server.SetUpChannelRouter(mr, addingService, listingService, editingService, deletingService, chattingService)
 	server.SetUpWebsocketRouter(mr, chattingService)
 

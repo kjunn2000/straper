@@ -123,7 +123,7 @@ func (server *Server) DeleteChannel(ls listing.Service, ds deleting.Service, cs 
 			rest.AddResponseToResponseWritter(w, nil, err.Error())
 			return
 		}
-		if err := cs.DeleteSeaweedfsMessages(r.Context(), channelId); err != nil {
+		if err := cs.DeleteSeaweedfsMessagesByChannelId(r.Context(), channelId); err != nil {
 			rest.AddResponseToResponseWritter(w, nil, "failed.to.delete.files")
 			return
 		}

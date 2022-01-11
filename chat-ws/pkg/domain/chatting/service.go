@@ -6,6 +6,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
@@ -28,7 +29,8 @@ type Service interface {
 	SetUpWSServer(ctx context.Context) error
 	SetUpUserConnection(ctx context.Context, userId string, conn *websocket.Conn)
 	GetChannelMessages(ctx context.Context, channelId string, userId string, limit, offset uint64) ([]Message, error)
-	DeleteSeaweedfsMessages(ctx context.Context, channelId string) error
+	DeleteSeaweedfsMessagesByChannelId(ctx context.Context, channelId string) error
+	DeleteSeaweedfsMessagesByWorkspaceId(ctx context.Context, workspaceId string) error
 }
 
 type PubSub interface {
@@ -295,12 +297,26 @@ func (s *service) GetChannelMessages(ctx context.Context, channelId string, user
 	return msgs, nil
 }
 
-func (s *service) DeleteSeaweedfsMessages(ctx context.Context, channelId string) error {
+func (s *service) DeleteSeaweedfsMessagesByChannelId(ctx context.Context, channelId string) error {
 
 	msgs, err := s.store.GetAllChannelMessages(ctx, channelId)
 	if err != nil {
-		return nil
+		return err
 	}
+	return s.deleteSeaweedfsMessages(ctx, msgs)
+}
+
+func (s *service) DeleteSeaweedfsMessagesByWorkspaceId(ctx context.Context, workspaceId string) error {
+
+	msgs, err := s.store.GetAllChannelMessagesByWorkspaceId(ctx, workspaceId)
+	if err != nil {
+		return err
+	}
+	return s.deleteSeaweedfsMessages(ctx, msgs)
+}
+
+func (s *service) deleteSeaweedfsMessages(ctx context.Context, msgs []Message) error {
+
 	for _, msg := range msgs {
 		if msg.Type == "FILE" {
 			fid := strings.Split(msg.Content, ",")
@@ -320,6 +336,7 @@ func (s *service) DeleteSeaweedfsMessages(ctx context.Context, channelId string)
 
 			client := &http.Client{}
 
+			fmt.Println("DELETE", "http://"+weedVolumeLoopUpResponse.Locations[0].PublicUrl+"/"+msg.Content)
 			req, err := http.NewRequest("DELETE", "http://"+weedVolumeLoopUpResponse.Locations[0].PublicUrl+"/"+msg.Content, nil)
 			if err != nil {
 				return err

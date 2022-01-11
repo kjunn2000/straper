@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/kjunn2000/straper/chat-ws/pkg/domain/chatting"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/adding"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/deleting"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/editing"
@@ -13,13 +14,13 @@ import (
 	"github.com/kjunn2000/straper/chat-ws/pkg/http/rest/middleware"
 )
 
-func (server *Server) SetUpWorkspaceRouter(mr *mux.Router, as adding.Service, ls listing.Service, es editing.Service, ds deleting.Service) {
+func (server *Server) SetUpWorkspaceRouter(mr *mux.Router, as adding.Service, ls listing.Service, es editing.Service, ds deleting.Service, cs chatting.Service) {
 	wr := mr.PathPrefix("/protected/workspace").Subrouter()
 	wr.HandleFunc("/create", server.CreateWorkspace(as)).Methods("POST")
 	wr.HandleFunc("/join/{workspace_id}", server.JoinWorkspace(as, ls)).Methods("POST")
 	wr.HandleFunc("/list", server.GetWorkspaces(ls)).Methods("GET")
 	wr.HandleFunc("/update", server.UpdateWorkspace(es)).Methods("POST")
-	wr.HandleFunc("/delete/{workspace_id}", server.DeleteWorkspace(ls, ds)).Methods("POST")
+	wr.HandleFunc("/delete/{workspace_id}", server.DeleteWorkspace(ls, ds, cs)).Methods("POST")
 	wr.HandleFunc("/leave/{workspace_id}", server.LeaveWorkspace(ds)).Methods("POST")
 	wr.Use(middleware.TokenVerifier(server.tokenMaker))
 }
@@ -112,7 +113,7 @@ func (server *Server) UpdateWorkspace(as editing.Service) func(http.ResponseWrit
 	}
 }
 
-func (server *Server) DeleteWorkspace(ls listing.Service, ds deleting.Service) func(http.ResponseWriter, *http.Request) {
+func (server *Server) DeleteWorkspace(ls listing.Service, ds deleting.Service, cs chatting.Service) func(http.ResponseWriter, *http.Request) {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		userId, err := server.getUserIdFromToken(r)
 		if err != nil {
@@ -125,14 +126,15 @@ func (server *Server) DeleteWorkspace(ls listing.Service, ds deleting.Service) f
 			rest.AddResponseToResponseWritter(rw, nil, "Id not found.")
 			return
 		}
-		err = ls.VerfiyDeleteWorkspace(r.Context(), workspaceId, userId)
-		if err != nil {
+		if err := ls.VerfiyDeleteWorkspace(r.Context(), workspaceId, userId); err != nil {
 			rest.AddResponseToResponseWritter(rw, nil, err.Error())
 			return
 		}
-		err = ds.DeleteWorkspace(r.Context(), workspaceId)
-		if err != nil {
-			rw.WriteHeader(http.StatusBadRequest)
+		if err := cs.DeleteSeaweedfsMessagesByWorkspaceId(r.Context(), workspaceId); err != nil {
+			rest.AddResponseToResponseWritter(rw, nil, err.Error())
+			return
+		}
+		if err = ds.DeleteWorkspace(r.Context(), workspaceId); err != nil {
 			rest.AddResponseToResponseWritter(rw, nil, err.Error())
 			return
 		}
