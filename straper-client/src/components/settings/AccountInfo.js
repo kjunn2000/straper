@@ -146,10 +146,7 @@ const AccountInfo = () => {
           />
           <ErrorMessage errors={errors} name="phone_no" as="p" />
         </div>
-        <button
-          type="submit"
-          className="bg-indigo-400 self-center w-48 p-1 rounded"
-        >
+        <button type="submit" className="bg-indigo-400 self-center w-48 p-1">
           CONFIRM UPDATE
         </button>
       </form>

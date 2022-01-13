@@ -1,8 +1,10 @@
 import { useState } from "react";
 import { Tab } from "@headlessui/react";
 import { darkGrayBg } from "../utils/style/color";
+import { FaWindowClose } from "react-icons/fa";
 import AccountInfo from "../components/settings/AccountInfo";
 import UserPassword from "../components/settings/UserPassword";
+import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -14,15 +16,19 @@ function Setting() {
     "User Password": <UserPassword />,
   });
 
+  const history = useHistory();
+
   return (
     <div className="w-full h-screen" style={darkGrayBg}>
       <Tab.Group vertical={true}>
         <div className="grid grid-cols-3 w-full h-full">
-          <div className="flex justify-end">
-            <Tab.List
-              className="flex flex-col w-1/3 h-full"
-              style={{ paddingTop: "100px" }}
-            >
+          <div className="flex justify-end" style={{ paddingTop: "100px" }}>
+            <FaWindowClose
+              size="40"
+              className="text-indigo-500 mr-5 cursor-pointer"
+              onClick={() => history.push("/channel")}
+            />
+            <Tab.List className="flex flex-col w-1/3 h-full">
               <div className="text-white font-bold text-sm">USER SETTINGS</div>
               {Object.keys(categories).map((category) => (
                 <Tab

@@ -151,10 +151,7 @@ const Register = () => {
             <div className="text-red-500">Password is too weak</div>
           )}
         </div>
-        <button
-          type="submit"
-          className="bg-indigo-400 self-center w-48 p-1 rounded"
-        >
+        <button type="submit" className="bg-indigo-400 self-center w-48 p-1">
           REGISTER NOW
         </button>
         <Link
