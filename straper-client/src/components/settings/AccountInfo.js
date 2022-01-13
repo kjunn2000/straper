@@ -1,30 +1,44 @@
-import axios from "../axios/api";
-import React, { useRef, useState } from "react";
-import { Link, useHistory } from "react-router-dom";
-import PasswordStrengthBar from "react-password-strength-bar";
-import { useForm } from "react-hook-form";
-import SimpleDialog from "../components/dialog/SimpleDialog";
 import { ErrorMessage } from "@hookform/error-message";
+import React, { useRef, useState } from "react";
+import { useForm } from "react-hook-form";
+import api from "../../axios/api";
+import useIdentifyStore from "../../store/identityStore";
+import SimpleDialog from "../dialog/SimpleDialog";
 
-const Register = () => {
-  const history = useHistory();
+const AccountInfo = () => {
   const {
     handleSubmit,
     register,
-    watch,
     formState: { errors },
   } = useForm();
-  const passwordStrength = useRef();
-  const watchPassword = watch("password");
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [showFailDialog, setShowFailDialog] = useState(false);
   const [dialogErrMsg, setDialogErrMsg] = useState("");
+  const [isEmailUpdate, setEmailUpdate] = useState(false);
+  const identity = useIdentifyStore((state) => state.identity);
+  const setIdentity = useIdentifyStore((state) => state.setIdentity);
 
-  const onRegister = (data) => {
-    axios
-      .post("http://localhost:8080/api/v1/account/create", data)
+  const onUpdate = (data) => {
+    if (
+      data.username === identity.username &&
+      data.email === identity.email &&
+      data.phone_no === identity.phone_no
+    ) {
+      return;
+    }
+    setEmailUpdate(data.email !== identity.email);
+    console.log(data.email !== identity.email);
+    api
+      .post("/protected/account/update", data)
       .then((res) => {
         if (res.data.Success) {
+          const newIdentity = {
+            ...identity,
+            username: data.username,
+            email: data.email,
+            phone_no: data.phone_no,
+          };
+          setIdentity(newIdentity);
           setShowSuccessDialog(true);
         } else {
           switch (res.data.ErrorMessage) {
@@ -45,9 +59,7 @@ const Register = () => {
               break;
             }
             case "invalid.username.format": {
-              setDialogErrMsg(
-                "Phone number format incorrect. Please try again."
-              );
+              setDialogErrMsg("Username format incorrect. Please try again.");
               break;
             }
             case "invalid.email.format": {
@@ -58,10 +70,6 @@ const Register = () => {
               setDialogErrMsg(
                 "Phone number format incorrect. Please try again."
               );
-              break;
-            }
-            case "password.too.weak": {
-              setDialogErrMsg("Password too weak. Please try again.");
               break;
             }
             default: {
@@ -76,26 +84,31 @@ const Register = () => {
       });
   };
 
-  const isPasswordValid = () => {
-    return passwordStrength.current.state.score >= 3;
-  };
+  const successDialogContent =
+    "Your account information has updated successful to the system. " +
+    (isEmailUpdate
+      ? "Please verify your new email at your email inbox before the next login."
+      : "");
 
   return (
     <div className="bg-gradient-to-r from-purple-600 to-gray-900 w-full h-screen flex justify-center content-center">
       <form
         className="bg-gray-700 rounded-lg text-white flex flex-col space-y-5 w-96 h-auto justify-center self-center py-5"
-        onSubmit={handleSubmit(onRegister)}
+        onSubmit={handleSubmit(onUpdate)}
       >
         <div className="self-center">
-          <div className="text-xl font-medium text-center">WELCOME BACK</div>
+          <div className="text-xl font-medium text-center">
+            Account Information
+          </div>
           <div className="self-center text-gray-500 text-center">
-            Good To See You Again, Friends!
+            Feel free to update your latest profile.
           </div>
         </div>
         <div className="self-center">
           <div>Username</div>
           <input
             className="bg-gray-800 p-2 rounded-lg"
+            defaultValue={identity.username}
             {...register("username", {
               required: "Username is required.",
               minLength: { value: 4, message: "Username at least 4 digits." },
@@ -107,6 +120,7 @@ const Register = () => {
           <div>Email</div>
           <input
             className="bg-gray-800 p-2 rounded-lg"
+            defaultValue={identity.email}
             {...register("email", {
               required: "Email is required.",
               pattern: {
@@ -122,6 +136,7 @@ const Register = () => {
           <input
             className="bg-gray-800 p-2 rounded-lg"
             type="number"
+            defaultValue={identity.phone_no}
             {...register("phone_no", {
               required: "Phone number is required.",
               pattern: {
@@ -132,53 +147,27 @@ const Register = () => {
           />
           <ErrorMessage errors={errors} name="phone_no" as="p" />
         </div>
-        <div className="self-center">
-          <div>Password</div>
-          <input
-            type="password"
-            className="bg-gray-800 p-2 rounded-lg"
-            {...register("password", {
-              required: true,
-              validate: () => isPasswordValid(),
-            })}
-          />
-          <PasswordStrengthBar
-            ref={passwordStrength}
-            password={watchPassword}
-            className="pt-3"
-          />
-          {errors?.password && (
-            <div className="text-red-500">Password is too weak</div>
-          )}
-        </div>
         <button
           type="submit"
           className="bg-indigo-400 self-center w-48 p-1 rounded"
         >
-          REGISTER NOW
+          CONFIRM UPDATE
         </button>
-        <Link
-          to="/login"
-          className="text-indigo-300 self-center cursor-pointer hover:text-indigo-500"
-        >
-          Go to login ?
-        </Link>
       </form>
       <SimpleDialog
         isOpen={showSuccessDialog}
         setIsOpen={setShowSuccessDialog}
-        title="Register Successfully"
-        content="Thank you for registering account in Straper, please verify your 
-          email in your email inbox to complete the registration."
+        title="Update Successfully"
+        content={successDialogContent}
         buttonText="Close"
-        buttonAction={() => history.push("/login")}
+        buttonAction={() => setShowSuccessDialog(false)}
         buttonStatus="success"
       />
 
       <SimpleDialog
         isOpen={showFailDialog}
         setIsOpen={setShowFailDialog}
-        title="Registered Fail"
+        title="Update Fail"
         content={dialogErrMsg}
         buttonText="Close"
         buttonStatus="fail"
@@ -187,4 +176,4 @@ const Register = () => {
   );
 };
 
-export default Register;
+export default AccountInfo;

@@ -6,7 +6,7 @@ import { darkGrayBg } from "../../utils/style/color";
 const FileMessage = ({ file }) => {
   return (
     <div
-      className="flex shadow-2xl bg-gray-600 rounded px-3 py-1 justify-center items-center"
+      className="flex shadow-2xl rounded px-3 py-1 justify-center items-center"
       style={darkGrayBg}
     >
       <FcDocument size={40} />

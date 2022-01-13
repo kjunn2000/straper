@@ -25,7 +25,7 @@ const Message = ({ msg }) => {
   }, []);
 
   const isCreator = () => {
-    return identity.username === msg.creator_name;
+    return identity.user_id === msg.creator_id;
   };
 
   const zeroPad = (num, places) => String(num).padStart(places, "0");
@@ -55,7 +55,7 @@ const Message = ({ msg }) => {
           }`}
         >
           <span className="inline-block text-gray-300 pb-3">
-            {msg.creator_name}
+            {msg?.user_detail.creator_name}
           </span>
 
           {msg.type === "MESSAGE" ? (

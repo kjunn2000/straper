@@ -13,6 +13,7 @@ import NoAuthGuard from "./utils/guards/NoAuthGuard";
 import ResetPasswordRequest from "./page/ResetPasswordRequest";
 import ResetPassword from "./page/ResetPassword";
 import Workspace from "./page/Workspace";
+import Setting from "./page/Setting";
 
 function App() {
   return (
@@ -24,6 +25,7 @@ function App() {
             component={Workspace}
           />
           <UserAuthGuard path="/channel" component={Workspace} />
+          <UserAuthGuard path="/setting" component={Setting} />
           <NoAuthGuard path="/login" component={Login} />
           <NoAuthGuard path="/register" component={Register} />
           <NoAuthGuard

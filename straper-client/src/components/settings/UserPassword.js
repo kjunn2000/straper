@@ -1,12 +1,12 @@
-import axios from "../axios/api";
-import React, { useRef, useState } from "react";
-import { Link, useHistory } from "react-router-dom";
-import PasswordStrengthBar from "react-password-strength-bar";
-import { useForm } from "react-hook-form";
-import SimpleDialog from "../components/dialog/SimpleDialog";
 import { ErrorMessage } from "@hookform/error-message";
+import axios from "axios";
+import React, { useRef, useState } from "react";
+import { useForm } from "react-hook-form";
+import PasswordStrengthBar from "react-password-strength-bar";
+import { Link, useHistory } from "react-router-dom/cjs/react-router-dom.min";
+import SimpleDialog from "../dialog/SimpleDialog";
 
-const Register = () => {
+const UserPassword = () => {
   const history = useHistory();
   const {
     handleSubmit,
@@ -87,50 +87,10 @@ const Register = () => {
         onSubmit={handleSubmit(onRegister)}
       >
         <div className="self-center">
-          <div className="text-xl font-medium text-center">WELCOME BACK</div>
+          <div className="text-xl font-medium text-center">Reset Password</div>
           <div className="self-center text-gray-500 text-center">
-            Good To See You Again, Friends!
+            Please note that the old password will be completely removed.
           </div>
-        </div>
-        <div className="self-center">
-          <div>Username</div>
-          <input
-            className="bg-gray-800 p-2 rounded-lg"
-            {...register("username", {
-              required: "Username is required.",
-              minLength: { value: 4, message: "Username at least 4 digits." },
-            })}
-          />
-          <ErrorMessage errors={errors} name="username" as="p" />
-        </div>
-        <div className="self-center">
-          <div>Email</div>
-          <input
-            className="bg-gray-800 p-2 rounded-lg"
-            {...register("email", {
-              required: "Email is required.",
-              pattern: {
-                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+.[A-Z]{2,4}$/i,
-                message: "Invalid email format.",
-              },
-            })}
-          />
-          <ErrorMessage errors={errors} name="email" as="p" />
-        </div>
-        <div className="self-center">
-          <div>Phone No</div>
-          <input
-            className="bg-gray-800 p-2 rounded-lg"
-            type="number"
-            {...register("phone_no", {
-              required: "Phone number is required.",
-              pattern: {
-                value: /^[0-9]{10,11}$/,
-                message: "Invalid phone number.",
-              },
-            })}
-          />
-          <ErrorMessage errors={errors} name="phone_no" as="p" />
         </div>
         <div className="self-center">
           <div>Password</div>
@@ -155,21 +115,14 @@ const Register = () => {
           type="submit"
           className="bg-indigo-400 self-center w-48 p-1 rounded"
         >
-          REGISTER NOW
+          CONFIRM RESET
         </button>
-        <Link
-          to="/login"
-          className="text-indigo-300 self-center cursor-pointer hover:text-indigo-500"
-        >
-          Go to login ?
-        </Link>
       </form>
       <SimpleDialog
         isOpen={showSuccessDialog}
         setIsOpen={setShowSuccessDialog}
-        title="Register Successfully"
-        content="Thank you for registering account in Straper, please verify your 
-          email in your email inbox to complete the registration."
+        title="Reset Successfully"
+        content="Please log in again with you new password."
         buttonText="Close"
         buttonAction={() => history.push("/login")}
         buttonStatus="success"
@@ -178,7 +131,7 @@ const Register = () => {
       <SimpleDialog
         isOpen={showFailDialog}
         setIsOpen={setShowFailDialog}
-        title="Registered Fail"
+        title="Reset Password Fail"
         content={dialogErrMsg}
         buttonText="Close"
         buttonStatus="fail"
@@ -187,4 +140,4 @@ const Register = () => {
   );
 };
 
-export default Register;
+export default UserPassword;

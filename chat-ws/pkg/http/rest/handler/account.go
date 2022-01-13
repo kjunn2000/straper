@@ -88,6 +88,12 @@ func (server *Server) UpdateAccount(as account.Service) func(http.ResponseWriter
 			rest.AddResponseToResponseWritter(w, nil, err.Error())
 			return
 		}
+		userId, err := server.getUserIdFromToken(r)
+		if err != nil {
+			rest.AddResponseToResponseWritter(w, nil, err.Error())
+			return
+		}
+		user.UserId = userId
 		err = as.UpdateUser(r.Context(), user)
 		if err != nil {
 			rest.AddResponseToResponseWritter(w, nil, err.Error())

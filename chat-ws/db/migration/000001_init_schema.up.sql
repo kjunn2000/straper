@@ -67,7 +67,7 @@ CREATE TABLE `message` (
   `message_id` CHAR(36) PRIMARY KEY,
   `type` VARCHAR(36) NOT NULL,
   `channel_id` CHAR(36) NOT NULL,
-  `creator_name` VARCHAR(255) NOT NULL,
+  `creator_id` CHAR(36) NOT NULL,
   `content` LONGTEXT NOT NULL,
   `file_name` VARCHAR(255),
   `file_type` VARCHAR(255),
@@ -145,7 +145,7 @@ ALTER TABLE `channel_user` ADD FOREIGN KEY (`channel_id`) REFERENCES `channel` (
 
 ALTER TABLE `channel_user` ADD FOREIGN KEY (`user_id`) REFERENCES `user_detail` (`user_id`) ON DELETE CASCADE;
 
-ALTER TABLE `message` ADD FOREIGN KEY (`creator_name`) REFERENCES `user_detail` (`username`) ON DELETE CASCADE;
+ALTER TABLE `message` ADD FOREIGN KEY (`creator_id`) REFERENCES `user_detail` (`user_id`) ON DELETE CASCADE;
 
 ALTER TABLE `message` ADD FOREIGN KEY (`channel_id`) REFERENCES `channel` (`channel_id`) ON DELETE CASCADE;
 

@@ -13,6 +13,7 @@ import AddDialog from "../dialog/AddDialog";
 import JoinDialog from "../dialog/JoinDialog";
 import SimpleDialog from "../dialog/SimpleDialog";
 import WorkspaceMenu from "../menu/WorkspaceMenu";
+import AccountStatus from "./AccountStatus";
 
 function ChannelSidebar() {
   const history = useHistory();
@@ -149,111 +150,118 @@ function ChannelSidebar() {
     setSuccessCopyLinkDialogOpen(true);
   };
 
-  return currWorkspace.workspace_id ? (
-    <div className="flex flex-col w-64 h-screen " style={darkGrayBg}>
-      <WorkspaceMenu />
-      <div className="p-5 text-sm text-gray-400 flex justify-between hover:text-white">
-        <span>CHANNELS</span>
-        <AiOutlinePlus onClick={() => setAddChannelDialogOpen(true)} />
-      </div>
-      <div className="px-3">
-        {currWorkspace?.channel_list &&
-          currWorkspace.channel_list.map((channel) => (
-            <div
-              className="group flex justify-between text-white text-sm font-medium p-3 text-gray-400 hover:bg-gray-700 rounded hover:text-white"
-              key={channel?.channel_id}
-              onClick={() => changeChannel(channel.channel_id)}
-            >
-              <span> # {channel?.channel_name} </span>
-              <div className="flex">
-                <span
-                  className="opacity-0 group-hover:opacity-100 cursor-pointer"
-                  onClick={() => copyLinkToClipboard()}
+  return (
+    <div className="h-screen" style={darkGrayBg}>
+      {currWorkspace.workspace_id ? (
+        <div className="flex flex-col w-64">
+          <WorkspaceMenu />
+          <div className="p-5 text-sm text-gray-400 flex justify-between hover:text-white">
+            <span>CHANNELS</span>
+            <AiOutlinePlus onClick={() => setAddChannelDialogOpen(true)} />
+          </div>
+          <div className="px-3">
+            {currWorkspace?.channel_list &&
+              currWorkspace.channel_list.map((channel) => (
+                <div
+                  className="group flex justify-between text-white text-sm font-medium p-3 text-gray-400 hover:bg-gray-700 rounded hover:text-white"
+                  key={channel?.channel_id}
+                  onClick={() => changeChannel(channel.channel_id)}
                 >
-                  <AiOutlineLink style={iconStyle} />
-                </span>
-                {!channel.is_default &&
-                  (identity.user_id == channel.creator_id ? (
+                  <span> # {channel?.channel_name} </span>
+                  <div className="flex">
                     <span
-                      className="opacity-0 group-hover:opacity-100 cursor-pointer pl-3"
-                      onClick={() =>
-                        onDeleteChannel(channel.channel_id, "delete")
-                      }
+                      className="opacity-0 group-hover:opacity-100 cursor-pointer"
+                      onClick={() => copyLinkToClipboard()}
                     >
-                      <AiFillDelete style={iconStyle} />
+                      <AiOutlineLink style={iconStyle} />
                     </span>
-                  ) : (
-                    <span
-                      className="opacity-0 group-hover:opacity-100 cursor-pointer pl-3"
-                      onClick={() =>
-                        onDeleteChannel(channel.channel_id, "leave")
-                      }
-                    >
-                      <BsDoorOpen style={iconStyle} />
-                    </span>
-                  ))}
-              </div>
-            </div>
-          ))}
+                    {!channel.is_default &&
+                      (identity.user_id == channel.creator_id ? (
+                        <span
+                          className="opacity-0 group-hover:opacity-100 cursor-pointer pl-3"
+                          onClick={() =>
+                            onDeleteChannel(channel.channel_id, "delete")
+                          }
+                        >
+                          <AiFillDelete style={iconStyle} />
+                        </span>
+                      ) : (
+                        <span
+                          className="opacity-0 group-hover:opacity-100 cursor-pointer pl-3"
+                          onClick={() =>
+                            onDeleteChannel(channel.channel_id, "leave")
+                          }
+                        >
+                          <BsDoorOpen style={iconStyle} />
+                        </span>
+                      ))}
+                  </div>
+                </div>
+              ))}
+          </div>
+          <AddDialog
+            isOpen={isAddChannelDialogOpen}
+            close={() => setAddChannelDialogOpen(false)}
+            toggleDialog={toggleDialog}
+            addAction={addNewChannel}
+            type="channel"
+          />
+          <JoinDialog
+            isOpen={isJoinChannelDialogOpen}
+            close={() => setJoinChannelDialogOpen(false)}
+            toggleDialog={toggleDialog}
+            joinAction={joinNewChannel}
+            type="channel"
+          />
+          <SimpleDialog
+            isOpen={failDeleteDialogOpen}
+            setIsOpen={setFailDeleteDialogOpen}
+            title="Fail To Delete Channel"
+            content="Please note that you are not allowed to delete/leave default channel."
+            buttonText="Close"
+            buttonStatus="fail"
+          />
+          <SimpleDialog
+            isOpen={invalidChannelDialogOpen}
+            setIsOpen={setInvalidChannelDialogOpen}
+            title="Channel Not Found"
+            content="The workspace may be deleted by the creator, please refresh your page."
+            buttonText="Close"
+            buttonStatus="fail"
+          />
+          <ActionDialog
+            isOpen={deleteWarningDialogOpen}
+            setIsOpen={setDeleteWarningDialogOpen}
+            title={
+              deleteType == "delete"
+                ? "Delete Channel Confirmation"
+                : "Leave Channel Confirmation"
+            }
+            content="Please confirm that the removed channel will not able to be recovered."
+            buttonText={
+              deleteType == "delete" ? "Delete Anyway" : "Leave Anyway"
+            }
+            buttonStatus="fail"
+            buttonAction={() => deleteOrLeaveChannel(targetDeleteChannelId)}
+            closeButtonText="close"
+          />
+          <SimpleDialog
+            isOpen={successCopyLinkDialogOpen}
+            setIsOpen={setSuccessCopyLinkDialogOpen}
+            title="Copied Channel Link To Clipboard"
+            content="Successfully copied channel link to clipboard. You are able to send it to your friend for joining this channel."
+            buttonText="Close"
+            buttonStatus="success"
+          />
+        </div>
+      ) : (
+        <div className="flex flex-col w-64"></div>
+      )}
+      <div className="text-white fixed bottom-0 w-64">
+        <AccountStatus />
       </div>
-      <AddDialog
-        isOpen={isAddChannelDialogOpen}
-        close={() => setAddChannelDialogOpen(false)}
-        toggleDialog={toggleDialog}
-        addAction={addNewChannel}
-        type="channel"
-      />
-      <JoinDialog
-        isOpen={isJoinChannelDialogOpen}
-        close={() => setJoinChannelDialogOpen(false)}
-        toggleDialog={toggleDialog}
-        joinAction={joinNewChannel}
-        type="channel"
-      />
-      <SimpleDialog
-        isOpen={failDeleteDialogOpen}
-        setIsOpen={setFailDeleteDialogOpen}
-        title="Fail To Delete Channel"
-        content="Please note that you are not allowed to delete/leave default channel."
-        buttonText="Close"
-        buttonStatus="fail"
-      />
-      <SimpleDialog
-        isOpen={invalidChannelDialogOpen}
-        setIsOpen={setInvalidChannelDialogOpen}
-        title="Channel Not Found"
-        content="The workspace may be deleted by the creator, please refresh your page."
-        buttonText="Close"
-        buttonStatus="fail"
-      />
-      <ActionDialog
-        isOpen={deleteWarningDialogOpen}
-        setIsOpen={setDeleteWarningDialogOpen}
-        title={
-          deleteType == "delete"
-            ? "Delete Channel Confirmation"
-            : "Leave Channel Confirmation"
-        }
-        content="Please confirm that the removed channel will not able to be recovered."
-        buttonText={deleteType == "delete" ? "Delete Anyway" : "Leave Anyway"}
-        buttonStatus="fail"
-        buttonAction={() => deleteOrLeaveChannel(targetDeleteChannelId)}
-        closeButtonText="close"
-      />
-      <SimpleDialog
-        isOpen={successCopyLinkDialogOpen}
-        setIsOpen={setSuccessCopyLinkDialogOpen}
-        title="Copied Channel Link To Clipboard"
-        content="Successfully copied channel link to clipboard. You are able to send it to your friend for joining this channel."
-        buttonText="Close"
-        buttonStatus="success"
-      />
+      ;
     </div>
-  ) : (
-    <div
-      className="flex flex-col w-64 h-screen "
-      style={{ background: "rgb(47,49,54)" }}
-    ></div>
   );
 }
 

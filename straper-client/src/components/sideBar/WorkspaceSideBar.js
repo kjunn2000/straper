@@ -82,7 +82,7 @@ function WorkspaceSidebar() {
   return (
     <div>
       <div
-        className="flex flex-col w-24 h-screen p-3"
+        className="flex flex-col h-screen p-3"
         style={{ background: "rgb(32,34,37)" }}
       >
         {workspaces &&

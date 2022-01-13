@@ -35,23 +35,21 @@ const connect = (cb) => {
   };
 };
 
-let sendMsg = async (type, channelId, username, content) => {
+let sendMsg = async (type, channelId, creatorId, content) => {
   const payload = {
     type,
     channel_id: channelId,
-    creator_name: username,
+    creator_id: creatorId,
   };
   if (type === "MESSAGE") {
     payload.content = content;
   } else if (type === "FILE") {
-    console.log(content);
     const result = await getAsByteArray(content);
     payload.file_name = content.name;
     payload.file_type = content.type;
     payload.file_bytes = Array.from(result);
   }
   console.log("Sending msg...");
-  console.log(payload);
   socket.send(JSON.stringify(payload));
 };
 

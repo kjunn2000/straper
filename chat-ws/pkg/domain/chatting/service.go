@@ -98,6 +98,12 @@ func (s *service) SetUpWSServer(ctx context.Context) error {
 					s.log.Warn("Fail to save message.", zap.Error(err))
 					return err
 				}
+				userDetail, err := s.store.GetUserInfoByUserId(ctx, newMsg.CreatorId)
+				if err != nil {
+					s.log.Warn("Fail to fetch user data.", zap.Error(err))
+					return err
+				}
+				msg.UserDetail = userDetail
 				if err := s.publishPubSub(ctx, newMsg); err != nil {
 					s.log.Warn("Fail to publish message.", zap.Error(err))
 					return err

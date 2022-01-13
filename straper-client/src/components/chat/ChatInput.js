@@ -28,7 +28,7 @@ const ChatInput = ({ scrollToBottom }) => {
     if (!msg || msg === "" || isEmpty(msg)) {
       return;
     }
-    sendMsg(type, currChannel.channel_id, identity.username, msg);
+    sendMsg(type, currChannel.channel_id, identity.user_id, msg);
     inputRef.current.value = "";
     scrollToBottom();
   };
