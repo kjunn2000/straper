@@ -2,7 +2,7 @@ import { Menu, Transition } from "@headlessui/react";
 import { Fragment, useEffect, useState } from "react";
 import { AiFillCaretDown, AiFillDelete, AiOutlineLink } from "react-icons/ai";
 import { FiSettings } from "react-icons/fi";
-import useIdentifyStore from "../../store/identityStore";
+import useIdentityStore from "../../store/identityStore";
 import useWorkspaceStore from "../../store/workspaceStore";
 import api from "../../axios/api";
 import MenuItem from "./MenuItem";
@@ -13,7 +13,7 @@ import { copyTextToClipboard } from "../../service/navigator";
 
 export default function WorkspaceMenu() {
   const [isCreator, setIsCreator] = useState(false);
-  const identity = useIdentifyStore((state) => state.identity);
+  const identity = useIdentityStore((state) => state.identity);
   const workspace = useWorkspaceStore((state) => state.currWorkspace);
   const deleteWorkspaceAtStore = useWorkspaceStore(
     (state) => state.deleteWorkspace

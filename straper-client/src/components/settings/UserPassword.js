@@ -1,9 +1,8 @@
-import { ErrorMessage } from "@hookform/error-message";
 import axios from "axios";
-import React, { useRef, useState } from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import PasswordStrengthBar from "react-password-strength-bar";
-import { Link, useHistory } from "react-router-dom/cjs/react-router-dom.min";
+import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
+import useIdentityStore from "../../store/identityStore";
 import SimpleDialog from "../dialog/SimpleDialog";
 
 const UserPassword = () => {
@@ -14,54 +13,37 @@ const UserPassword = () => {
     watch,
     formState: { errors },
   } = useForm();
-  const passwordStrength = useRef();
-  const watchPassword = watch("password");
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [showFailDialog, setShowFailDialog] = useState(false);
   const [dialogErrMsg, setDialogErrMsg] = useState("");
+  const identity = useIdentityStore((state) => state.identity);
 
-  const onRegister = (data) => {
+  const onReset = () => {
+    const payload = {
+      email: identity.email,
+    };
     axios
-      .post("http://localhost:8080/api/v1/account/create", data)
+      .post(
+        "http://localhost:8080/api/v1/account/reset-password/create",
+        payload
+      )
       .then((res) => {
         if (res.data.Success) {
           setShowSuccessDialog(true);
         } else {
           switch (res.data.ErrorMessage) {
-            case "username.registered": {
-              setDialogErrMsg(
-                "Username is registered. Please try other username."
-              );
-              break;
-            }
-            case "email.registered": {
-              setDialogErrMsg("Email is registered. Please try other email.");
-              break;
-            }
-            case "phone.no.registered": {
-              setDialogErrMsg(
-                "Phone number is registered. Please try other phone number."
-              );
-              break;
-            }
-            case "invalid.username.format": {
-              setDialogErrMsg(
-                "Phone number format incorrect. Please try again."
-              );
+            case "email.not.found": {
+              setDialogErrMsg("Email not found. Please try again.");
               break;
             }
             case "invalid.email.format": {
               setDialogErrMsg("Email format incorrect. Please try again.");
               break;
             }
-            case "invalid.phone.no.format": {
+            case "password_reset_attempt_in_past_15_min": {
               setDialogErrMsg(
-                "Phone number format incorrect. Please try again."
+                "Password reset request has been sent to your email inbox in the past 15 minutes. Please check it out."
               );
-              break;
-            }
-            case "password.too.weak": {
-              setDialogErrMsg("Password too weak. Please try again.");
               break;
             }
             default: {
@@ -76,62 +58,36 @@ const UserPassword = () => {
       });
   };
 
-  const isPasswordValid = () => {
-    return passwordStrength.current.state.score >= 3;
-  };
-
   return (
     <div className="bg-gradient-to-r from-purple-600 to-gray-900 w-full h-screen flex justify-center content-center">
       <form
         className="bg-gray-700 rounded-lg text-white flex flex-col space-y-5 w-96 h-auto justify-center self-center py-5"
-        onSubmit={handleSubmit(onRegister)}
+        onSubmit={handleSubmit(onReset)}
       >
         <div className="self-center">
-          <div className="text-xl font-medium text-center">Reset Password</div>
+          <div className="text-xl font-medium text-center">RESET PASSWORD</div>
           <div className="self-center text-gray-500 text-center">
-            Please note that the old password will be completely removed.
+            Do not worries, one minute to reset it!
           </div>
         </div>
-        <div className="self-center">
-          <div>Password</div>
-          <input
-            type="password"
-            className="bg-gray-800 p-2 rounded-lg"
-            {...register("password", {
-              required: true,
-              validate: () => isPasswordValid(),
-            })}
-          />
-          <PasswordStrengthBar
-            ref={passwordStrength}
-            password={watchPassword}
-            className="pt-3"
-          />
-          {errors?.password && (
-            <div className="text-red-500">Password is too weak</div>
-          )}
-        </div>
-        <button
-          type="submit"
-          className="bg-indigo-400 self-center w-48 p-1 rounded"
-        >
-          CONFIRM RESET
+        <button type="submit" className="bg-indigo-400 self-center w-48 p-1">
+          RESET
         </button>
       </form>
       <SimpleDialog
         isOpen={showSuccessDialog}
         setIsOpen={setShowSuccessDialog}
-        title="Reset Successfully"
-        content="Please log in again with you new password."
+        title="Reset Email Sent"
+        content="Please verify in your email inbox for resetting your account password."
         buttonText="Close"
-        buttonAction={() => history.push("/login")}
+        buttonAction={() => setShowSuccessDialog(false)}
         buttonStatus="success"
       />
 
       <SimpleDialog
         isOpen={showFailDialog}
         setIsOpen={setShowFailDialog}
-        title="Reset Password Fail"
+        title="Reset Email Request Fail"
         content={dialogErrMsg}
         buttonText="Close"
         buttonStatus="fail"

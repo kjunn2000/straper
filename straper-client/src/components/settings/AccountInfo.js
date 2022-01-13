@@ -2,7 +2,7 @@ import { ErrorMessage } from "@hookform/error-message";
 import React, { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import api from "../../axios/api";
-import useIdentifyStore from "../../store/identityStore";
+import useIdentityStore from "../../store/identityStore";
 import SimpleDialog from "../dialog/SimpleDialog";
 
 const AccountInfo = () => {
@@ -15,8 +15,8 @@ const AccountInfo = () => {
   const [showFailDialog, setShowFailDialog] = useState(false);
   const [dialogErrMsg, setDialogErrMsg] = useState("");
   const [isEmailUpdate, setEmailUpdate] = useState(false);
-  const identity = useIdentifyStore((state) => state.identity);
-  const setIdentity = useIdentifyStore((state) => state.setIdentity);
+  const identity = useIdentityStore((state) => state.identity);
+  const setIdentity = useIdentityStore((state) => state.setIdentity);
 
   const onUpdate = (data) => {
     if (
@@ -27,7 +27,6 @@ const AccountInfo = () => {
       return;
     }
     setEmailUpdate(data.email !== identity.email);
-    console.log(data.email !== identity.email);
     api
       .post("/protected/account/update", data)
       .then((res) => {

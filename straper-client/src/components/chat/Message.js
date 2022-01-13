@@ -5,11 +5,11 @@ import {
   createBlobFile,
   downloadBlobFile,
 } from "../../service/file";
-import useIdentifyStore from "../../store/identityStore";
+import useIdentityStore from "../../store/identityStore";
 import FileMessage from "./FileMessage";
 
 const Message = ({ msg }) => {
-  const identity = useIdentifyStore((state) => state.identity);
+  const identity = useIdentityStore((state) => state.identity);
   const [file, setFile] = useState({});
 
   useEffect(() => {

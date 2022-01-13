@@ -2,14 +2,17 @@ import axios from "../axios/api";
 import React, { useEffect, useState } from "react";
 import { Link, useHistory } from "react-router-dom";
 import useAuthStore from "../store/authStore";
-import useIdentifyStore from "../store/identityStore";
+import useIdentityStore from "../store/identityStore";
 import useWorkspaceStore from "../store/workspaceStore";
 import { useForm } from "react-hook-form";
 import { ErrorMessage } from "@hookform/error-message";
 import "./login.scss";
 import api from "../axios/api";
 import SimpleDialog from "../components/dialog/SimpleDialog";
-import { fetchWorkspaceData, redirectToLatestWorkspace } from "../service/workspace";
+import {
+  fetchWorkspaceData,
+  redirectToLatestWorkspace,
+} from "../service/workspace";
 import { connect } from "../service/websocket";
 import useMessageStore from "../store/messageStore";
 
@@ -23,7 +26,7 @@ const Login = ({ location }) => {
   const history = useHistory();
 
   const setAccessToken = useAuthStore((state) => state.setAccessToken);
-  const setIdentity = useIdentifyStore((state) => state.setIdentity);
+  const setIdentity = useIdentityStore((state) => state.setIdentity);
 
   const [errMsg, setErrMsg] = useState("");
   const [showTimeoutDialog, setShowTimeoutDialog] = useState(false);

@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
 import { sendMsg } from "../../service/websocket";
-import useIdentifyStore from "../../store/identityStore";
+import useIdentityStore from "../../store/identityStore";
 import useWorkspaceStore from "../../store/workspaceStore";
 import UploadButton from "../button/UploadButton";
 import { IoSendSharp } from "react-icons/io5";
@@ -8,7 +8,7 @@ import { isEmpty } from "../../service/object";
 
 const ChatInput = ({ scrollToBottom }) => {
   const currChannel = useWorkspaceStore((state) => state.currChannel);
-  const identity = useIdentifyStore((state) => state.identity);
+  const identity = useIdentityStore((state) => state.identity);
 
   const inputRef = useRef(null);
 

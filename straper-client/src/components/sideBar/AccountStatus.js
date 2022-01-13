@@ -2,10 +2,10 @@ import React from "react";
 import { FaUserCircle } from "react-icons/fa";
 import { FiSettings } from "react-icons/fi";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
-import useIdentifyStore from "../../store/identityStore";
+import useIdentityStore from "../../store/identityStore";
 
 const AccountStatus = () => {
-  const identity = useIdentifyStore((state) => state.identity);
+  const identity = useIdentityStore((state) => state.identity);
   const history = useHistory();
 
   return (

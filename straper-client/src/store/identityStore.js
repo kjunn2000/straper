@@ -1,7 +1,7 @@
 import create from "zustand";
 import { getLocalStorage, setLocalStorage } from "./localStorage";
 
-const useIdentifyStore = create((set) => ({
+const useIdentityStore = create((set) => ({
   identity: getLocalStorage("identity") || {},
   setIdentity: (identity) => {
     set((state) => {
@@ -16,4 +16,4 @@ const useIdentifyStore = create((set) => ({
   },
 }));
 
-export default useIdentifyStore;
+export default useIdentityStore;

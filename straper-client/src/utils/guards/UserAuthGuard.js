@@ -1,9 +1,9 @@
 import React from "react";
 import { Route, Redirect } from "react-router-dom";
-import useIdentifyStore from "../../store/identityStore";
+import useIdentityStore from "../../store/identityStore";
 
 const UserAuthGuard = ({ component: Component, ...rest }) => {
-  const identity = useIdentifyStore((state) => state.identity);
+  const identity = useIdentityStore((state) => state.identity);
   return (
     <Route
       {...rest}

@@ -4,7 +4,7 @@ import { BsDoorOpen } from "react-icons/bs";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import api from "../../axios/api";
 import { copyTextToClipboard } from "../../service/navigator";
-import useIdentifyStore from "../../store/identityStore";
+import useIdentityStore from "../../store/identityStore";
 import useWorkspaceStore from "../../store/workspaceStore";
 import { darkGrayBg } from "../../utils/style/color";
 import { iconStyle } from "../../utils/style/icon";
@@ -18,7 +18,7 @@ import AccountStatus from "./AccountStatus";
 function ChannelSidebar() {
   const history = useHistory();
 
-  const identity = useIdentifyStore((state) => state.identity);
+  const identity = useIdentityStore((state) => state.identity);
   const currWorkspace = useWorkspaceStore((state) => state.currWorkspace);
   const currChannel = useWorkspaceStore((state) => state.currChannel);
   const setCurrWorkspace = useWorkspaceStore((state) => state.setCurrWorkspace);

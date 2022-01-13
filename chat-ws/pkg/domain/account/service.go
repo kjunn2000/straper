@@ -67,12 +67,12 @@ func (us *service) GetUserByUserId(ctx context.Context, userId string) (UserDeta
 
 func (us *service) UpdateUser(ctx context.Context, params UpdateUserParam) error {
 	params.UpdatedDate = time.Now()
-	if err := us.ur.UpdateUser(ctx, params); err != nil {
-		return us.verigyUserFieldError(err)
-	}
 	userDetail, err := us.GetUserByUserId(ctx, params.UserId)
 	if err != nil {
 		return err
+	}
+	if err := us.ur.UpdateUser(ctx, params); err != nil {
+		return us.verigyUserFieldError(err)
 	}
 	if params.Email != userDetail.Email {
 		if err := us.ur.UpdateAccountStatus(ctx, params.UserId, StatusVerifying); err != nil {
