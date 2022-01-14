@@ -1,12 +1,12 @@
 import React from "react";
-import WorkspaceSidebar from "./WorkspaceSideBar";
-import ChannelSidebar from "./ChannelSidebar";
+import WorkspaceSidebar from "./WorkspaceSidebar";
+import WorkspaceNavigator from "./WorkspaceNavigator";
 
 function Sidebar() {
   return (
     <div className="flex flex-row">
+      <WorkspaceNavigator />
       <WorkspaceSidebar />
-      <ChannelSidebar />
     </div>
   );
 }

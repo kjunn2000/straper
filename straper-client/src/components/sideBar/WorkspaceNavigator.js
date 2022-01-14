@@ -6,7 +6,7 @@ import api from "../../axios/api";
 import JoinDialog from "../dialog/JoinDialog";
 import SidebarIcon from "./SidebarIcon";
 
-function WorkspaceSidebar() {
+function WorkspaceNavigator() {
   const workspaces = useWorkspaceStore((state) => state.workspaces);
   const selectedChannelIds = useWorkspaceStore(
     (state) => state.selectedChannelIds
@@ -120,4 +120,4 @@ function WorkspaceSidebar() {
   );
 }
 
-export default WorkspaceSidebar;
+export default WorkspaceNavigator;

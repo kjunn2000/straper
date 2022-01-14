@@ -15,7 +15,7 @@ import SimpleDialog from "../dialog/SimpleDialog";
 import WorkspaceMenu from "../menu/WorkspaceMenu";
 import AccountStatus from "./AccountStatus";
 
-function ChannelSidebar() {
+function WorkspaceSidebar() {
   const history = useHistory();
 
   const identity = useIdentityStore((state) => state.identity);
@@ -155,50 +155,61 @@ function ChannelSidebar() {
       {currWorkspace.workspace_id ? (
         <div className="flex flex-col w-64">
           <WorkspaceMenu />
-          <div className="p-5 text-sm text-gray-400 flex justify-between hover:text-white">
-            <span>CHANNELS</span>
-            <AiOutlinePlus onClick={() => setAddChannelDialogOpen(true)} />
-          </div>
-          <div className="px-3">
-            {currWorkspace?.channel_list &&
-              currWorkspace.channel_list.map((channel) => (
-                <div
-                  className="group flex justify-between text-white text-sm font-medium p-3 text-gray-400 hover:bg-gray-700 rounded hover:text-white"
-                  key={channel?.channel_id}
-                  onClick={() => changeChannel(channel.channel_id)}
-                >
-                  <span> # {channel?.channel_name} </span>
-                  <div className="flex">
-                    <span
-                      className="opacity-0 group-hover:opacity-100 cursor-pointer"
-                      onClick={() => copyLinkToClipboard()}
-                    >
-                      <AiOutlineLink style={iconStyle} />
-                    </span>
-                    {!channel.is_default &&
-                      (identity.user_id == channel.creator_id ? (
-                        <span
-                          className="opacity-0 group-hover:opacity-100 cursor-pointer pl-3"
-                          onClick={() =>
-                            onDeleteChannel(channel.channel_id, "delete")
-                          }
-                        >
-                          <AiFillDelete style={iconStyle} />
-                        </span>
-                      ) : (
-                        <span
-                          className="opacity-0 group-hover:opacity-100 cursor-pointer pl-3"
-                          onClick={() =>
-                            onDeleteChannel(channel.channel_id, "leave")
-                          }
-                        >
-                          <BsDoorOpen style={iconStyle} />
-                        </span>
-                      ))}
+          <div>
+            <div className="p-5 text-sm text-gray-400 flex justify-between hover:text-white">
+              <span>CHANNELS</span>
+              <AiOutlinePlus onClick={() => setAddChannelDialogOpen(true)} />
+            </div>
+            <div className="px-3">
+              {currWorkspace?.channel_list &&
+                currWorkspace.channel_list.map((channel) => (
+                  <div
+                    className="group flex justify-between text-white text-sm font-medium p-3 text-gray-400 hover:bg-gray-700 rounded hover:text-white"
+                    key={channel?.channel_id}
+                    onClick={() => changeChannel(channel.channel_id)}
+                  >
+                    <span> # {channel?.channel_name} </span>
+                    <div className="flex">
+                      <span
+                        className="opacity-0 group-hover:opacity-100 cursor-pointer"
+                        onClick={() => copyLinkToClipboard()}
+                      >
+                        <AiOutlineLink style={iconStyle} />
+                      </span>
+                      {!channel.is_default &&
+                        (identity.user_id == channel.creator_id ? (
+                          <span
+                            className="opacity-0 group-hover:opacity-100 cursor-pointer pl-3"
+                            onClick={() =>
+                              onDeleteChannel(channel.channel_id, "delete")
+                            }
+                          >
+                            <AiFillDelete style={iconStyle} />
+                          </span>
+                        ) : (
+                          <span
+                            className="opacity-0 group-hover:opacity-100 cursor-pointer pl-3"
+                            onClick={() =>
+                              onDeleteChannel(channel.channel_id, "leave")
+                            }
+                          >
+                            <BsDoorOpen style={iconStyle} />
+                          </span>
+                        ))}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+            </div>
           </div>
+          <div>
+            <div
+              className="p-5 text-sm text-gray-400 cursor-pointer hover:text-white"
+              onClick={() => history.push("/board")}
+            >
+              <span>TASK BOARD</span>
+            </div>
+          </div>
+
           <AddDialog
             isOpen={isAddChannelDialogOpen}
             close={() => setAddChannelDialogOpen(false)}
@@ -265,4 +276,4 @@ function ChannelSidebar() {
   );
 }
 
-export default ChannelSidebar;
+export default WorkspaceSidebar;

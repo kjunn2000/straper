@@ -14,6 +14,7 @@ import ResetPasswordRequest from "./page/ResetPasswordRequest";
 import ResetPassword from "./page/ResetPassword";
 import Workspace from "./page/Workspace";
 import Setting from "./page/Setting";
+import TaskBoard from "./page/TaskBoard";
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
           />
           <UserAuthGuard path="/channel" component={Workspace} />
           <UserAuthGuard path="/setting" component={Setting} />
+          <UserAuthGuard path="/board" component={TaskBoard} />
           <NoAuthGuard path="/login" component={Login} />
           <NoAuthGuard path="/register" component={Register} />
           <NoAuthGuard
