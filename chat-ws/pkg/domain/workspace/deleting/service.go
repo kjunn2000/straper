@@ -2,16 +2,14 @@ package deleting
 
 import (
 	"context"
-	"database/sql"
-	"errors"
 
 	"go.uber.org/zap"
 )
 
 type Service interface {
-	DeleteWorkspace(ctx context.Context, workspaceId, userId string) error
+	DeleteWorkspace(ctx context.Context, workspaceId string) error
 	LeaveWorkspace(ctx context.Context, workspaceId, userId string) error
-	DeleteChannel(ctx context.Context, channelId, userId string) error
+	DeleteChannel(ctx context.Context, channelId string) error
 	LeaveChannel(ctx context.Context, channelId, userId string) error
 }
 
@@ -31,15 +29,9 @@ type Channel struct {
 	ChannelId string `json:"channel_id" db:"channel_id"`
 }
 
-func (s *service) DeleteWorkspace(ctx context.Context, workspaceId, userId string) error {
-	w, err := s.r.GetWorkspaceByWorkspaceId(ctx, workspaceId)
-	if err != nil {
-		return err
-	}
-	if w.CreatorId != userId {
-		return errors.New("invalid.delete.workspace.authority")
-	}
-	err = s.r.DeleteWorkspace(ctx, workspaceId)
+func (s *service) DeleteWorkspace(ctx context.Context, workspaceId string) error {
+
+	err := s.r.DeleteWorkspace(ctx, workspaceId)
 	if err != nil {
 		return err
 	}
@@ -54,18 +46,8 @@ func (s *service) LeaveWorkspace(ctx context.Context, workspaceId, userId string
 	return nil
 }
 
-func (s *service) DeleteChannel(ctx context.Context, channelId, userId string) error {
-	channel, err := s.r.GetChannelByChannelId(ctx, channelId)
-	if err == sql.ErrNoRows {
-		return errors.New("invalid.channel.id")
-	}
-	if err != nil {
-		return err
-	}
-	if channel.CreatorId != userId {
-		return errors.New("invalid.delete.workspace.authority")
-	}
-	err = s.r.DeleteChannel(ctx, channelId)
+func (s *service) DeleteChannel(ctx context.Context, channelId string) error {
+	err := s.r.DeleteChannel(ctx, channelId)
 	if err != nil {
 		return err
 	}

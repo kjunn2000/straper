@@ -25,6 +25,13 @@ type UserData struct {
 	UserId string `db:"user_id"`
 }
 
+type UserDetail struct {
+	UserId   string `json:"user_id" db:"user_id"`
+	Username string `json:"username" db:"username"`
+	Email    string `json:"email" db:"email" validate:"email"`
+	PhoneNo  string `json:"phone_no" db:"phone_no"`
+}
+
 func (user *User) readMsg(ctx context.Context, log *zap.Logger) {
 	defer func() {
 		user.conn.Close()
@@ -33,13 +40,20 @@ func (user *User) readMsg(ctx context.Context, log *zap.Logger) {
 		var msg Message
 		err := user.conn.ReadJSON(&msg)
 		log.Info("Received message from user id :", zap.String("user_id", user.UserId))
-		if err != nil {
-			break
+		if websocket.IsCloseError(err, 1000, 1001, 1005) {
+			log.Info("Websocket Conn Closed.", zap.String("user_id", user.UserId))
+			user.wsServer.unregister <- user
+			return
+		} else if err != nil {
+			log.Warn("Receive error.", zap.Error(err))
+			return
 		}
+
 		switch msg.Type {
 		case UserLeave:
 			user.wsServer.unregister <- user
-		case Messaging:
+			return
+		case Messaging, File:
 			user.wsServer.broadcast <- &msg
 		}
 	}

@@ -27,3 +27,12 @@ mock:
 
 build:
 		docker build -t straper:latest .
+
+weed_master_up:
+		weed master &
+
+weed_volumn_up_1:
+		weed volume -dir="/tmp/data1" -max=5  -mserver="localhost:9333" -port=8080 &
+
+weed_volumn_up_2:
+		weed volume -dir="/tmp/data2" -max=5  -mserver="localhost:9333" -port=8081 &

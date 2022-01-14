@@ -3,9 +3,9 @@ package handler
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/gorilla/mux"
-	"github.com/kjunn2000/straper/chat-ws/pkg/domain/auth"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/chatting"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/adding"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/deleting"
@@ -21,8 +21,9 @@ func (server *Server) SetUpChannelRouter(mr *mux.Router, as adding.Service, ls l
 	cr.HandleFunc("/create", server.CreateChannel(as, ls, cs)).Methods("POST")
 	cr.HandleFunc("/join", server.JoinChannel(as, ls, cs)).Methods("POST")
 	cr.HandleFunc("/update", server.UpdateChannel(es)).Methods("POST")
-	cr.HandleFunc("/delete/{channel_id}", server.DeleteChannel(ds)).Methods("POST")
+	cr.HandleFunc("/delete/{channel_id}", server.DeleteChannel(ls, ds, cs)).Methods("POST")
 	cr.HandleFunc("/leave/{channel_id}", server.LeaveChannel(ds)).Methods("POST")
+	cr.HandleFunc("/{channel_id}/messages", server.GetChannelMessages(cs)).Methods("GET")
 	cr.Use(middleware.TokenVerifier(server.tokenMaker))
 }
 
@@ -44,21 +45,16 @@ func (server *Server) CreateChannel(as adding.Service, ls listing.Service, cs ch
 			rest.AddResponseToResponseWritter(w, nil, err.Error())
 			return
 		}
-		payloadVal := r.Context().Value(middleware.TokenPayload{})
-		if payloadVal == nil {
-			rest.AddResponseToResponseWritter(w, nil, "payload.not.found.in.context")
-			return
-		}
-		payload, ok := payloadVal.(*auth.Payload)
-		if !ok {
-			rest.AddResponseToResponseWritter(w, nil, "invalid.payload.in.context")
+		userId, err := server.getUserIdFromToken(r)
+		if err != nil {
+			rest.AddResponseToResponseWritter(w, nil, err.Error())
 			return
 		}
 		if _, err := ls.GetWorkspaceByWorkspaceId(r.Context(), cq.WorkspaceId); err != nil {
 			rest.AddResponseToResponseWritter(w, nil, err.Error())
 			return
 		}
-		channel, err := as.CreateChannel(r.Context(), cq.WorkspaceId, cq.ChannelName, payload.UserId)
+		channel, err := as.CreateChannel(r.Context(), cq.WorkspaceId, cq.ChannelName, userId)
 		if err != nil {
 			rest.AddResponseToResponseWritter(w, nil, err.Error())
 			return
@@ -75,14 +71,9 @@ func (server *Server) JoinChannel(as adding.Service, ls listing.Service, cs chat
 			rest.AddResponseToResponseWritter(w, nil, err.Error())
 			return
 		}
-		payloadVal := r.Context().Value(middleware.TokenPayload{})
-		if payloadVal == nil {
-			rest.AddResponseToResponseWritter(w, nil, "payload.not.found.in.context")
-			return
-		}
-		payload, ok := payloadVal.(*auth.Payload)
-		if !ok {
-			rest.AddResponseToResponseWritter(w, nil, "invalid.payload.in.context")
+		userId, err := server.getUserIdFromToken(r)
+		if err != nil {
+			rest.AddResponseToResponseWritter(w, nil, err.Error())
 			return
 		}
 		channel, err := ls.VerifyAndGetChannel(r.Context(), cq.WorkspaceId, cq.ChannelId)
@@ -90,7 +81,7 @@ func (server *Server) JoinChannel(as adding.Service, ls listing.Service, cs chat
 			rest.AddResponseToResponseWritter(w, nil, err.Error())
 			return
 		}
-		if err := as.AddUserToChannel(r.Context(), cq.ChannelId, []string{payload.UserId}); err != nil {
+		if err := as.AddUserToChannel(r.Context(), cq.ChannelId, []string{userId}); err != nil {
 			rest.AddResponseToResponseWritter(w, nil, err.Error())
 			return
 		}
@@ -115,16 +106,11 @@ func (server *Server) UpdateChannel(es editing.Service) func(w http.ResponseWrit
 	}
 }
 
-func (server *Server) DeleteChannel(ds deleting.Service) func(w http.ResponseWriter, r *http.Request) {
+func (server *Server) DeleteChannel(ls listing.Service, ds deleting.Service, cs chatting.Service) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		payloadVal := r.Context().Value(middleware.TokenPayload{})
-		if payloadVal == nil {
-			rest.AddResponseToResponseWritter(w, nil, "payload.not.found.in.context")
-			return
-		}
-		payload, ok := payloadVal.(*auth.Payload)
-		if !ok {
-			rest.AddResponseToResponseWritter(w, nil, "invalid.payload.in.context")
+		userId, err := server.getUserIdFromToken(r)
+		if err != nil {
+			rest.AddResponseToResponseWritter(w, nil, err.Error())
 			return
 		}
 		vars := mux.Vars(r)
@@ -133,8 +119,15 @@ func (server *Server) DeleteChannel(ds deleting.Service) func(w http.ResponseWri
 			rest.AddResponseToResponseWritter(w, nil, "channel.id.not.found")
 			return
 		}
-		err := ds.DeleteChannel(r.Context(), channelId, payload.UserId)
-		if err != nil {
+		if err := ls.VerfiyDeleteChannel(r.Context(), channelId, userId); err != nil {
+			rest.AddResponseToResponseWritter(w, nil, err.Error())
+			return
+		}
+		if err := cs.DeleteSeaweedfsMessagesByChannelId(r.Context(), channelId); err != nil {
+			rest.AddResponseToResponseWritter(w, nil, "failed.to.delete.files")
+			return
+		}
+		if err := ds.DeleteChannel(r.Context(), channelId); err != nil {
 			rest.AddResponseToResponseWritter(w, nil, err.Error())
 			return
 		}
@@ -150,21 +143,48 @@ func (server *Server) LeaveChannel(ds deleting.Service) func(w http.ResponseWrit
 			rest.AddResponseToResponseWritter(w, nil, "channel.id.not.found")
 			return
 		}
-		payloadVal := r.Context().Value(middleware.TokenPayload{})
-		if payloadVal == nil {
-			rest.AddResponseToResponseWritter(w, nil, "payload.not.found.in.context")
+		userId, err := server.getUserIdFromToken(r)
+		if err != nil {
+			rest.AddResponseToResponseWritter(w, nil, err.Error())
 			return
 		}
-		payload, ok := payloadVal.(*auth.Payload)
-		if !ok {
-			rest.AddResponseToResponseWritter(w, nil, "invalid.payload.in.context")
-			return
-		}
-		err := ds.LeaveChannel(r.Context(), channelId, payload.UserId)
+		err = ds.LeaveChannel(r.Context(), channelId, userId)
 		if err != nil {
 			rest.AddResponseToResponseWritter(w, nil, err.Error())
 			return
 		}
 		rest.AddResponseToResponseWritter(w, nil, "")
+	}
+}
+
+func (server *Server) GetChannelMessages(cs chatting.Service) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		channelId, ok := vars["channel_id"]
+		if !ok {
+			rest.AddResponseToResponseWritter(w, nil, "channel.id.not.found")
+			return
+		}
+		limit, err := strconv.ParseUint(r.URL.Query().Get("limit"), 10, 64)
+		if err != nil {
+			rest.AddResponseToResponseWritter(w, nil, "invalid.limit")
+			return
+		}
+		offset, err := strconv.ParseUint(r.URL.Query().Get("offset"), 10, 64)
+		if err != nil {
+			rest.AddResponseToResponseWritter(w, nil, "invalid.offset")
+			return
+		}
+		userId, err := server.getUserIdFromToken(r)
+		if err != nil {
+			rest.AddResponseToResponseWritter(w, nil, err.Error())
+			return
+		}
+		msgs, err := cs.GetChannelMessages(r.Context(), channelId, userId, limit, offset)
+		if err != nil {
+			rest.AddResponseToResponseWritter(w, nil, err.Error())
+			return
+		}
+		rest.AddResponseToResponseWritter(w, msgs, "")
 	}
 }

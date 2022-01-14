@@ -13,6 +13,8 @@ type Service interface {
 	GetWorkspaceByWorkspaceId(ctx context.Context, workspaceId string) (Workspace, error)
 	GetChannelByChannelId(ctx context.Context, channelId string) (Channel, error)
 	VerifyAndGetChannel(ctx context.Context, workspaceId string, channelId string) (Channel, error)
+	VerfiyDeleteWorkspace(ctx context.Context, workspaceId string, userId string) error
+	VerfiyDeleteChannel(ctx context.Context, channelId string, userId string) error
 }
 
 type service struct {
@@ -71,10 +73,12 @@ func (s *service) GetWorkspaceByWorkspaceId(ctx context.Context, workspaceId str
 		return Workspace{}, err
 	}
 	c, err := s.r.GetDefaultChannel(ctx, workspaceId)
-	if err != nil {
+	if err != nil && err != sql.ErrNoRows {
 		return Workspace{}, err
 	}
-	w.ChannelList = []Channel{c}
+	if err != sql.ErrNoRows {
+		w.ChannelList = []Channel{c}
+	}
 	return w, nil
 }
 
@@ -112,4 +116,30 @@ func (s *service) VerifyAndGetChannel(ctx context.Context, workspaceId string, c
 		return Channel{}, errors.New("channel.id.not.found")
 	}
 	return channel, nil
+}
+
+func (s *service) VerfiyDeleteWorkspace(ctx context.Context, workspaceId string, userId string) error {
+
+	w, err := s.r.GetWorkspaceByWorkspaceId(ctx, workspaceId)
+	if err == sql.ErrNoRows {
+		return errors.New("workspace.id.not.found")
+	} else if w.CreatorId != userId {
+		return errors.New("invalid.delete.workspace.authority")
+	} else if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s *service) VerfiyDeleteChannel(ctx context.Context, channelId string, userId string) error {
+
+	c, err := s.GetChannelByChannelId(ctx, channelId)
+	if c.IsDefault {
+		return errors.New("failed.to.delete.default.channel")
+	} else if c.CreatorId != userId {
+		return errors.New("invalid.delete.workspace.authority")
+	} else if err != nil {
+		return errors.New("invalid.channel.id")
+	}
+	return nil
 }

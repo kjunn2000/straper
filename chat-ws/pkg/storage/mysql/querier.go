@@ -18,6 +18,7 @@ type Querier interface {
 	CreateUserAccessInfo(ctx context.Context, params CreateUserAccessInfo) error
 	GetUserDetailByUsername(ctx context.Context, username string) (account.UserDetail, error)
 	GetUserDetailByUserId(ctx context.Context, userId string) (account.UserDetail, error)
+	GetUserInfoByUserId(ctx context.Context, userId string) (chatting.UserDetail, error)
 	GetUserDetailByEmail(ctx context.Context, email string) (account.UserDetail, error)
 	GetUserCredentialByUsername(ctx context.Context, username string) (auth.User, error)
 	GetUserCredentialByUserId(ctx context.Context, userId string) (auth.User, error)
@@ -58,4 +59,11 @@ type Querier interface {
 	UpdateChannel(ctx context.Context, channel editing.Channel) error
 	DeleteChannel(ctx context.Context, channelId string) error
 	RemoveUserFromChannel(ctx context.Context, channelId string, userId string) error
+
+	// message
+	CreateMessage(ctx context.Context, message *chatting.Message) error
+	GetChannelMessages(ctx context.Context, channelId string, limit, offset uint64) ([]chatting.Message, error)
+	GetAllChannelMessages(ctx context.Context, channelId string) ([]chatting.Message, error)
+	GetAllChannelMessagesByWorkspaceId(ctx context.Context, workspaceId string) ([]chatting.Message, error)
+	UpdateChannelAccessTime(ctx context.Context, channelId string, userId string) error
 }

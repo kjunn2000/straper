@@ -52,21 +52,26 @@ CREATE TABLE `channel` (
   `channel_name` VARCHAR(255) NOT NULL,
   `workspace_id` CHAR(36) NOT NULL,
   `creator_id` VARCHAR(255) NOT NULL,
+  `is_default` BOOLEAN NOT NULL,
   `created_date` DATETIME NOT NULL DEFAULT (now())
 );
 
 CREATE TABLE `channel_user` (
   `channel_id` CHAR(36),
   `user_id` VARCHAR(255),
+  `last_accessed` DATETIME NOT NULL DEFAULT (now()),
   PRIMARY KEY (`channel_id`, `user_id`)
 );
 
 CREATE TABLE `message` (
   `message_id` CHAR(36) PRIMARY KEY,
   `type` VARCHAR(36) NOT NULL,
-  `content` LONGTEXT NOT NULL,
   `channel_id` CHAR(36) NOT NULL,
-  `creator_id` VARCHAR(255) NOT NULL
+  `creator_id` CHAR(36) NOT NULL,
+  `content` LONGTEXT NOT NULL,
+  `file_name` VARCHAR(255),
+  `file_type` VARCHAR(255),
+  `created_date` DATETIME NOT NULL DEFAULT (now())
 );
 
 CREATE TABLE `task_board` (

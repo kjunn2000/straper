@@ -3,7 +3,6 @@ package handler
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"net/http"
 
 	"github.com/go-playground/validator/v10"
@@ -89,6 +88,12 @@ func (server *Server) UpdateAccount(as account.Service) func(http.ResponseWriter
 			rest.AddResponseToResponseWritter(w, nil, err.Error())
 			return
 		}
+		userId, err := server.getUserIdFromToken(r)
+		if err != nil {
+			rest.AddResponseToResponseWritter(w, nil, err.Error())
+			return
+		}
+		user.UserId = userId
 		err = as.UpdateUser(r.Context(), user)
 		if err != nil {
 			rest.AddResponseToResponseWritter(w, nil, err.Error())
@@ -159,6 +164,5 @@ func (server *Server) UpdatePassword(as account.Service) func(http.ResponseWrite
 func validatePassword(fl validator.FieldLevel) bool {
 	password := fl.Field().String()
 	score := zxcvbn.PasswordStrength(password, []string{})
-	fmt.Println(score.Score)
 	return score.Score >= 2
 }

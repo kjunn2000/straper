@@ -37,7 +37,7 @@ func (s *service) CreateWorkspace(ctx context.Context, newWorkspaceName, userId 
 		CreatorId:   userId,
 		CreatedDate: time.Now(),
 	}
-	c := NewChannel(uuid.New().String(), "General", w.Id, userId, time.Now())
+	c := NewChannel(uuid.New().String(), "General", w.Id, userId, true, time.Now())
 	w.ChannelList = []Channel{c}
 	w, err := s.r.CreateNewWorkspace(ctx, w, c, userId)
 	if err != nil {
@@ -55,7 +55,7 @@ func (s *service) AddUserToWorkspace(ctx context.Context, workspaceId string, us
 }
 
 func (s *service) CreateChannel(ctx context.Context, workspaceId, channelName, userId string) (Channel, error) {
-	c := NewChannel(uuid.New().String(), channelName, workspaceId, userId, time.Now())
+	c := NewChannel(uuid.New().String(), channelName, workspaceId, userId, false, time.Now())
 	channel, err := s.r.CreateNewChannel(ctx, c, userId)
 	if err != nil {
 		return channel, err
