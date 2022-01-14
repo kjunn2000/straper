@@ -5,6 +5,9 @@ import { FaWindowClose } from "react-icons/fa";
 import AccountInfo from "../components/settings/AccountInfo";
 import UserPassword from "../components/settings/UserPassword";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
+import { logOut } from "../service/logout";
+import ActionDialog from "../components/dialog/ActionDialog";
+import { set } from "react-hook-form";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -17,6 +20,12 @@ function Setting() {
   });
 
   const history = useHistory();
+  const [isConfirmLogoutDialogOpen, setConfirmLogoutDialogOpen] =
+    useState(false);
+
+  const handleLogOut = () => {
+    setConfirmLogoutDialogOpen(true);
+  };
 
   return (
     <div className="w-full h-screen" style={darkGrayBg}>
@@ -45,6 +54,13 @@ function Setting() {
                   {category.toUpperCase()}
                 </Tab>
               ))}
+              <button
+                onClick={() => handleLogOut()}
+                className="w-full py-3 px-5 text-sm font-medium text-left text-gray-300 rounded transition-all duration-300 
+                    drop-shadow-lg hover:bg-red-600"
+              >
+                Log Out
+              </button>
             </Tab.List>
           </div>
           <Tab.Panels className="w-full h-full col-span-2">
@@ -56,6 +72,16 @@ function Setting() {
           </Tab.Panels>
         </div>
       </Tab.Group>
+      <ActionDialog
+        isOpen={isConfirmLogoutDialogOpen}
+        setIsOpen={setConfirmLogoutDialogOpen}
+        title="Confirm Logout Straper"
+        content="You will be completely log out from straper once you confirm."
+        buttonText="Log Out"
+        buttonStatus="fail"
+        buttonAction={() => logOut()}
+        closeButtonText="Close"
+      />
     </div>
   );
 }

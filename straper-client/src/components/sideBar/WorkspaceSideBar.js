@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import useWorkspaceStore from "../../store/workspaceStore";
 import { useHistory } from "react-router";
-import { logOut } from "../../service/logout";
 import AddDialog from "../dialog/AddDialog";
 import api from "../../axios/api";
 import JoinDialog from "../dialog/JoinDialog";
@@ -101,14 +100,6 @@ function WorkspaceSidebar() {
           bgColor="bg-indigo-500"
           hoverBgColor="hover:bg-indigo-800"
         />
-        <div className="absolute bottom-5 left-5">
-          <SidebarIcon
-            content="LogOut"
-            click={() => logOut(false)}
-            bgColor="bg-indigo-500"
-            hoverBgColor="hover:bg-indigo-800"
-          />
-        </div>
       </div>
       <AddDialog
         isOpen={isAddWorkspaceDialogOpen}
