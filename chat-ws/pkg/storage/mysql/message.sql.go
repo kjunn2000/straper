@@ -46,7 +46,7 @@ func (q *Queries) GetAllChannelMessages(ctx context.Context, channelId string) (
 
 func (q *Queries) GetAllChannelMessagesByWorkspaceId(ctx context.Context, workspaceId string) ([]chatting.Message, error) {
 	msgs := make([]chatting.Message, 0)
-	sql, arg, err := sq.Select("message_id", "type", "message.channel_id", "creator_id", "content", "file_name", "file_type", "message.created_date").
+	sql, arg, err := sq.Select("message_id", "type", "message.channel_id", "message.creator_id", "content", "file_name", "file_type", "message.created_date").
 		From("message").Join("channel c on message.channel_id = c.channel_id").
 		Where(sq.Eq{"c.workspace_id": workspaceId}).ToSql()
 	if err != nil {

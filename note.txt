@@ -1,0 +1,19 @@
+User,
+ To view other users’ status
+
+ To manage tasks by using the task board
+ To assign tasks on the task board to team members
+ To add checklist to the task on the task board
+ To provide comments for the tasks on the task board
+ To sort tasks on the task board by the task priority or created time
+
+ To link tasks on the task board to the corresponding ticket if exists
+
+ To raise tickets with detailed description and attachments
+ To close tickets after completed
+
+Straper allows Administrator,
+ To login and logout from the system
+ To view and manage all the users
+ To view and manage all the workspaces
+
