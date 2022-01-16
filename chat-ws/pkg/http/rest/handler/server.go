@@ -13,7 +13,9 @@ import (
 
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/account"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/auth"
+	"github.com/kjunn2000/straper/chat-ws/pkg/domain/board"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/chatting"
+	"github.com/kjunn2000/straper/chat-ws/pkg/domain/websocket"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/adding"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/deleting"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/editing"
@@ -91,17 +93,19 @@ func (server *Server) SetServerRoute() (*mux.Router, error) {
 	accountService := account.NewService(server.log, server.store, server.config)
 	authService := auth.NewService(server.log, server.store, server.tokenMaker, server.config)
 	addingService := adding.NewService(server.log, server.store)
-	chattingService := chatting.NewService(server.log, server.store, server.redisClient)
-	chattingService.SetUpWSServer(context.Background())
+	chattingService := chatting.NewService(server.log, server.store)
+	boardService := board.NewService(server.log, server.store)
 	listingService := listing.NewService(server.log, server.store)
 	editingService := editing.NewService(server.log, server.store)
 	deletingService := deleting.NewService(server.log, server.store)
+	websocketService := websocket.NewService(server.log, server.store, server.redisClient, chattingService, boardService)
+	websocketService.SetUpWSServer(context.Background())
 
 	server.SetUpAuthRouter(mr, authService)
 	server.SetUpAccountRouter(mr, accountService)
 	server.SetUpWorkspaceRouter(mr, addingService, listingService, editingService, deletingService, chattingService)
 	server.SetUpChannelRouter(mr, addingService, listingService, editingService, deletingService, chattingService)
-	server.SetUpWebsocketRouter(mr, chattingService)
+	server.SetUpWebsocketRouter(mr, websocketService, chattingService, boardService)
 
 	server.httpServer.Handler = getCORSHandler()(mr)
 	return mr, nil

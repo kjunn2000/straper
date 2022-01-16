@@ -16,7 +16,7 @@ import (
 
 	"github.com/go-redis/redis/v8"
 	"github.com/google/uuid"
-	"github.com/gorilla/websocket"
+	ws "github.com/kjunn2000/straper/chat-ws/pkg/domain/websocket"
 	"go.uber.org/zap"
 )
 
@@ -26,8 +26,7 @@ var (
 )
 
 type Service interface {
-	SetUpWSServer(ctx context.Context) error
-	SetUpUserConnection(ctx context.Context, userId string, conn *websocket.Conn)
+	HandleBroadcast(ctx context.Context, msg *ws.Message, publishPubSub func(context.Context, *ws.Message) error) error
 	GetChannelMessages(ctx context.Context, channelId string, userId string, limit, offset uint64) ([]Message, error)
 	DeleteSeaweedfsMessagesByChannelId(ctx context.Context, channelId string) error
 	DeleteSeaweedfsMessagesByWorkspaceId(ctx context.Context, workspaceId string) error
@@ -68,111 +67,76 @@ type Location struct {
 }
 
 type service struct {
-	log      *zap.Logger
-	store    Repository
-	pubsub   PubSub
-	wsServer *WSServer
+	log   *zap.Logger
+	store Repository
 }
 
-func NewService(log *zap.Logger, store Repository, pubsub PubSub) *service {
+func NewService(log *zap.Logger, store Repository) *service {
 	return &service{
-		log:      log,
-		store:    store,
-		pubsub:   pubsub,
-		wsServer: NewWSServer(),
+		log:   log,
+		store: store,
 	}
 }
 
-func (s *service) SetUpWSServer(ctx context.Context) error {
-	go s.subscribePubSub(ctx)
-	go func(ctx context.Context) error {
-		for {
-			select {
-			case user := <-s.wsServer.register:
-				s.handleRegister(ctx, user)
-			case user := <-s.wsServer.unregister:
-				s.handleUnregister(ctx, user.UserId)
-			case msg := <-s.wsServer.broadcast:
-				newMsg, err := s.saveMessage(ctx, msg)
-				if err != nil {
-					s.log.Warn("Fail to save message.", zap.Error(err))
-					return err
-				}
-				userDetail, err := s.store.GetUserInfoByUserId(ctx, newMsg.CreatorId)
-				if err != nil {
-					s.log.Warn("Fail to fetch user data.", zap.Error(err))
-					return err
-				}
-				msg.UserDetail = userDetail
-				if err := s.publishPubSub(ctx, newMsg); err != nil {
-					s.log.Warn("Fail to publish message.", zap.Error(err))
-					return err
-				}
-			}
-		}
-	}(ctx)
-	return nil
-}
-
-func (s *service) SetUpUserConnection(ctx context.Context, userId string, conn *websocket.Conn) {
-	user := NewUser(userId, conn, s.wsServer)
-	s.wsServer.register <- user
-	go user.readMsg(ctx, s.log)
-}
-
-func (s *service) handleRegister(ctx context.Context, user *User) {
-	s.wsServer.activeUser[user.UserId] = user
-}
-
-func (s *service) handleUnregister(ctx context.Context, userId string) {
-	delete(s.wsServer.activeUser, userId)
-}
-
-func (s *service) handleBroadcast(ctx context.Context, msg *Message) error {
-	userList, err := s.store.GetUserListByChannelId(ctx, msg.ChannelId)
+func (s *service) HandleBroadcast(ctx context.Context, msg *ws.Message, publishPubSub func(context.Context, *ws.Message) error) error {
+	newMsg, err := s.saveMessage(ctx, msg)
 	if err != nil {
+		s.log.Warn("Fail to save message.", zap.Error(err))
 		return err
 	}
-	for _, user := range userList {
-		u, ok := s.wsServer.activeUser[user.UserId]
-		if !ok {
-			continue
-		}
-		err = s.broadcastMessage(ctx, u.UserId, u.conn, msg)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (s *service) broadcastMessage(ctx context.Context, userId string, conn *websocket.Conn, msg *Message) error {
-	err := conn.WriteJSON(msg)
+	newMsg, err = s.fetchUserDetail(ctx, newMsg)
 	if err != nil {
-		s.log.Info("Unable to write json message.")
+		s.log.Warn("Fail to save message.", zap.Error(err))
 		return err
 	}
-	s.log.Info("Sent message to user id : ", zap.String("user_id", userId))
+	if err := publishPubSub(ctx, newMsg); err != nil {
+		s.log.Warn("Fail to publish message.", zap.Error(err))
+		return err
+	}
 	return nil
 }
 
-func (s *service) saveMessage(ctx context.Context, msg *Message) (*Message, error) {
+func (s *service) saveMessage(ctx context.Context, msg *ws.Message) (*ws.Message, error) {
 	messageId, err := uuid.NewRandom()
 	if err != nil {
-		return &Message{}, err
+		return &ws.Message{}, err
 	}
-	msg.MessageId = messageId.String()
-	msg.CreatedDate = time.Now()
-	if msg.Type == File {
-		fid, err := s.saveFile(ctx, msg.FileBytes)
+	bytePayload, err := msg.Payload.MarshalJSON()
+	if err != nil {
+		return &ws.Message{}, err
+	}
+	var message Message
+	if err := json.Unmarshal(bytePayload, &message); err != nil {
+		return &ws.Message{}, err
+	}
+
+	message.MessageId = messageId.String()
+	message.CreatedDate = time.Now()
+	if message.Type == File {
+		fid, err := s.saveFile(ctx, message.FileBytes)
 		if err != nil {
-			return &Message{}, err
+			return &ws.Message{}, err
 		}
-		msg.Content = fid
+		message.Content = fid
 	}
-	if err := s.store.CreateMessage(ctx, msg); err != nil {
-		return &Message{}, err
+	if err := s.store.CreateMessage(ctx, &message); err != nil {
+		return &ws.Message{}, err
 	}
+	newMsg, err := json.Marshal(message)
+	if err != nil {
+		return &ws.Message{}, err
+	}
+	msg.Payload.UnmarshalJSON(newMsg)
+	return msg, nil
+}
+
+func (s *service) fetchUserDetail(ctx context.Context, msg *ws.Message) (*ws.Message, error) {
+	userDetail, err := s.store.GetUserInfoByUserId(ctx, msg.SenderId)
+	if err != nil {
+		s.log.Warn("Fail to fetch user data.", zap.Error(err))
+		return &ws.Message{}, err
+	}
+	msg.UserDetail = userDetail
 	return msg, nil
 }
 
@@ -222,37 +186,6 @@ func (s *service) SendMultiPartRequest(fileBytes []byte, url string) error {
 	_, err = client.Do(req)
 	if err != nil {
 		s.log.Warn("Multipart post request to seaweedfs server failed", zap.Error(err))
-		return err
-	}
-	return nil
-}
-
-func (s *service) subscribePubSub(ctx context.Context) error {
-	pubSubChannel := s.pubsub.SubscribeToChannel(ctx, ChannelMessage)
-
-	for data := range pubSubChannel {
-
-		var msg Message
-
-		if err := json.Unmarshal([]byte(data.Payload), &msg); err != nil {
-			panic(err)
-		}
-
-		if err := s.handleBroadcast(ctx, &msg); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (s *service) publishPubSub(ctx context.Context, msg *Message) error {
-	payload, err := json.Marshal(msg)
-	if err != nil {
-		s.log.Warn("Fail to marshal message", zap.Error(err))
-		return err
-	}
-	if err := s.pubsub.PublishToChannel(ctx, ChannelMessage, payload); err != nil {
-		s.log.Warn("Fail to publish message to pub sub server", zap.Error(err))
 		return err
 	}
 	return nil

@@ -5,7 +5,7 @@ import (
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
-	"github.com/kjunn2000/straper/chat-ws/pkg/domain/chatting"
+	"github.com/kjunn2000/straper/chat-ws/pkg/domain/websocket"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/adding"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/editing"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/listing"
@@ -105,13 +105,13 @@ func (q *Queries) GetChannelListByWorkspaceId(ctx context.Context, workspaceId s
 	return channels, nil
 }
 
-func (q *Queries) GetUserListByChannelId(ctx context.Context, channelId string) ([]chatting.UserData, error) {
+func (q *Queries) GetUserListByChannelId(ctx context.Context, channelId string) ([]websocket.UserData, error) {
 	sql, args, err := sq.Select("user_id").From("channel_user").Where(sq.Eq{"channel_id": channelId}).ToSql()
 	if err != nil {
 		q.log.Info("Unable to create select client list sql.", zap.Error(err))
 		return nil, err
 	}
-	var clientList []chatting.UserData
+	var clientList []websocket.UserData
 	err = q.db.Select(&clientList, sql, args...)
 	if err != nil {
 		q.log.Info("Failed to select client list.", zap.Error(err))

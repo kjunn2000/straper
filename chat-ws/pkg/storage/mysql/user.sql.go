@@ -7,7 +7,7 @@ import (
 	sq "github.com/Masterminds/squirrel"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/account"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/auth"
-	"github.com/kjunn2000/straper/chat-ws/pkg/domain/chatting"
+	"github.com/kjunn2000/straper/chat-ws/pkg/domain/websocket"
 	"go.uber.org/zap"
 )
 
@@ -89,17 +89,17 @@ func (q *Queries) GetUserDetailByUserId(ctx context.Context, userId string) (acc
 	return user, nil
 }
 
-func (q *Queries) GetUserInfoByUserId(ctx context.Context, userId string) (chatting.UserDetail, error) {
-	var user chatting.UserDetail
+func (q *Queries) GetUserInfoByUserId(ctx context.Context, userId string) (websocket.UserDetail, error) {
+	var user websocket.UserDetail
 	sta, arg, err := sq.Select("user_id", "username", "email", "phone_no").
 		From("user_detail").Where(sq.Eq{"user_id": userId}).Limit(1).ToSql()
 	if err != nil {
 		q.log.Warn("Failed to create select sql.")
-		return chatting.UserDetail{}, err
+		return websocket.UserDetail{}, err
 	}
 	err = q.db.Get(&user, sta, arg...)
 	if err != nil {
-		return chatting.UserDetail{}, err
+		return websocket.UserDetail{}, err
 	}
 	return user, nil
 }

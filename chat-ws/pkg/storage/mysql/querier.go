@@ -6,6 +6,7 @@ import (
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/account"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/auth"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/chatting"
+	"github.com/kjunn2000/straper/chat-ws/pkg/domain/websocket"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/adding"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/editing"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/listing"
@@ -18,7 +19,7 @@ type Querier interface {
 	CreateUserAccessInfo(ctx context.Context, params CreateUserAccessInfo) error
 	GetUserDetailByUsername(ctx context.Context, username string) (account.UserDetail, error)
 	GetUserDetailByUserId(ctx context.Context, userId string) (account.UserDetail, error)
-	GetUserInfoByUserId(ctx context.Context, userId string) (chatting.UserDetail, error)
+	GetUserInfoByUserId(ctx context.Context, userId string) (websocket.UserDetail, error)
 	GetUserDetailByEmail(ctx context.Context, email string) (account.UserDetail, error)
 	GetUserCredentialByUsername(ctx context.Context, username string) (auth.User, error)
 	GetUserCredentialByUserId(ctx context.Context, userId string) (auth.User, error)
@@ -53,7 +54,7 @@ type Querier interface {
 	GetChannelByChannelId(ctx context.Context, channelId string) (listing.Channel, error)
 	GetChannelsByUserId(ctx context.Context, userId string) ([]listing.Channel, error)
 	GetChannelListByWorkspaceId(ctx context.Context, workspaceId string) ([]listing.Channel, error)
-	GetUserListByChannelId(ctx context.Context, channelId string) ([]chatting.UserData, error)
+	// GetUserListByChannelId(ctx context.Context, channelId string) ([]chatting.UserData, error)
 	GetDefaultChannel(ctx context.Context, workspaceId string) (listing.Channel, error)
 	GetDefaultChannelByWorkspaceId(ctx context.Context, workspaceId string) (adding.Channel, error)
 	UpdateChannel(ctx context.Context, channel editing.Channel) error
@@ -66,4 +67,8 @@ type Querier interface {
 	GetAllChannelMessages(ctx context.Context, channelId string) ([]chatting.Message, error)
 	GetAllChannelMessagesByWorkspaceId(ctx context.Context, workspaceId string) ([]chatting.Message, error)
 	UpdateChannelAccessTime(ctx context.Context, channelId string, userId string) error
+
+	// websocket
+	GetUserListByChannelId(ctx context.Context, channelId string) ([]websocket.UserData, error)
+	GetUserListByWorkspaceId(ctx context.Context, workspaceId string) ([]websocket.UserData, error)
 }

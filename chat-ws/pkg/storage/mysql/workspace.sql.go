@@ -4,6 +4,7 @@ import (
 	"context"
 
 	sq "github.com/Masterminds/squirrel"
+	"github.com/kjunn2000/straper/chat-ws/pkg/domain/websocket"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/adding"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/editing"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/listing"
@@ -123,4 +124,19 @@ func (q *Queries) RemoveUserFromWorkspace(ctx context.Context, workspaceId, user
 		return err
 	}
 	return nil
+}
+
+func (q *Queries) GetUserListByWorkspaceId(ctx context.Context, workspaceId string) ([]websocket.UserData, error) {
+	sql, args, err := sq.Select("user_id").From("workspace_user").Where(sq.Eq{"workspace_id": workspaceId}).ToSql()
+	if err != nil {
+		q.log.Info("Unable to create select client list sql.", zap.Error(err))
+		return nil, err
+	}
+	var clientList []websocket.UserData
+	err = q.db.Select(&clientList, sql, args...)
+	if err != nil {
+		q.log.Info("Failed to select client list.", zap.Error(err))
+		return nil, err
+	}
+	return clientList, err
 }

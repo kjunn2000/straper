@@ -5,7 +5,9 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
+	"github.com/kjunn2000/straper/chat-ws/pkg/domain/board"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/chatting"
+	ws "github.com/kjunn2000/straper/chat-ws/pkg/domain/websocket"
 	"github.com/kjunn2000/straper/chat-ws/pkg/http/rest"
 	"go.uber.org/zap"
 )
@@ -16,12 +18,12 @@ var Upgrader websocket.Upgrader = websocket.Upgrader{
 	CheckOrigin:     func(r *http.Request) bool { return true },
 }
 
-func (server *Server) SetUpWebsocketRouter(mr *mux.Router, cs chatting.Service) {
+func (server *Server) SetUpWebsocketRouter(mr *mux.Router, ws ws.Service, cs chatting.Service, bs board.Service) {
 	cr := mr.PathPrefix("/protected").Subrouter()
-	cr.HandleFunc("/ws/{userId}", server.HandleUpgrade(cs))
+	cr.HandleFunc("/ws/{userId}", server.HandleUpgrade(ws, cs, bs))
 }
 
-func (server *Server) HandleUpgrade(cs chatting.Service) func(http.ResponseWriter, *http.Request) {
+func (server *Server) HandleUpgrade(ws ws.Service, cs chatting.Service, bs board.Service) func(http.ResponseWriter, *http.Request) {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		userId, ok := vars["userId"]
@@ -35,7 +37,7 @@ func (server *Server) HandleUpgrade(cs chatting.Service) func(http.ResponseWrite
 			rest.AddResponseToResponseWritter(rw, nil, err.Error())
 			return
 		}
-		cs.SetUpUserConnection(r.Context(), userId, conn)
+		ws.SetUpUserConnection(r.Context(), userId, conn)
 		server.log.Info("Successful open websocket connection.", zap.String("user_id", userId))
 	}
 }

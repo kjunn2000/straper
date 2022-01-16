@@ -1,10 +1,13 @@
 package chatting
 
-import "context"
+import (
+	"context"
+
+	"github.com/kjunn2000/straper/chat-ws/pkg/domain/websocket"
+)
 
 type Repository interface {
-	GetUserListByChannelId(ctx context.Context, channelId string) ([]UserData, error)
-	GetUserInfoByUserId(ctx context.Context, userId string) (UserDetail, error)
+	GetUserInfoByUserId(ctx context.Context, userId string) (websocket.UserDetail, error)
 	CreateMessage(ctx context.Context, message *Message) error
 	GetChannelMessages(ctx context.Context, channelId string, limit, offset uint64) ([]Message, error)
 	GetAllChannelMessages(ctx context.Context, channelId string) ([]Message, error)
