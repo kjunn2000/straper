@@ -105,6 +105,7 @@ func (server *Server) SetServerRoute() (*mux.Router, error) {
 	server.SetUpAccountRouter(mr, accountService)
 	server.SetUpWorkspaceRouter(mr, addingService, listingService, editingService, deletingService, chattingService)
 	server.SetUpChannelRouter(mr, addingService, listingService, editingService, deletingService, chattingService)
+	server.SetUpBoardRouter(mr, boardService)
 	server.SetUpWebsocketRouter(mr, websocketService, chattingService, boardService)
 
 	server.httpServer.Handler = getCORSHandler()(mr)

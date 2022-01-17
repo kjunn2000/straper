@@ -8,4 +8,7 @@ import (
 
 type Repository interface {
 	GetUserListByWorkspaceId(ctx context.Context, workspaceId string) ([]ws.UserData, error)
+	GetTaskBoardByWorkspaceId(ctx context.Context, workspaceId string) (TaskBoard, error)
+	GetTaskListsByBoardId(ctx context.Context, boardId string) ([]TaskList, error)
+	GetCardListByListId(ctx context.Context, listId string) ([]Card, error)
 }

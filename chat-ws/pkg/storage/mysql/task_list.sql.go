@@ -9,8 +9,8 @@ import (
 )
 
 func (q *Queries) CreateTaskList(ctx context.Context, taskList board.TaskList) error {
-	sql, args, err := sq.Insert("task_list").Columns("list_id", "list_name", "board_id", "order").
-		Values(taskList.ListId, taskList.ListName, taskList.BoardId, taskList.Order).ToSql()
+	sql, args, err := sq.Insert("task_list").Columns("list_id", "list_name", "board_id", "order_index").
+		Values(taskList.ListId, taskList.ListName, taskList.BoardId, taskList.OrderIndex).ToSql()
 	if err != nil {
 		q.log.Info("Unable to create insert task list sql.", zap.Error(err))
 		return err
@@ -23,8 +23,8 @@ func (q *Queries) CreateTaskList(ctx context.Context, taskList board.TaskList) e
 	return nil
 }
 
-func (q *Queries) GetTaskListByBoardId(ctx context.Context, boardId string) ([]board.TaskList, error) {
-	sql, args, err := sq.Select("list_id", "list_name", "board_id", "order").From("task_list").
+func (q *Queries) GetTaskListsByBoardId(ctx context.Context, boardId string) ([]board.TaskList, error) {
+	sql, args, err := sq.Select("list_id", "list_name", "board_id", "order_index").From("task_list").
 		Where(sq.Eq{"board_id": boardId}).ToSql()
 	if err != nil {
 		q.log.Info("Unable to create select task list sql.", zap.Error(err))
@@ -42,7 +42,7 @@ func (q *Queries) GetTaskListByBoardId(ctx context.Context, boardId string) ([]b
 func (q *Queries) UpdateTaskList(ctx context.Context, taskList board.TaskList) error {
 	sql, args, err := sq.Update("task_list").
 		Set("list_name", taskList.ListName).
-		Set("order", taskList.Order).
+		Set("order_index", taskList.OrderIndex).
 		Where(sq.Eq{"list_id": taskList.ListId}).ToSql()
 	if err != nil {
 		q.log.Info("Failed to create update task list sql.", zap.Error(err))

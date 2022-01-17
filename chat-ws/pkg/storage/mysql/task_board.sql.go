@@ -24,7 +24,7 @@ func (q *Queries) CreateBoard(ctx context.Context, board board.TaskBoard) error 
 }
 
 func (q *Queries) GetTaskBoardByWorkspaceId(ctx context.Context, workspaceId string) (board.TaskBoard, error) {
-	sql, args, err := sq.Select("board_id", "board_name", "workspace_id").From("task_board").
+	sql, args, err := sq.Select("board_id, board_name, workspace_id").From("task_board").
 		Where(sq.Eq{"workspace_id": workspaceId}).ToSql()
 	if err != nil {
 		q.log.Info("Unable to create select task board sql.", zap.Error(err))

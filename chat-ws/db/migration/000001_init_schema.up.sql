@@ -84,7 +84,7 @@ CREATE TABLE `task_list` (
   `list_id` CHAR(36) PRIMARY KEY,
   `list_name` VARCHAR(255) NOT NULL,
   `board_id` CHAR(36) NOT NULL,
-  `order` INT NOT NULL
+  `order_index` INT NOT NULL
 );
 
 CREATE TABLE `card` (
@@ -97,7 +97,7 @@ CREATE TABLE `card` (
   `creator_id` VARCHAR(255) NOT NULL,
   `created_date` DATETIME NOT NULL DEFAULT (now()),
   `due_date` DATETIME NOT NULL,
-  `order` INT NOT NULL
+  `order_index` INT NOT NULL
 );
 
 CREATE TABLE `card_user` (

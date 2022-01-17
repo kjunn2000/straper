@@ -79,7 +79,7 @@ type Querier interface {
 	UpdateTaskBoard(ctx context.Context, board board.TaskBoard) error
 
 	CreateTaskList(ctx context.Context, taskList board.TaskList) error
-	GetTaskListByBoardId(ctx context.Context, boardId string) ([]board.TaskList, error)
+	GetTaskListsByBoardId(ctx context.Context, boardId string) ([]board.TaskList, error)
 	UpdateTaskList(ctx context.Context, taskList board.TaskList) error
 	DeleteTaskList(ctx context.Context, listId string) error
 

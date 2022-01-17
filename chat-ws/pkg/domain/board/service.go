@@ -2,13 +2,14 @@ package board
 
 import (
 	"context"
+	"database/sql"
 
 	ws "github.com/kjunn2000/straper/chat-ws/pkg/domain/websocket"
 	"go.uber.org/zap"
 )
 
 type Service interface {
-	GetBoardData(ctx context.Context, workspaceId string)
+	GetTaskBoardData(ctx context.Context, workspaceId string) (TaskBoardDataResponse, error)
 	HandleBroadcast(ctx context.Context, msg *ws.Message, publishPubSub func(context.Context, *ws.Message) error) error
 	GetBoarcastUserListByMessageType(ctx context.Context, msg *ws.Message) ([]ws.UserData, error)
 }
@@ -25,8 +26,26 @@ func NewService(log *zap.Logger, store Repository) *service {
 	}
 }
 
-func (service *service) GetBoardData(ctx context.Context, workspaceId string) {
-
+func (service *service) GetTaskBoardData(ctx context.Context, workspaceId string) (TaskBoardDataResponse, error) {
+	taskBoard, err := service.store.GetTaskBoardByWorkspaceId(ctx, workspaceId)
+	if err != nil {
+		return TaskBoardDataResponse{}, err
+	}
+	var taskBoardData TaskBoardDataResponse
+	taskBoardData.TaskBoard = taskBoard
+	taskLists, err := service.store.GetTaskListsByBoardId(ctx, taskBoard.BoardId)
+	if err != nil && err != sql.ErrNoRows {
+		return TaskBoardDataResponse{}, err
+	}
+	for i, taskList := range taskLists {
+		cardList, err := service.store.GetCardListByListId(ctx, taskList.ListId)
+		if err != nil && err != sql.ErrNoRows {
+			return TaskBoardDataResponse{}, err
+		}
+		taskLists[i].CardList = cardList
+	}
+	taskBoardData.TaskLists = taskLists
+	return taskBoardData, err
 }
 
 func (service *service) HandleBroadcast(ctx context.Context, msg *ws.Message, publishPubSub func(context.Context, *ws.Message) error) error {

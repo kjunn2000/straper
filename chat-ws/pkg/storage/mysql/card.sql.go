@@ -10,9 +10,9 @@ import (
 
 func (q *Queries) CreateCard(ctx context.Context, card board.Card) error {
 	sql, args, err := sq.Insert("card").Columns("card_id", "title", "status", "priority", "list_id",
-		"description", "creator_id", "created_date", "due_data", "order").
+		"description", "creator_id", "created_date", "due_data", "order_index").
 		Values(card.CardId, card.Title, card.Status, card.Priority, card.ListId, card.Description,
-			card.CreatorId, card.CreatedDate, card.DueDate, card.Order).ToSql()
+			card.CreatorId, card.CreatedDate, card.DueDate, card.OrderIndex).ToSql()
 	if err != nil {
 		q.log.Info("Unable to create insert card sql.", zap.Error(err))
 		return err
@@ -26,8 +26,7 @@ func (q *Queries) CreateCard(ctx context.Context, card board.Card) error {
 }
 
 func (q *Queries) GetCardListByListId(ctx context.Context, listId string) ([]board.Card, error) {
-	sql, args, err := sq.Select("card_id", "title", "status", "priority", "list_id",
-		"description", "creator_id", "created_date", "due_data", "order").From("card").
+	sql, args, err := sq.Select("card_id, title, status, priority, list_id, description, creator_id, created_date, due_data, order_index").From("card").
 		Where(sq.Eq{"list_id": listId}).ToSql()
 	if err != nil {
 		q.log.Info("Unable to create select card sql.", zap.Error(err))
@@ -50,7 +49,7 @@ func (q *Queries) UpdateCard(ctx context.Context, params board.UpdateCardParams)
 		Set("list_id", params.ListId).
 		Set("description", params.Description).
 		Set("due_date", params.DueDate).
-		Set("order", params.Order).
+		Set("order_index", params.OrderIndex).
 		Where(sq.Eq{"card_id": params.CardId}).ToSql()
 	if err != nil {
 		q.log.Info("Failed to create update card sql.", zap.Error(err))

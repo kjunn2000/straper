@@ -12,10 +12,11 @@ type TaskBoard struct {
 }
 
 type TaskList struct {
-	ListId   string `json:"list_id" db:"list_id"`
-	ListName string `json:"list_name" db:"list_name"`
-	BoardId  string `json:"board_id" db:"board_id"`
-	Order    int    `json:"order" db:"order"`
+	ListId     string `json:"list_id" db:"list_id"`
+	ListName   string `json:"list_name" db:"list_name"`
+	BoardId    string `json:"board_id" db:"board_id"`
+	OrderIndex int    `json:"order_index" db:"order_index"`
+	CardList   []Card `json:"card_list"`
 }
 
 type Card struct {
@@ -28,7 +29,7 @@ type Card struct {
 	CreatorId   string    `json:"creator_id" db:"creator_id"`
 	CreatedDate time.Time `json:"created_date" db:"created_date"`
 	DueDate     time.Time `json:"due_date" db:"due_date"`
-	Order       int       `json:"order" db:"order"`
+	OrderIndex  int       `json:"order_index" db:"order_index"`
 }
 
 func (card *Card) Encode() ([]byte, error) {
@@ -67,5 +68,10 @@ type UpdateCardParams struct {
 	ListId      string    `json:"list_id"`
 	Description string    `json:"description" db:"description"`
 	DueDate     time.Time `json:"due_date" db:"due_date"`
-	Order       int       `json:"order" db:"order"`
+	OrderIndex  int       `json:"order_index" db:"order_index"`
+}
+
+type TaskBoardDataResponse struct {
+	TaskBoard TaskBoard  `json:"task_board"`
+	TaskLists []TaskList `json:"task_lists"`
 }
