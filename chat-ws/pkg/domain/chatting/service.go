@@ -236,6 +236,12 @@ func (s *service) GetChannelMessages(ctx context.Context, channelId string, user
 			msg.FileBytes = body
 			msgs[i] = msg
 		}
+		userDetail, err := s.store.GetUserInfoByUserId(ctx, msg.CreatorId)
+		if err != nil {
+			return []Message{}, err
+		} else {
+			msgs[i].UserDetail = userDetail
+		}
 	}
 	if err = s.store.UpdateChannelAccessTime(ctx, channelId, userId); err != nil {
 		return []Message{}, err

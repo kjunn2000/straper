@@ -55,7 +55,7 @@ const Message = ({ msg }) => {
           }`}
         >
           <span className="inline-block text-gray-300 pb-3">
-            {msg?.user_detail.creator_name}
+            {msg?.user_detail.username}
           </span>
 
           {msg.type === "MESSAGE" ? (
