@@ -6,7 +6,6 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
@@ -28,6 +27,7 @@ var (
 type Service interface {
 	HandleBroadcast(ctx context.Context, msg *ws.Message, publishPubSub func(context.Context, *ws.Message) error) error
 	GetChannelMessages(ctx context.Context, channelId string, userId string, limit, offset uint64) ([]Message, error)
+	GetBoarcastUserListByMessageType(ctx context.Context, msg *ws.Message) ([]ws.UserData, error)
 	DeleteSeaweedfsMessagesByChannelId(ctx context.Context, channelId string) error
 	DeleteSeaweedfsMessagesByWorkspaceId(ctx context.Context, workspaceId string) error
 }
@@ -79,12 +79,7 @@ func NewService(log *zap.Logger, store Repository) *service {
 }
 
 func (s *service) HandleBroadcast(ctx context.Context, msg *ws.Message, publishPubSub func(context.Context, *ws.Message) error) error {
-	newMsg, err := s.saveMessage(ctx, msg)
-	if err != nil {
-		s.log.Warn("Fail to save message.", zap.Error(err))
-		return err
-	}
-	newMsg, err = s.fetchUserDetail(ctx, newMsg)
+	newMsg, err := s.saveAndUpdateMessage(ctx, msg)
 	if err != nil {
 		s.log.Warn("Fail to save message.", zap.Error(err))
 		return err
@@ -96,17 +91,13 @@ func (s *service) HandleBroadcast(ctx context.Context, msg *ws.Message, publishP
 	return nil
 }
 
-func (s *service) saveMessage(ctx context.Context, msg *ws.Message) (*ws.Message, error) {
+func (s *service) saveAndUpdateMessage(ctx context.Context, msg *ws.Message) (*ws.Message, error) {
 	messageId, err := uuid.NewRandom()
 	if err != nil {
 		return &ws.Message{}, err
 	}
-	bytePayload, err := msg.Payload.MarshalJSON()
+	message, err := s.convertByteArrayToMessage(ctx, msg)
 	if err != nil {
-		return &ws.Message{}, err
-	}
-	var message Message
-	if err := json.Unmarshal(bytePayload, &message); err != nil {
 		return &ws.Message{}, err
 	}
 
@@ -122,6 +113,12 @@ func (s *service) saveMessage(ctx context.Context, msg *ws.Message) (*ws.Message
 	if err := s.store.CreateMessage(ctx, &message); err != nil {
 		return &ws.Message{}, err
 	}
+	userDetail, err := s.store.GetUserInfoByUserId(ctx, message.CreatorId)
+	if err != nil {
+		s.log.Warn("Fail to fetch user data.", zap.Error(err))
+		return &ws.Message{}, err
+	}
+	message.UserDetail = userDetail
 	newMsg, err := json.Marshal(message)
 	if err != nil {
 		return &ws.Message{}, err
@@ -130,14 +127,24 @@ func (s *service) saveMessage(ctx context.Context, msg *ws.Message) (*ws.Message
 	return msg, nil
 }
 
-func (s *service) fetchUserDetail(ctx context.Context, msg *ws.Message) (*ws.Message, error) {
-	userDetail, err := s.store.GetUserInfoByUserId(ctx, msg.SenderId)
+func (s *service) GetBoarcastUserListByMessageType(ctx context.Context, msg *ws.Message) ([]ws.UserData, error) {
+	message, err := s.convertByteArrayToMessage(ctx, msg)
 	if err != nil {
-		s.log.Warn("Fail to fetch user data.", zap.Error(err))
-		return &ws.Message{}, err
+		return []ws.UserData{}, err
 	}
-	msg.UserDetail = userDetail
-	return msg, nil
+	return s.store.GetUserListByChannelId(ctx, message.ChannelId)
+}
+
+func (s *service) convertByteArrayToMessage(ctx context.Context, msg *ws.Message) (Message, error) {
+	bytePayload, err := msg.Payload.MarshalJSON()
+	if err != nil {
+		return Message{}, err
+	}
+	var message Message
+	if err := json.Unmarshal(bytePayload, &message); err != nil {
+		return Message{}, err
+	}
+	return message, nil
 }
 
 func (s *service) saveFile(ctx context.Context, fileBytes []byte) (string, error) {
@@ -275,7 +282,6 @@ func (s *service) deleteSeaweedfsMessages(ctx context.Context, msgs []Message) e
 
 			client := &http.Client{}
 
-			fmt.Println("DELETE", "http://"+weedVolumeLoopUpResponse.Locations[0].PublicUrl+"/"+msg.Content)
 			req, err := http.NewRequest("DELETE", "http://"+weedVolumeLoopUpResponse.Locations[0].PublicUrl+"/"+msg.Content, nil)
 			if err != nil {
 				return err

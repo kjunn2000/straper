@@ -104,7 +104,7 @@ CREATE TABLE `card_user` (
   PRIMARY KEY (`card_id`, `user_id`)
 );
 
-CREATE TABLE `task_comment` (
+CREATE TABLE `card_comment` (
   `comment_id` CHAR(36) PRIMARY KEY,
   `type` VARCHAR(36) NOT NULL,
   `content` LONGTEXT NOT NULL,
@@ -152,21 +152,21 @@ ALTER TABLE `message` ADD FOREIGN KEY (`channel_id`) REFERENCES `channel` (`chan
 
 ALTER TABLE `task_board` ADD FOREIGN KEY (`workspace_id`) REFERENCES `workspace` (`workspace_id`) ON DELETE CASCADE;
 
-ALTER TABLE `task_tag` ADD FOREIGN KEY (`board_id`) REFERENCES `task_board` (`board_id`) ON DELETE CASCADE;
+ALTER TABLE `task_list` ADD FOREIGN KEY (`board_id`) REFERENCES `task_board` (`board_id`) ON DELETE CASCADE;
 
-ALTER TABLE `task` ADD FOREIGN KEY (`tag_id`) REFERENCES `task_tag` (`tag_id`) ON DELETE CASCADE;
+ALTER TABLE `card` ADD FOREIGN KEY (`list_id`) REFERENCES `task_list` (`list_id`) ON DELETE CASCADE;
 
-ALTER TABLE `task` ADD FOREIGN KEY (`creator_id`) REFERENCES `user_detail` (`user_id`) ON DELETE CASCADE;
+ALTER TABLE `card` ADD FOREIGN KEY (`creator_id`) REFERENCES `user_detail` (`user_id`) ON DELETE CASCADE;
 
-ALTER TABLE `task_user` ADD FOREIGN KEY (`card_id`) REFERENCES `task` (`card_id`) ON DELETE CASCADE;
+ALTER TABLE `card_user` ADD FOREIGN KEY (`card_id`) REFERENCES `card` (`card_id`) ON DELETE CASCADE;
 
-ALTER TABLE `task_user` ADD FOREIGN KEY (`user_id`) REFERENCES `user_detail` (`user_id`) ON DELETE CASCADE;
+ALTER TABLE `card_user` ADD FOREIGN KEY (`user_id`) REFERENCES `user_detail` (`user_id`) ON DELETE CASCADE;
 
-ALTER TABLE `task_comment` ADD FOREIGN KEY (`card_id`) REFERENCES `task` (`card_id`) ON DELETE CASCADE;
+ALTER TABLE `card_comment` ADD FOREIGN KEY (`card_id`) REFERENCES `card` (`card_id`) ON DELETE CASCADE;
 
-ALTER TABLE `task_comment` ADD FOREIGN KEY (`creator_id`) REFERENCES `user_detail` (`user_id`) ON DELETE CASCADE;
+ALTER TABLE `card_comment` ADD FOREIGN KEY (`creator_id`) REFERENCES `user_detail` (`user_id`) ON DELETE CASCADE;
 
-ALTER TABLE `ticket` ADD FOREIGN KEY (`card_id`) REFERENCES `task` (`card_id`) ON DELETE CASCADE;
+ALTER TABLE `ticket` ADD FOREIGN KEY (`card_id`) REFERENCES `card` (`card_id`) ON DELETE CASCADE;
 
 ALTER TABLE `ticket` ADD FOREIGN KEY (`creator_id`) REFERENCES `user_detail` (`user_id`) ON DELETE CASCADE;
 

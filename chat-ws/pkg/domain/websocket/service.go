@@ -23,6 +23,7 @@ type Service interface {
 
 type HandlingService interface {
 	HandleBroadcast(ctx context.Context, msg *Message, publishPubSub func(context.Context, *Message) error) error
+	GetBoarcastUserListByMessageType(ctx context.Context, msg *Message) ([]UserData, error)
 }
 
 type PubSub interface {
@@ -90,7 +91,7 @@ func (s *service) handleUnregister(ctx context.Context, userId string) {
 }
 
 func (s *service) handleBroadcast(ctx context.Context, msg *Message) error {
-	userList, err := s.getBoarcastUserListByMessageType(ctx, msg)
+	userList, err := s.getBoarcastUserList(ctx, msg)
 	if err != nil {
 		return err
 	}
@@ -107,11 +108,11 @@ func (s *service) handleBroadcast(ctx context.Context, msg *Message) error {
 	return nil
 }
 
-func (s *service) getBoarcastUserListByMessageType(ctx context.Context, msg *Message) ([]UserData, error) {
+func (s *service) getBoarcastUserList(ctx context.Context, msg *Message) ([]UserData, error) {
 	if strings.HasPrefix(msg.MessageType, "CHAT") {
-		return s.store.GetUserListByChannelId(ctx, msg.ChannelId)
+		return s.chattingService.GetBoarcastUserListByMessageType(ctx, msg)
 	} else if strings.HasPrefix(msg.MessageType, "BOARD") {
-		return s.store.GetUserListByWorkspaceId(ctx, msg.WorkspaceId)
+		return s.broadcastService.GetBoarcastUserListByMessageType(ctx, msg)
 	} else {
 		return []UserData{}, errors.New("invalid.message.type")
 	}

@@ -7,7 +7,7 @@ import {
 
 var socket;
 
-const connect = (cb) => {
+const connect = (pushMsg, pushCard) => {
   var identity = getLocalStorage("identity");
   socket = new WebSocket(
     `ws://localhost:8080/api/v1/protected/ws/${identity.user_id}`
@@ -21,7 +21,12 @@ const connect = (cb) => {
   socket.onmessage = (msg) => {
     console.log("Successfully receive message");
     const data = JSON.parse(msg.data);
-    cb(data);
+    console.log(data);
+    if (data.type.startsWith("CHAT")) {
+      pushMsg(data.payload);
+    } else {
+      pushCard(data);
+    }
   };
 
   socket.onclose = (event) => {
@@ -50,7 +55,13 @@ let sendMsg = async (type, channelId, creatorId, content) => {
     payload.file_bytes = Array.from(result);
   }
   console.log("Sending msg...");
-  socket.send(JSON.stringify(payload));
+  const dto = {
+    type: "CHAT_MESSAGE",
+    payload,
+  };
+  console.log(dto);
+
+  socket.send(JSON.stringify(dto));
 };
 
 export { connect, sendMsg };

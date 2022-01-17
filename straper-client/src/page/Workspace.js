@@ -17,10 +17,11 @@ function Workspace() {
   const currWorkspace = useWorkspaceStore((state) => state.currWorkspace);
   const currChannel = useWorkspaceStore((state) => state.currChannel);
   const pushMessage = useMessageStore((state) => state.pushMessage);
+  const pushCard = () => {};
 
   useEffect(() => {
     fetchWorkspaceData().then((data) => redirectToLatestWorkspace(data));
-    connect(pushMessage);
+    connect(pushMessage, pushCard);
   }, []);
 
   const emptyComponent = (Image, text) => (
