@@ -83,7 +83,8 @@ CREATE TABLE `task_board` (
 CREATE TABLE `task_list` (
   `list_id` CHAR(36) PRIMARY KEY,
   `list_name` VARCHAR(255) NOT NULL,
-  `board_id` CHAR(36) NOT NULL
+  `board_id` CHAR(36) NOT NULL,
+  `order` INT NOT NULL
 );
 
 CREATE TABLE `card` (
@@ -95,7 +96,8 @@ CREATE TABLE `card` (
   `description` LONGTEXT NOT NULL,
   `creator_id` VARCHAR(255) NOT NULL,
   `created_date` DATETIME NOT NULL DEFAULT (now()),
-  `due_date` DATETIME NOT NULL
+  `due_date` DATETIME NOT NULL,
+  `order` INT NOT NULL
 );
 
 CREATE TABLE `card_user` (
@@ -107,9 +109,12 @@ CREATE TABLE `card_user` (
 CREATE TABLE `card_comment` (
   `comment_id` CHAR(36) PRIMARY KEY,
   `type` VARCHAR(36) NOT NULL,
-  `content` LONGTEXT NOT NULL,
   `card_id` CHAR(36) NOT NULL,
-  `creator_id` VARCHAR(255) NOT NULL
+  `creator_id` VARCHAR(255) NOT NULL,
+  `content` LONGTEXT NOT NULL,
+  `file_name` VARCHAR(255),
+  `file_type` VARCHAR(255),
+  `created_date` DATETIME NOT NULL DEFAULT (now())
 );
 
 CREATE TABLE `ticket` (
@@ -117,6 +122,7 @@ CREATE TABLE `ticket` (
   `title` VARCHAR(255) NOT NULL,
   `type` VARCHAR(36) NOT NULL,
   `status` VARCHAR(255) NOT NULL,
+  `priority` VARCHAR(5) NOT NULL,
   `description` LONGTEXT NOT NULL,
   `card_id` CHAR(36) NOT NULL,
   `creator_id` VARCHAR(255) NOT NULL,

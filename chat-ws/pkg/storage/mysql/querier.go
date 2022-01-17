@@ -5,6 +5,7 @@ import (
 
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/account"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/auth"
+	"github.com/kjunn2000/straper/chat-ws/pkg/domain/board"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/chatting"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/websocket"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/adding"
@@ -71,4 +72,24 @@ type Querier interface {
 	// websocket
 	GetUserListByChannelId(ctx context.Context, channelId string) ([]websocket.UserData, error)
 	GetUserListByWorkspaceId(ctx context.Context, workspaceId string) ([]websocket.UserData, error)
+
+	// board
+	CreateBoard(ctx context.Context, board board.TaskBoard) error
+	GetTaskBoardByWorkspaceId(ctx context.Context, workspaceId string) (board.TaskBoard, error)
+	UpdateTaskBoard(ctx context.Context, board board.TaskBoard) error
+
+	CreateTaskList(ctx context.Context, taskList board.TaskList) error
+	GetTaskListByBoardId(ctx context.Context, boardId string) ([]board.TaskList, error)
+	UpdateTaskList(ctx context.Context, taskList board.TaskList) error
+	DeleteTaskList(ctx context.Context, listId string) error
+
+	CreateCard(ctx context.Context, card board.Card) error
+	GetCardListByListId(ctx context.Context, listId string) ([]board.Card, error)
+	UpdateCard(ctx context.Context, params board.UpdateCardParams) error
+	DeleteCard(ctx context.Context, cardId string) error
+	AddUserToCard(ctx context.Context, cardId, userId string) error
+	DeleteUserFromCard(ctx context.Context, cardId, userId string) error
+
+	CreateCardComment(ctx context.Context, comment *board.CardComment) error
+	GetCardComments(ctx context.Context, cardId string) ([]board.CardComment, error)
 }
