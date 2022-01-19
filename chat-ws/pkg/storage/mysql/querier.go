@@ -81,6 +81,7 @@ type Querier interface {
 	CreateTaskList(ctx context.Context, taskList board.TaskList) error
 	GetTaskListsByBoardId(ctx context.Context, boardId string) ([]board.TaskList, error)
 	UpdateTaskList(ctx context.Context, taskList board.TaskList) error
+	UpdateTaskListOrder(ctx context.Context, listId string, orderIndex int) error
 	DeleteTaskList(ctx context.Context, listId string) error
 
 	CreateCard(ctx context.Context, card board.Card) error

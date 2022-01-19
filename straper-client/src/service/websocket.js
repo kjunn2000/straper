@@ -1,3 +1,4 @@
+import useIdentityStore from "../store/identityStore";
 import { getLocalStorage } from "../store/localStorage";
 import useMessageStore from "../store/messageStore";
 import { handleWsBoardMsg } from "./board";
@@ -56,17 +57,19 @@ const sendMsg = async (type, channelId, creatorId, content) => {
   const dto = {
     type: "CHAT_MESSAGE",
     payload,
+    sender_id: creatorId,
   };
   console.log(dto);
-
   socket.send(JSON.stringify(dto));
 };
 
 const sendBoardMsg = (type, workspaceId, payload) => {
+  const senderId = useIdentityStore.getState().identity.user_id;
   const dto = {
     type,
     workspace_id: workspaceId,
     payload,
+    sender_id: senderId,
   };
   console.log(dto);
   socket.send(JSON.stringify(dto));

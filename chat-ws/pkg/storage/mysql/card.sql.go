@@ -28,7 +28,9 @@ func (q *Queries) CreateCard(ctx context.Context, card board.Card) error {
 func (q *Queries) GetCardListByListId(ctx context.Context, listId string) ([]board.Card, error) {
 	sql, args, err := sq.Select("card_id", "title", "status", "priority", "list_id", "description", "creator_id", "created_date",
 		"due_date", "order_index").From("card").
-		Where(sq.Eq{"list_id": listId}).ToSql()
+		Where(sq.Eq{"list_id": listId}).
+		OrderBy("order_index").
+		ToSql()
 	if err != nil {
 		q.log.Info("Unable to create select card sql.", zap.Error(err))
 		return []board.Card{}, err

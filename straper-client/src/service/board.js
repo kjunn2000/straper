@@ -7,7 +7,7 @@ export const handleWsBoardMsg = (msg) => {
       break;
     }
     case "BOARD_UPDATE_LIST": {
-      // boardState.updateTaskList(msg.payload);
+      boardState.updateTaskList(msg.payload);
       break;
     }
     case "BOARD_DELETE_LIST": {
@@ -15,7 +15,7 @@ export const handleWsBoardMsg = (msg) => {
       break;
     }
     case "BOARD_ORDER_LIST": {
-      // boardState.orderTaskList(msg.payload);
+      boardState.orderTaskList(msg.payload);
       break;
     }
   }

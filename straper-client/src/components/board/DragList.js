@@ -1,10 +1,11 @@
 import React, { useEffect } from "react";
 import styled from "styled-components";
-import { DragDropContext } from "react-beautiful-dnd";
+import { DragDropContext, Droppable } from "react-beautiful-dnd";
 import DraggableElement from "./DraggableElement.js";
 import useBoardStore from "../../store/boardStore.js";
 import AddComponent from "./AddComponent.js";
 import { sendBoardMsg } from "../../service/websocket.js";
+import useIdentityStore from "../../store/identityStore.js";
 
 const DragDropContextContainer = styled.div`
   padding: 20px;
@@ -32,27 +33,28 @@ const addToList = (list, index, element) => {
 function DragList() {
   const taskLists = useBoardStore((state) => state.taskLists);
   const board = useBoardStore((state) => state.board);
+  const orderTaskList = useBoardStore((state) => state.orderTaskList);
 
   const onDragEnd = (result) => {
-    if (!result.destination) {
+    if (
+      !result.destination ||
+      !result.source ||
+      result.destination.index === result.source.index
+    ) {
       return;
     }
-    console.log(result);
-    // const listCopy = { ...elements };
-    // const sourceList = listCopy[result.source.droppableId];
-    // console.log(sourceList);
-    // const [removedElement, newSourceList] = removeFromList(
-    //   sourceList,
-    //   result.source.index
-    // );
-    // listCopy[result.source.droppableId] = newSourceList;
-    // const destinationList = listCopy[result.destination.droppableId];
-    // listCopy[result.destination.droppableId] = addToList(
-    //   destinationList,
-    //   result.destination.index,
-    //   removedElement
-    // );
-    // setElements(listCopy);
+    const listIds = taskLists.map((taskList) => taskList.list_id);
+    const [removedElement, newSourceList] = removeFromList(
+      listIds,
+      result.source.index - 1
+    );
+    const newListIds = addToList(
+      newSourceList,
+      result.destination.index - 1,
+      removedElement
+    );
+    sendBoardMsg("BOARD_ORDER_LIST", board.workspace_id, newListIds);
+    orderTaskList(newListIds);
   };
 
   const handleAddNewList = (value) => {
@@ -68,9 +70,24 @@ function DragList() {
     <DragDropContextContainer className="flex">
       <DragDropContext onDragEnd={onDragEnd}>
         <div className="flex">
-          {taskLists.map((taskList) => (
-            <DraggableElement element={taskList} key={taskList.list_id} />
-          ))}
+          <Droppable
+            droppableId={board.board_id}
+            direction="horizontal"
+            type="COLUMN"
+          >
+            {(provided) => (
+              <div
+                {...provided.droppableProps}
+                ref={provided.innerRef}
+                className="flex"
+              >
+                {taskLists.map((taskList) => (
+                  <DraggableElement element={taskList} key={taskList.list_id} />
+                ))}
+                {provided.placeholder}
+              </div>
+            )}
+          </Droppable>
         </div>
       </DragDropContext>
       <AddComponent

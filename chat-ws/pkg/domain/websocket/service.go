@@ -33,17 +33,15 @@ type PubSub interface {
 
 type service struct {
 	log              *zap.Logger
-	store            Repository
 	wsServer         *WSServer
 	pubsub           PubSub
 	chattingService  HandlingService
 	broadcastService HandlingService
 }
 
-func NewService(log *zap.Logger, store Repository, pubsub PubSub, cs HandlingService, bs HandlingService) *service {
+func NewService(log *zap.Logger, pubsub PubSub, cs HandlingService, bs HandlingService) *service {
 	return &service{
 		log:              log,
-		store:            store,
 		wsServer:         NewWSServer(),
 		pubsub:           pubsub,
 		chattingService:  cs,
@@ -96,6 +94,10 @@ func (s *service) handleBroadcast(ctx context.Context, msg *Message) error {
 		return err
 	}
 	for _, user := range userList {
+		if strings.HasPrefix(msg.MessageType, "BOARD_ORDER") &&
+			user.UserId == msg.SenderId {
+			continue
+		}
 		u, ok := s.wsServer.activeUser[user.UserId]
 		if !ok {
 			continue

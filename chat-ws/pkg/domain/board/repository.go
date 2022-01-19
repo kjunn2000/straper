@@ -14,6 +14,7 @@ type Repository interface {
 
 	CreateTaskList(ctx context.Context, taskList TaskList) error
 	UpdateTaskList(ctx context.Context, taskList TaskList) error
+	UpdateTaskListOrder(ctx context.Context, listId string, orderIndex int) error
 	DeleteTaskList(ctx context.Context, listId string) error
 
 	CreateCard(ctx context.Context, card Card) error

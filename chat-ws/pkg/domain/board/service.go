@@ -11,18 +11,6 @@ import (
 	"go.uber.org/zap"
 )
 
-const (
-	BoardAddList    = "BOARD_ADD_LIST"
-	BoardUpdateList = "BOARD_UPDATE_LIST"
-	BoardDeleteList = "BOARD_DELETE_LIST"
-	BoardOrderList  = "BOARD_ORDER_LIST"
-
-	BoardAddCard    = "BOARD_ADD_CARD"
-	BoardUpdateCard = "BOARD_UPDATE_CARD"
-	BoardDeleteCard = "BOARD_DELETE_CARD"
-	BoardOrderCard  = "BOARD_ORDER_CARD"
-)
-
 type Service interface {
 	GetTaskBoardData(ctx context.Context, workspaceId string) (TaskBoardDataResponse, error)
 	HandleBroadcast(ctx context.Context, msg *ws.Message, publishPubSub func(context.Context, *ws.Message) error) error
@@ -151,12 +139,12 @@ func (service *service) handleDeleteList(ctx context.Context, bytePayload []byte
 }
 
 func (service *service) handleOrderList(ctx context.Context, bytePayload []byte) error {
-	var taskLists []TaskList
-	if err := json.Unmarshal(bytePayload, &taskLists); err != nil {
+	var listIds []string
+	if err := json.Unmarshal(bytePayload, &listIds); err != nil {
 		return err
 	}
-	for _, taskList := range taskLists {
-		if err := service.store.UpdateTaskList(ctx, taskList); err != nil {
+	for i, listId := range listIds {
+		if err := service.store.UpdateTaskListOrder(ctx, listId, i+1); err != nil {
 			return err
 		}
 	}

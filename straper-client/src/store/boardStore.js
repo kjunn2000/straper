@@ -23,18 +23,39 @@ const useBoardStore = create((set) => ({
       return { taskLists: newTaskLists };
     });
   },
-  deleteTaskList: (listId) => {
-    console.log("call you");
-    console.log(listId);
+  updateTaskList: (taskList) => {
     set((state) => {
-      console.log(state.taskLists);
+      const newTaskLists = state.taskLists.map((list) => {
+        return list.list_id === taskList.list_id ? taskList : list;
+      });
+      setLocalStorage("taskLists", newTaskLists);
+      return { taskLists: newTaskLists };
+    });
+  },
+  deleteTaskList: (listId) => {
+    set((state) => {
       const newTaskLists = state.taskLists
         .filter((taskList) => taskList.list_id !== listId)
         .map((taskList, i) => {
           taskList.order_index = i + 1;
           return taskList;
         });
-      console.log(newTaskLists);
+      setLocalStorage("taskLists", newTaskLists);
+      return { taskLists: newTaskLists };
+    });
+  },
+  orderTaskList: (listIds) => {
+    set((state) => {
+      const result = state.taskLists.reduce((map, obj) => {
+        map[obj.list_id] = obj;
+        return map;
+      }, {});
+      const newTaskLists = listIds
+        .map((listId) => result[listId])
+        .map((taskList, i) => {
+          taskList.order_index = i + 1;
+          return taskList;
+        });
       setLocalStorage("taskLists", newTaskLists);
       return { taskLists: newTaskLists };
     });

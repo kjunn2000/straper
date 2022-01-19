@@ -98,7 +98,7 @@ func (server *Server) SetServerRoute() (*mux.Router, error) {
 	listingService := listing.NewService(server.log, server.store)
 	editingService := editing.NewService(server.log, server.store)
 	deletingService := deleting.NewService(server.log, server.store)
-	websocketService := websocket.NewService(server.log, server.store, server.redisClient, chattingService, boardService)
+	websocketService := websocket.NewService(server.log, server.redisClient, chattingService, boardService)
 	websocketService.SetUpWSServer(context.Background())
 
 	server.SetUpAuthRouter(mr, authService)
