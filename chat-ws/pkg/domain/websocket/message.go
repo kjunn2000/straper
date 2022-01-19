@@ -10,4 +10,5 @@ const (
 type Message struct {
 	MessageType string          `json:"type"`
 	Payload     json.RawMessage `json:"payload"`
+	WorkspaceId string          `json:"workspace_id"`
 }

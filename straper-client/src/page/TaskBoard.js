@@ -7,6 +7,7 @@ import useWorkspaceStore from "../store/workspaceStore";
 import useBoardStore from "../store/boardStore";
 import { isEmpty } from "../service/object";
 import DragList from "../components/board/DragList";
+import { connect } from "../service/websocket";
 
 function TaskBoard() {
   const history = useHistory();
@@ -17,12 +18,15 @@ function TaskBoard() {
 
   useEffect(() => {
     api.get(`/protected/board/${currWorkspace.workspace_id}`).then((res) => {
-      const data = res.data.Data;
-      setBoard(data.task_board);
-      if (!isEmpty(data.task_lists)) {
-        setTaskLists(data.task_lists);
+      if (res.data.Success) {
+        const data = res.data.Data;
+        setBoard(data.task_board);
+        if (!isEmpty(data.task_lists)) {
+          setTaskLists(data.task_lists);
+        }
       }
     });
+    connect();
   }, []);
 
   return (

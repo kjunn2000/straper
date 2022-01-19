@@ -16,6 +16,29 @@ const useBoardStore = create((set) => ({
       taskLists: taskLists,
     }));
   },
+  addTaskList: (taskList) => {
+    set((state) => {
+      const newTaskLists = [...state.taskLists, taskList];
+      setLocalStorage("taskLists", newTaskLists);
+      return { taskLists: newTaskLists };
+    });
+  },
+  deleteTaskList: (listId) => {
+    console.log("call you");
+    console.log(listId);
+    set((state) => {
+      console.log(state.taskLists);
+      const newTaskLists = state.taskLists
+        .filter((taskList) => taskList.list_id !== listId)
+        .map((taskList, i) => {
+          taskList.order_index = i + 1;
+          return taskList;
+        });
+      console.log(newTaskLists);
+      setLocalStorage("taskLists", newTaskLists);
+      return { taskLists: newTaskLists };
+    });
+  },
 }));
 
 export default useBoardStore;

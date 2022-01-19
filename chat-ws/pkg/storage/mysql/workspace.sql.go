@@ -127,7 +127,8 @@ func (q *Queries) RemoveUserFromWorkspace(ctx context.Context, workspaceId, user
 }
 
 func (q *Queries) GetUserListByWorkspaceId(ctx context.Context, workspaceId string) ([]websocket.UserData, error) {
-	sql, args, err := sq.Select("user_id").From("workspace_user").Where(sq.Eq{"workspace_id": workspaceId}).ToSql()
+	sql, args, err := sq.Select("user_id").From("workspace_user").
+		Where(sq.Eq{"workspace_id": workspaceId}).ToSql()
 	if err != nil {
 		q.log.Info("Unable to create select client list sql.", zap.Error(err))
 		return nil, err

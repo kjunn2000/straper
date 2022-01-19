@@ -11,17 +11,14 @@ import {
 } from "../service/workspace";
 import { isEmpty } from "../service/object";
 import { connect } from "../service/websocket";
-import useMessageStore from "../store/messageStore";
 
 function Workspace() {
   const currWorkspace = useWorkspaceStore((state) => state.currWorkspace);
   const currChannel = useWorkspaceStore((state) => state.currChannel);
-  const pushMessage = useMessageStore((state) => state.pushMessage);
-  const pushCard = () => {};
 
   useEffect(() => {
     fetchWorkspaceData().then((data) => redirectToLatestWorkspace(data));
-    connect(pushMessage, pushCard);
+    connect();
   }, []);
 
   const emptyComponent = (Image, text) => (

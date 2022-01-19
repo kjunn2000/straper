@@ -1,13 +1,11 @@
 import { getLocalStorage } from "../store/localStorage";
-import {
-  getAsByteArray,
-  base64ToArray,
-  createAndDownloadBlobFile,
-} from "./file";
+import useMessageStore from "../store/messageStore";
+import { handleWsBoardMsg } from "./board";
+import { getAsByteArray } from "./file";
 
 var socket;
 
-const connect = (pushMsg, pushCard) => {
+const connect = () => {
   var identity = getLocalStorage("identity");
   socket = new WebSocket(
     `ws://localhost:8080/api/v1/protected/ws/${identity.user_id}`
@@ -23,9 +21,9 @@ const connect = (pushMsg, pushCard) => {
     const data = JSON.parse(msg.data);
     console.log(data);
     if (data.type.startsWith("CHAT")) {
-      pushMsg(data.payload);
+      useMessageStore.getState().pushMsg(data.payload);
     } else {
-      pushCard(data);
+      handleWsBoardMsg(data);
     }
   };
 
@@ -40,7 +38,7 @@ const connect = (pushMsg, pushCard) => {
   };
 };
 
-let sendMsg = async (type, channelId, creatorId, content) => {
+const sendMsg = async (type, channelId, creatorId, content) => {
   const payload = {
     type,
     channel_id: channelId,
@@ -64,4 +62,14 @@ let sendMsg = async (type, channelId, creatorId, content) => {
   socket.send(JSON.stringify(dto));
 };
 
-export { connect, sendMsg };
+const sendBoardMsg = (type, workspaceId, payload) => {
+  const dto = {
+    type,
+    workspace_id: workspaceId,
+    payload,
+  };
+  console.log(dto);
+  socket.send(JSON.stringify(dto));
+};
+
+export { connect, sendMsg, sendBoardMsg };

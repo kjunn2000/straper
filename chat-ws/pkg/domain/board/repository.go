@@ -11,4 +11,15 @@ type Repository interface {
 	GetTaskBoardByWorkspaceId(ctx context.Context, workspaceId string) (TaskBoard, error)
 	GetTaskListsByBoardId(ctx context.Context, boardId string) ([]TaskList, error)
 	GetCardListByListId(ctx context.Context, listId string) ([]Card, error)
+
+	CreateTaskList(ctx context.Context, taskList TaskList) error
+	UpdateTaskList(ctx context.Context, taskList TaskList) error
+	DeleteTaskList(ctx context.Context, listId string) error
+
+	CreateCard(ctx context.Context, card Card) error
+	UpdateCard(ctx context.Context, params UpdateCardParams) error
+	UpdateCardOrder(ctx context.Context, params UpdateCardOrderParams) error
+	DeleteCard(ctx context.Context, cardId string) error
+	AddUserToCard(ctx context.Context, cardId, userId string) error
+	DeleteUserFromCard(ctx context.Context, cardId, userId string) error
 }

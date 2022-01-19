@@ -1,14 +1,9 @@
 import React, { useRef, useState } from "react";
 import { AiOutlineClose } from "react-icons/ai";
-import { IoClose } from "react-icons/io5";
 
 const AddComponent = ({ action, type, text }) => {
   const [addMode, setAddMode] = useState(false);
   const inputRef = useRef();
-
-  const handleAddAction = () => {
-    console.log(inputRef.current.value);
-  };
 
   return (
     <div className="flex flex-col bg-gray-600 bg-opacity-25 rounded-md p-3 m-3 ">
@@ -18,7 +13,8 @@ const AddComponent = ({ action, type, text }) => {
           <div className="flex justify-between text-gray-400 hover:text-white cursor-pointer text-sm">
             <button
               onClick={() => {
-                handleAddAction();
+                action(inputRef.current.value);
+                setAddMode(false);
               }}
             >
               Add {type}{" "}

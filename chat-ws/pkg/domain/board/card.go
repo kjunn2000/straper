@@ -24,7 +24,7 @@ type Card struct {
 	Title       string    `json:"title" db:"title"`
 	Status      string    `json:"status" db:"status"`
 	Priority    string    `json:"priority" db:"priority"`
-	ListId      string    `json:"list_id"`
+	ListId      string    `json:"list_id" db:"list_id"`
 	Description string    `json:"description" db:"description"`
 	CreatorId   string    `json:"creator_id" db:"creator_id"`
 	CreatedDate time.Time `json:"created_date" db:"created_date"`
@@ -58,20 +58,4 @@ type UserDetail struct {
 	Username string `json:"username" db:"username"`
 	Email    string `json:"email" db:"email" validate:"email"`
 	PhoneNo  string `json:"phone_no" db:"phone_no"`
-}
-
-type UpdateCardParams struct {
-	CardId      string    `json:"card_id" db:"card_id"`
-	Title       string    `json:"title" db:"title"`
-	Status      string    `json:"status" db:"status"`
-	Priority    string    `json:"priority" db:"priority"`
-	ListId      string    `json:"list_id"`
-	Description string    `json:"description" db:"description"`
-	DueDate     time.Time `json:"due_date" db:"due_date"`
-	OrderIndex  int       `json:"order_index" db:"order_index"`
-}
-
-type TaskBoardDataResponse struct {
-	TaskBoard TaskBoard  `json:"task_board"`
-	TaskLists []TaskList `json:"task_lists"`
 }

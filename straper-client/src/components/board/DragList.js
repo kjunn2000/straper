@@ -4,6 +4,7 @@ import { DragDropContext } from "react-beautiful-dnd";
 import DraggableElement from "./DraggableElement.js";
 import useBoardStore from "../../store/boardStore.js";
 import AddComponent from "./AddComponent.js";
+import { sendBoardMsg } from "../../service/websocket.js";
 
 const DragDropContextContainer = styled.div`
   padding: 20px;
@@ -28,19 +29,18 @@ const addToList = (list, index, element) => {
   return result;
 };
 
-const lists = ["todo", "inProgress", "done"];
-
 function DragList() {
   const taskLists = useBoardStore((state) => state.taskLists);
-
-  useEffect(() => {}, []);
+  const board = useBoardStore((state) => state.board);
 
   const onDragEnd = (result) => {
-    // if (!result.destination) {
-    //   return;
-    // }
+    if (!result.destination) {
+      return;
+    }
+    console.log(result);
     // const listCopy = { ...elements };
     // const sourceList = listCopy[result.source.droppableId];
+    // console.log(sourceList);
     // const [removedElement, newSourceList] = removeFromList(
     //   sourceList,
     //   result.source.index
@@ -55,19 +55,29 @@ function DragList() {
     // setElements(listCopy);
   };
 
+  const handleAddNewList = (value) => {
+    const payload = {
+      list_name: value,
+      board_id: board.board_id,
+      order_index: taskLists.length + 1,
+    };
+    sendBoardMsg("BOARD_ADD_LIST", board.workspace_id, payload);
+  };
+
   return (
     <DragDropContextContainer className="flex">
       <DragDropContext onDragEnd={onDragEnd}>
-        <ListGrid>
+        <div className="flex">
           {taskLists.map((taskList) => (
-            <DraggableElement
-              element={taskList.cardList}
-              key={taskList.list_id}
-            />
+            <DraggableElement element={taskList} key={taskList.list_id} />
           ))}
-        </ListGrid>
+        </div>
       </DragDropContext>
-      <AddComponent type="List" text="+ Add New List" />
+      <AddComponent
+        action={handleAddNewList}
+        type="List"
+        text="+ Add New List"
+      />
     </DragDropContextContainer>
   );
 }
