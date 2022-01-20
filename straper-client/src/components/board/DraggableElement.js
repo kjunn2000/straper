@@ -9,7 +9,7 @@ import useBoardStore from "../../store/boardStore";
 import { DragListItem } from "../../utils/style/div";
 import useIdentityStore from "../../store/identityStore";
 
-const DraggableElement = ({ element }) => {
+const DraggableElement = ({ element, index }) => {
   const identity = useIdentityStore((state) => state.identity);
   const board = useBoardStore((state) => state.board);
   const [listName, setListName] = useState(element.list_name);
@@ -33,7 +33,7 @@ const DraggableElement = ({ element }) => {
   };
 
   return (
-    <Draggable draggableId={element.list_id} index={element.order_index}>
+    <Draggable draggableId={element.list_id} index={index}>
       {(provided, snapshot) => {
         return (
           <DragListItem
@@ -69,22 +69,18 @@ const DraggableElement = ({ element }) => {
                 {(provided) => (
                   <div {...provided.droppableProps} ref={provided.innerRef}>
                     {element.card_list &&
-                      element.card_list.map((card) => (
-                        <ListItem
-                          key={card.card_id}
-                          item={card}
-                          index={card.order_index}
-                        />
+                      element.card_list.map((card, i) => (
+                        <ListItem key={card.card_id} item={card} index={i} />
                       ))}
                     {provided.placeholder}
+                    <AddComponent
+                      action={handleAddNewCard}
+                      type="Card"
+                      text="Add New Card"
+                    />
                   </div>
                 )}
               </Droppable>
-              <AddComponent
-                action={handleAddNewCard}
-                type="Card"
-                text="Add New Card"
-              />
             </div>
           </DragListItem>
         );

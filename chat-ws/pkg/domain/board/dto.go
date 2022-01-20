@@ -17,7 +17,15 @@ type UpdateCardParams struct {
 	DueDate     time.Time `json:"due_date" db:"due_date"`
 }
 
-type UpdateCardOrderParams struct {
-	CardId     string `json:"card_id" db:"card_id"`
-	OrderIndex int    `json:"order_index" db:"order_index"`
+type OrderListParams struct {
+	BoardId      string `json:"board_id"`
+	OldListIndex int    `json:"oldListIndex"`
+	NewListIndex int    `json:"newListIndex"`
+}
+
+type OrderCardParams struct {
+	SourceListId string `json:"sourceListId"`
+	DestListId   string `json:"destListId"`
+	OldCardIndex int    `json:"oldCardIndex"`
+	NewCardIndex int    `json:"newCardIndex"`
 }

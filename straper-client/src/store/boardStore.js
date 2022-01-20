@@ -1,4 +1,6 @@
 import create from "zustand";
+import { addToList, removeFromList } from "../service/board";
+import { isEmpty } from "../service/object";
 import { getLocalStorage, setLocalStorage } from "./localStorage";
 
 const useBoardStore = create((set) => ({
@@ -44,18 +46,10 @@ const useBoardStore = create((set) => ({
       return { taskLists: newTaskLists };
     });
   },
-  orderTaskList: (listIds) => {
+  orderTaskList: ({ oldListIndex, newListIndex }) => {
     set((state) => {
-      const result = state.taskLists.reduce((map, obj) => {
-        map[obj.list_id] = obj;
-        return map;
-      }, {});
-      const newTaskLists = listIds
-        .map((listId) => result[listId])
-        .map((taskList, i) => {
-          taskList.order_index = i + 1;
-          return taskList;
-        });
+      const [removed, result] = removeFromList(state.taskLists, oldListIndex);
+      const newTaskLists = addToList(result, newListIndex, removed);
       setLocalStorage("taskLists", newTaskLists);
       return { taskLists: newTaskLists };
     });
@@ -70,6 +64,52 @@ const useBoardStore = create((set) => ({
         }
         return taskList;
       });
+      setLocalStorage("taskLists", newTaskLists);
+      return { taskLists: newTaskLists };
+    });
+  },
+  orderCard: ({ sourceListId, destListId, oldCardIndex, newCardIndex }) => {
+    set((state) => {
+      const isSameList = sourceListId === destListId;
+      let removedItem;
+      let newTaskLists = state.taskLists.map((taskList) => {
+        if (taskList.list_id === sourceListId) {
+          let [removed, result] = removeFromList(
+            taskList.card_list,
+            oldCardIndex
+          );
+          removedItem = removed;
+          if (isSameList) {
+            result = addToList(result, newCardIndex, removed);
+          }
+          result = result.map((card, i) => {
+            card.order_index = i + 1;
+            return card;
+          });
+          taskList.card_list = result;
+        }
+        return taskList;
+      });
+      if (!isSameList) {
+        newTaskLists = state.taskLists.map((taskList) => {
+          if (taskList.list_id === destListId) {
+            if (isEmpty(taskList.card_list)) {
+              taskList.card_list = [removedItem];
+            } else {
+              taskList.card_list = addToList(
+                taskList.card_list,
+                newCardIndex,
+                removedItem
+              );
+              taskList.card_list = taskList.card_list.map((card, i) => {
+                card.order_index = i + 1;
+                return card;
+              });
+            }
+          }
+          return taskList;
+        });
+      }
       setLocalStorage("taskLists", newTaskLists);
       return { taskLists: newTaskLists };
     });

@@ -140,12 +140,20 @@ func (service *service) handleDeleteList(ctx context.Context, bytePayload []byte
 }
 
 func (service *service) handleOrderList(ctx context.Context, bytePayload []byte) error {
-	var listIds []string
-	if err := json.Unmarshal(bytePayload, &listIds); err != nil {
+	var orderListParams OrderListParams
+	if err := json.Unmarshal(bytePayload, &orderListParams); err != nil {
 		return err
 	}
-	for i, listId := range listIds {
-		if err := service.store.UpdateTaskListOrder(ctx, listId, i+1); err != nil {
+	taskLists, err := service.store.GetTaskListsByBoardId(ctx, orderListParams.BoardId)
+	if err != nil {
+		return err
+	}
+	target := taskLists[orderListParams.OldListIndex]
+	taskLists = append(taskLists[:orderListParams.OldListIndex], taskLists[orderListParams.OldListIndex+1:]...)
+	taskLists = append(taskLists[:orderListParams.NewListIndex],
+		append([]TaskList{target}, taskLists[orderListParams.NewListIndex:]...)...)
+	for i, taskList := range taskLists {
+		if err := service.store.UpdateTaskListOrder(ctx, taskList.ListId, i+1); err != nil {
 			return err
 		}
 	}
@@ -188,12 +196,43 @@ func (service *service) handleDeleteCard(ctx context.Context, bytePayload []byte
 }
 
 func (service *service) handleOrderCard(ctx context.Context, bytePayload []byte) error {
-	var updateCardOrderParams []UpdateCardOrderParams
-	if err := json.Unmarshal(bytePayload, &updateCardOrderParams); err != nil {
+	var orderCardParams OrderCardParams
+	if err := json.Unmarshal(bytePayload, &orderCardParams); err != nil {
 		return err
 	}
-	for _, updateCardOrderParam := range updateCardOrderParams {
-		if err := service.store.UpdateCardOrder(ctx, updateCardOrderParam); err != nil {
+	cardList, err := service.store.GetCardListByListId(ctx, orderCardParams.SourceListId)
+	if err != nil {
+		return err
+	}
+
+	target := cardList[orderCardParams.OldCardIndex]
+
+	cardList = append(cardList[:orderCardParams.OldCardIndex], cardList[orderCardParams.OldCardIndex+1:]...)
+	if orderCardParams.SourceListId == orderCardParams.DestListId {
+		cardList = append(cardList[:orderCardParams.NewCardIndex],
+			append([]Card{target}, cardList[orderCardParams.NewCardIndex:]...)...)
+	}
+	if err := service.updateCardListOrderIndex(ctx, cardList, orderCardParams.SourceListId); err != nil {
+		return err
+	}
+
+	if orderCardParams.SourceListId != orderCardParams.DestListId {
+		destCardList, err := service.store.GetCardListByListId(ctx, orderCardParams.DestListId)
+		if err != nil {
+			return err
+		}
+		destCardList = append(destCardList[:orderCardParams.NewCardIndex],
+			append([]Card{target}, destCardList[orderCardParams.NewCardIndex:]...)...)
+		if err := service.updateCardListOrderIndex(ctx, destCardList, orderCardParams.DestListId); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (service *service) updateCardListOrderIndex(ctx context.Context, cardList []Card, listId string) error {
+	for i, card := range cardList {
+		if err := service.store.UpdateCardOrder(ctx, card.CardId, i+1, listId, card.ListId != listId); err != nil {
 			return err
 		}
 	}

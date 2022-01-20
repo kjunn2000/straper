@@ -11,43 +11,41 @@ const DragDropContextContainer = styled.div`
   border-radius: 6px;
 `;
 
-const removeFromList = (list, index) => {
-  const result = Array.from(list);
-  const [removed] = result.splice(index, 1);
-  return [removed, result];
-};
-
-const addToList = (list, index, element) => {
-  const result = Array.from(list);
-  result.splice(index, 0, element);
-  return result;
-};
-
 function DragList() {
   const taskLists = useBoardStore((state) => state.taskLists);
   const board = useBoardStore((state) => state.board);
   const orderTaskList = useBoardStore((state) => state.orderTaskList);
+  const orderCard = useBoardStore((state) => state.orderCard);
 
-  const onDragEnd = (result) => {
-    if (
-      !result.destination ||
-      !result.source ||
-      result.destination.index === result.source.index
-    ) {
+  const onDragEnd = ({ source, destination, type }) => {
+    if (!destination) return;
+
+    if (type === "COLUMN") {
+      if (source.index !== destination.index) {
+        const payload = {
+          board_id: board.board_id,
+          oldListIndex: source.index,
+          newListIndex: destination.index,
+        };
+        sendBoardMsg("BOARD_ORDER_LIST", board.workspace_id, payload);
+        orderTaskList(payload);
+      }
       return;
     }
-    const listIds = taskLists.map((taskList) => taskList.list_id);
-    const [removedElement, newSourceList] = removeFromList(
-      listIds,
-      result.source.index - 1
-    );
-    const newListIds = addToList(
-      newSourceList,
-      result.destination.index - 1,
-      removedElement
-    );
-    sendBoardMsg("BOARD_ORDER_LIST", board.workspace_id, newListIds);
-    orderTaskList(newListIds);
+
+    if (
+      source.index !== destination.index ||
+      source.droppableId !== destination.droppableId
+    ) {
+      const payload = {
+        sourceListId: source.droppableId,
+        destListId: destination.droppableId,
+        oldCardIndex: source.index,
+        newCardIndex: destination.index,
+      };
+      sendBoardMsg("BOARD_ORDER_CARD", board.workspace_id, payload);
+      orderCard(payload);
+    }
   };
 
   const handleAddNewList = (value) => {
@@ -76,20 +74,24 @@ function DragList() {
                 ref={provided.innerRef}
                 className="flex"
               >
-                {taskLists.map((taskList) => (
-                  <DraggableElement element={taskList} key={taskList.list_id} />
+                {taskLists.map((taskList, i) => (
+                  <DraggableElement
+                    element={taskList}
+                    key={taskList.list_id}
+                    index={i}
+                  />
                 ))}
                 {provided.placeholder}
+                <AddComponent
+                  action={handleAddNewList}
+                  type="List"
+                  text="+ Add New List"
+                />
               </div>
             )}
           </Droppable>
         </div>
       </DragDropContext>
-      <AddComponent
-        action={handleAddNewList}
-        type="List"
-        text="+ Add New List"
-      />
     </DragDropContextContainer>
   );
 }

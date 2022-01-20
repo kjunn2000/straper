@@ -1,8 +1,6 @@
 import React from "react";
 
 const Card = ({ card }) => {
-  console.log(card);
-
   const tagColor = () => {
     switch (card.priority) {
       case "LOW":

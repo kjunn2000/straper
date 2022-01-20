@@ -65,10 +65,13 @@ func (q *Queries) UpdateCard(ctx context.Context, params board.UpdateCardParams)
 	return nil
 }
 
-func (q *Queries) UpdateCardOrder(ctx context.Context, params board.UpdateCardOrderParams) error {
-	sql, args, err := sq.Update("card").
-		Set("order_index", params.OrderIndex).
-		Where(sq.Eq{"card_id": params.CardId}).ToSql()
+func (q *Queries) UpdateCardOrder(ctx context.Context, cardId string, orderIndex int, listId string, updateListId bool) error {
+	updateBuilder := sq.Update("card").
+		Set("order_index", orderIndex)
+	if updateListId {
+		updateBuilder = updateBuilder.Set("list_id", listId)
+	}
+	sql, args, err := updateBuilder.Where(sq.Eq{"card_id": cardId}).ToSql()
 	if err != nil {
 		q.log.Info("Failed to create update card order sql.", zap.Error(err))
 		return err
