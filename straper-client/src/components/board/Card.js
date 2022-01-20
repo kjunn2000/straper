@@ -1,16 +1,31 @@
 import React from "react";
-import { Draggable } from "react-beautiful-dnd";
 
-const Card = () => {
+const Card = ({ card }) => {
+  console.log(card);
+
+  const tagColor = () => {
+    switch (card.priority) {
+      case "LOW":
+        return "bg-sky-400";
+      case "MEDIUM":
+        return "bg-orange-500";
+      case "HIGH":
+        return "bg-red-600";
+    }
+  };
+
   return (
     <div className="flex flex-col bg-white rounded-md p-3 m-3">
-      <div className="bg-sky-600 text-white rounded-xl p-1 font-semibold text-sm">
-        Card status
-      </div>
-      <div className="break-all text-sm p-2">
-        Complete Task Board
-        dsffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-      </div>
+      {card.priority !== "NO" && (
+        <div
+          className={
+            "text-white rounded-xl p-1 font-semibold text-sm " + tagColor()
+          }
+        >
+          {card.priority}
+        </div>
+      )}
+      <div className="break-all text-sm p-2">{card.title}</div>
       <div className="text-right">People involved</div>
     </div>
   );

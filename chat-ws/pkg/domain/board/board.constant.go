@@ -5,10 +5,10 @@ const (
 )
 
 const (
-	NoPriority     = "NO_PRIORITY"
-	LowPriority    = "LOW_PRIORITY"
-	MediumPriority = "MEDIUM_PRIORITY"
-	HighPriority   = "HIGH_PRIORITY"
+	NoPriority     = "NO"
+	LowPriority    = "LOW"
+	MediumPriority = "MEDIUM"
+	HighPriority   = "HIGH"
 )
 
 const (

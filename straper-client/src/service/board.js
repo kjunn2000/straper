@@ -18,5 +18,10 @@ export const handleWsBoardMsg = (msg) => {
       boardState.orderTaskList(msg.payload);
       break;
     }
+    case "BOARD_ADD_CARD": {
+      boardState.addCard(msg.payload);
+      break;
+    }
+    default:
   }
 };

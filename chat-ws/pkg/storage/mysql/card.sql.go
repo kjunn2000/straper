@@ -19,7 +19,7 @@ func (q *Queries) CreateCard(ctx context.Context, card board.Card) error {
 	}
 	_, err = q.db.Exec(sql, args...)
 	if err != nil {
-		q.log.Info("Failed to create new card list.", zap.Error(err))
+		q.log.Info("Failed to create new card.", zap.Error(err))
 		return err
 	}
 	return nil

@@ -6,9 +6,11 @@ import { iconStyle } from "../../utils/style/icon.js";
 import AddComponent from "./AddComponent";
 import { sendBoardMsg } from "../../service/websocket";
 import useBoardStore from "../../store/boardStore";
-import { DragItem, DragListItem } from "../../utils/style/div";
+import { DragListItem } from "../../utils/style/div";
+import useIdentityStore from "../../store/identityStore";
 
 const DraggableElement = ({ element }) => {
+  const identity = useIdentityStore((state) => state.identity);
   const board = useBoardStore((state) => state.board);
   const [listName, setListName] = useState(element.list_name);
 
@@ -18,6 +20,16 @@ const DraggableElement = ({ element }) => {
     }
     element.list_name = listName;
     sendBoardMsg("BOARD_UPDATE_LIST", board.workspace_id, element);
+  };
+
+  const handleAddNewCard = (value) => {
+    const payload = {
+      title: value,
+      list_id: element.list_id,
+      creator_id: identity.user_id,
+      order_index: element.card_list ? element.card_list.length + 1 : 1,
+    };
+    sendBoardMsg("BOARD_ADD_CARD", board.workspace_id, payload);
   };
 
   return (
@@ -57,14 +69,22 @@ const DraggableElement = ({ element }) => {
                 {(provided) => (
                   <div {...provided.droppableProps} ref={provided.innerRef}>
                     {element.card_list &&
-                      element.card_list.map((item, index) => (
-                        <ListItem key={item.id} item={item} index={index} />
+                      element.card_list.map((card) => (
+                        <ListItem
+                          key={card.card_id}
+                          item={card}
+                          index={card.order_index}
+                        />
                       ))}
                     {provided.placeholder}
                   </div>
                 )}
               </Droppable>
-              <AddComponent type="Card" text="Add New Card" />
+              <AddComponent
+                action={handleAddNewCard}
+                type="Card"
+                text="Add New Card"
+              />
             </div>
           </DragListItem>
         );

@@ -60,6 +60,20 @@ const useBoardStore = create((set) => ({
       return { taskLists: newTaskLists };
     });
   },
+  addCard: (card) => {
+    set((state) => {
+      const newTaskLists = state.taskLists.map((taskList) => {
+        if (taskList.list_id === card.list_id) {
+          taskList.card_list = taskList.card_list
+            ? [...taskList.card_list, card]
+            : [card];
+        }
+        return taskList;
+      });
+      setLocalStorage("taskLists", newTaskLists);
+      return { taskLists: newTaskLists };
+    });
+  },
 }));
 
 export default useBoardStore;

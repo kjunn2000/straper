@@ -5,7 +5,7 @@ import { DragItem } from "../../utils/style/div";
 
 const ListItem = ({ item, index }) => {
   return (
-    <Draggable draggableId={item.id} index={index}>
+    <Draggable draggableId={item.card_id} index={index}>
       {(provided, snapshot) => {
         return (
           <DragItem
@@ -14,7 +14,7 @@ const ListItem = ({ item, index }) => {
             {...provided.draggableProps}
             {...provided.dragHandleProps}
           >
-            <Card />
+            <Card card={item} />
           </DragItem>
         );
       }}

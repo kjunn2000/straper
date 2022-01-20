@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -162,6 +163,7 @@ func (service *service) handleAddCard(ctx context.Context, bytePayload []byte) (
 	card.Priority = NoPriority
 	card.CreatedDate = time.Now()
 	card.DueDate = time.Now().Add(time.Hour * 24 * 7)
+	fmt.Println(card)
 	if err := service.store.CreateCard(ctx, card); err != nil {
 		return []byte{}, err
 	}

@@ -1,21 +1,14 @@
-import React, { useEffect } from "react";
+import React from "react";
 import styled from "styled-components";
 import { DragDropContext, Droppable } from "react-beautiful-dnd";
 import DraggableElement from "./DraggableElement.js";
 import useBoardStore from "../../store/boardStore.js";
 import AddComponent from "./AddComponent.js";
 import { sendBoardMsg } from "../../service/websocket.js";
-import useIdentityStore from "../../store/identityStore.js";
 
 const DragDropContextContainer = styled.div`
   padding: 20px;
   border-radius: 6px;
-`;
-
-const ListGrid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  grid-gap: 8px;
 `;
 
 const removeFromList = (list, index) => {
@@ -66,7 +59,9 @@ function DragList() {
     sendBoardMsg("BOARD_ADD_LIST", board.workspace_id, payload);
   };
 
-  return (
+  return !board.board_id ? (
+    <svg className="animate-spin h-5 w-5 mr-3 ..." viewBox="0 0 24 24"></svg>
+  ) : (
     <DragDropContextContainer className="flex">
       <DragDropContext onDragEnd={onDragEnd}>
         <div className="flex">
