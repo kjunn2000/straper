@@ -67,7 +67,7 @@ func (as *service) Login(ctx context.Context, req LoginRequest) (LoginResponse, 
 		return LoginResponse{}, err
 	}
 
-	refreshToken, err := as.tokenMaker.CreateToken(u.UserId, u.Username, as.config.AccessTokenDuration)
+	refreshToken, err := as.tokenMaker.CreateToken(u.UserId, u.Username, as.config.RefreshTokenDuration)
 	if err != nil {
 		return LoginResponse{}, err
 	}
