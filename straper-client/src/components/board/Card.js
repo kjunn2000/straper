@@ -1,6 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
+import CardDialog from "./CardDialog";
 
 const Card = ({ card }) => {
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+
   const tagColor = () => {
     switch (card.priority) {
       case "LOW":
@@ -13,7 +16,10 @@ const Card = ({ card }) => {
   };
 
   return (
-    <div className="flex flex-col bg-white rounded-md p-3 m-3">
+    <div
+      className="flex flex-col bg-white rounded-md p-3 m-3"
+      onClick={() => setIsDialogOpen(true)}
+    >
       {card.priority !== "NO" && (
         <div
           className={
@@ -25,6 +31,11 @@ const Card = ({ card }) => {
       )}
       <div className="break-all text-sm p-2">{card.title}</div>
       <div className="text-right">People involved</div>
+      <CardDialog
+        open={isDialogOpen}
+        closeModal={() => setIsDialogOpen(false)}
+        card={card}
+      />
     </div>
   );
 };
