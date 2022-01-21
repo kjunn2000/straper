@@ -22,7 +22,7 @@ const connect = () => {
     const data = JSON.parse(msg.data);
     console.log(data);
     if (data.type.startsWith("CHAT")) {
-      useMessageStore.getState().pushMsg(data.payload);
+      useMessageStore.getState().pushMessage(data.payload);
     } else {
       handleWsBoardMsg(data);
     }
