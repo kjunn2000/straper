@@ -1,29 +1,54 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useState } from "react";
-import { MdOutlineTitle } from "react-icons/md";
+import {
+  MdOutlineTitle,
+  MdOutlineDescription,
+  MdLowPriority,
+} from "react-icons/md";
+import { FaWindowClose } from "react-icons/fa";
 import { sendBoardMsg } from "../../service/websocket";
 import useBoardStore from "../../store/boardStore";
 import { iconStyle } from "../../utils/style/icon";
 import InputField from "../field/InputField";
+import CardHeader from "./CardSection";
+import { ErrorMessage } from "@hookform/error-message";
+import { useForm } from "react-hook-form";
+import { BsFillCalendarDateFill } from "react-icons/bs";
+import { AiFillDelete } from "react-icons/ai";
+import CardComment from "./CardComment";
 
 const CardDialog = ({ open, closeModal, card }) => {
   const board = useBoardStore((state) => state.board);
 
-  const handleCardTitleUpdate = (value) => {
-    if (value === "" || value === card.title) {
-      return;
-    }
-    const payload = {
-      card_id: card.card_id,
-      list_id: card.list_id,
-      title: value,
-    };
-    sendBoardMsg("BOARD_UPDATE_CARD_TITLE", board.workspace_id, payload);
-  };
+  console.log(card);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm();
 
   const close = () => {
+    reset();
     closeModal();
   };
+
+  const onSave = (data) => {
+    console.log(data);
+  };
+
+  const moreActionBtn = (text, action, Icon) => (
+    <button
+      className="w-full bg-indigo-400 text-white hover:bg-indigo-600 rounded shadow-lg shadow-indigo-500/50"
+      onClick={() => action()}
+    >
+      <div className="flex space-x-3 p-2">
+        <Icon size={20} />
+        <span>{text}</span>
+      </div>
+    </button>
+  );
 
   return (
     <>
@@ -61,27 +86,81 @@ const CardDialog = ({ open, closeModal, card }) => {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <div className="inline-block w-full max-w-md p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl">
-                <Dialog.Title
-                  as="h3"
-                  className="text-lg font-medium leading-6 text-gray-900 flex"
-                >
-                  <MdOutlineTitle style={iconStyle} />
-                  <InputField
-                    defaultValue={card.title}
-                    action={handleCardTitleUpdate}
-                  />
-                </Dialog.Title>
-
-                <div className="mt-4">
-                  <button
-                    type="button"
-                    className="inline-flex justify-center px-4 py-2 text-sm font-medium text-blue-900 bg-blue-100 border border-transparent rounded-md hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-500"
-                    onClick={closeModal}
+              <div className="inline-block p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl ">
+                <div className="flex space-x-5">
+                  <form
+                    onSubmit={handleSubmit(onSave)}
+                    className="rounded-lg flex flex-col space-y-5 justify-center self-center"
                   >
-                    Got it, thanks!
-                  </button>
+                    <div className="flex flex-col">
+                      <div className="flex p-3 space-x-3">
+                        <MdOutlineTitle size={20} />
+                        <span className="font-semibold text-sm">TITLE</span>
+                      </div>
+                      <input
+                        className="p-1 rounded-lg hover:bg-gray-300"
+                        defaultValue={card.title}
+                        {...register("title")}
+                      />
+                    </div>
+                    <div className="flex flex-col">
+                      <div className="flex p-3 space-x-3">
+                        <MdOutlineDescription size={20} />
+                        <span className="font-semibold text-sm">
+                          DESCRIPTION
+                        </span>
+                      </div>
+                      <textarea
+                        className="p-1 rounded-lg bg-gray-200 hover:bg-gray-300"
+                        defaultValue={card.description}
+                        {...register("description")}
+                      />
+                    </div>
+                    <div className="flex">
+                      <div className="flex self-center p-3 space-x-3">
+                        <MdLowPriority size={20} />
+                        <span className="font-semibold text-sm">PRIORITY</span>
+                      </div>
+                      <select
+                        defaultValue={card.priority}
+                        {...register("priority")}
+                        className="rounded-md w-full"
+                      >
+                        <option value="NO">No Priority</option>
+                        <option value="LOW">Low Priority</option>
+                        <option value="MEDIUM">Medium Priority</option>
+                        <option value="HIGH">High Priority</option>
+                      </select>
+                    </div>
+                    <button
+                      type="submit"
+                      className="bg-indigo-600 self-end p-3 rounded text-gray-200 hover:bg-indigo-400"
+                    >
+                      SAVE
+                    </button>
+                  </form>
+
+                  <div>
+                    <div>
+                      <div className="font-semibold text-sm py-3">MEMBERS</div>
+                      <div className="flex flex-col space-y-5"></div>
+                    </div>
+                    <div>
+                      <div className="font-semibold text-sm py-3">
+                        MORE ACTION
+                      </div>
+                      <div className="flex flex-col space-y-5">
+                        {moreActionBtn(
+                          "DUE DATE",
+                          () => {},
+                          BsFillCalendarDateFill
+                        )}
+                        {moreActionBtn("DELETE CARD", () => {}, AiFillDelete)}
+                      </div>
+                    </div>
+                  </div>
                 </div>
+                <CardComment />
               </div>
             </Transition.Child>
           </div>

@@ -6,7 +6,7 @@ const InputField = ({ defaultValue, action }) => {
     <div>
       <input
         className="bg-transparent focus:outline-none"
-        defaultValue={defaultValue}
+        value={field}
         onChange={(e) => setField(e.currentTarget.value)}
         onBlur={(e) => action(e.currentTarget.value)}
       />

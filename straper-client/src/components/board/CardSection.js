@@ -1,12 +1,13 @@
 import React from "react";
 
-const CardSection = ({ Icon, title }) => {
+const CardSection = ({ Icon, title, children }) => {
   return (
-    <div>
+    <div className="p-2">
       <span className="flex">
-        <Icon />
-        {title}
+        <Icon size={25} />
+        <span className="px-3 font-semibold">{title}</span>
       </span>
+      {children}
     </div>
   );
 };

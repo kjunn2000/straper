@@ -26,6 +26,10 @@ export const handleWsBoardMsg = (msg) => {
       boardState.updateCardTitle(msg.payload);
       break;
     }
+    case "BOARD_ORDER_CARD": {
+      boardState.orderCard(msg.payload);
+      break;
+    }
     default:
   }
 };
