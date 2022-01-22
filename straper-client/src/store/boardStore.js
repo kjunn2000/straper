@@ -68,6 +68,24 @@ const useBoardStore = create((set) => ({
       return { taskLists: newTaskLists };
     });
   },
+  updateCardTitle: (payload) => {
+    set((state) => {
+      const newTaskLists = state.taskLists.map((taskList) => {
+        if (taskList.list_id === payload.list_id) {
+          const newCardLists = taskList.card_list.map((card) => {
+            if (card.card_id === payload.card_id) {
+              card.title = payload.title;
+            }
+            return card;
+          });
+          taskList.card_list = newCardLists;
+        }
+        return taskList;
+      });
+      setLocalStorage("taskLists", newTaskLists);
+      return { taskLists: newTaskLists };
+    });
+  },
   orderCard: ({ sourceListId, destListId, oldCardIndex, newCardIndex }) => {
     set((state) => {
       const isSameList = sourceListId === destListId;

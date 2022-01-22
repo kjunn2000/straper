@@ -12,9 +12,13 @@ type UpdateCardParams struct {
 	Title       string    `json:"title" db:"title"`
 	Status      string    `json:"status" db:"status"`
 	Priority    string    `json:"priority" db:"priority"`
-	ListId      string    `json:"list_id"`
 	Description string    `json:"description" db:"description"`
 	DueDate     time.Time `json:"due_date" db:"due_date"`
+}
+
+type UpdateCardTitleParams struct {
+	CardId string `json:"card_id"`
+	Title  string `json:"title"`
 }
 
 type OrderListParams struct {

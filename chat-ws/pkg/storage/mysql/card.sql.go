@@ -49,9 +49,24 @@ func (q *Queries) UpdateCard(ctx context.Context, params board.UpdateCardParams)
 		Set("title", params.Title).
 		Set("status", params.Status).
 		Set("priority", params.Priority).
-		Set("list_id", params.ListId).
 		Set("description", params.Description).
 		Set("due_date", params.DueDate).
+		Where(sq.Eq{"card_id": params.CardId}).ToSql()
+	if err != nil {
+		q.log.Info("Failed to create update card sql.", zap.Error(err))
+		return err
+	}
+	_, err = q.db.Exec(sql, args...)
+	if err != nil {
+		q.log.Info("Failed to update card.", zap.Error(err))
+		return err
+	}
+	return nil
+}
+
+func (q *Queries) UpdateCardTitle(ctx context.Context, params board.UpdateCardTitleParams) error {
+	sql, args, err := sq.Update("card").
+		Set("title", params.Title).
 		Where(sq.Eq{"card_id": params.CardId}).ToSql()
 	if err != nil {
 		q.log.Info("Failed to create update card sql.", zap.Error(err))

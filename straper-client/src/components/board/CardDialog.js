@@ -1,20 +1,24 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { Fragment, useState } from "react";
 import { MdOutlineTitle } from "react-icons/md";
+import { sendBoardMsg } from "../../service/websocket";
+import useBoardStore from "../../store/boardStore";
 import { iconStyle } from "../../utils/style/icon";
+import InputField from "../field/InputField";
 
 const CardDialog = ({ open, closeModal, card }) => {
-  const [cardTitle, setCardTitle] = useState(card.title);
+  const board = useBoardStore((state) => state.board);
 
-  const handleCardTitleUpdate = () => {
-    if (cardTitle === "") {
+  const handleCardTitleUpdate = (value) => {
+    if (value === "" || value === card.title) {
       return;
     }
     const payload = {
       card_id: card.card_id,
-      title: cardTitle,
+      list_id: card.list_id,
+      title: value,
     };
-    console.log(payload);
+    sendBoardMsg("BOARD_UPDATE_CARD_TITLE", board.workspace_id, payload);
   };
 
   const close = () => {
@@ -63,11 +67,9 @@ const CardDialog = ({ open, closeModal, card }) => {
                   className="text-lg font-medium leading-6 text-gray-900 flex"
                 >
                   <MdOutlineTitle style={iconStyle} />
-                  <input
-                    className="bg-transparent focus:outline-none"
-                    value={cardTitle}
-                    onChange={(e) => setCardTitle(e.currentTarget.value)}
-                    onBlur={() => handleCardTitleUpdate()}
+                  <InputField
+                    defaultValue={card.title}
+                    action={handleCardTitleUpdate}
                   />
                 </Dialog.Title>
 

@@ -87,6 +87,7 @@ type Querier interface {
 	CreateCard(ctx context.Context, card board.Card) error
 	GetCardListByListId(ctx context.Context, listId string) ([]board.Card, error)
 	UpdateCard(ctx context.Context, params board.UpdateCardParams) error
+	UpdateCardTitle(ctx context.Context, params board.UpdateCardTitleParams) error
 	UpdateCardOrder(ctx context.Context, cardId string, orderIndex int, listId string, updateListId bool) error
 	DeleteCard(ctx context.Context, cardId string) error
 	AddUserToCard(ctx context.Context, cardId, userId string) error
