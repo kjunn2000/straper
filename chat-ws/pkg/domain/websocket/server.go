@@ -1,4 +1,4 @@
-package chatting
+package websocket
 
 type WSServer struct {
 	activeUser map[string]*User

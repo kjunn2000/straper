@@ -1,13 +1,12 @@
+import useIdentityStore from "../store/identityStore";
 import { getLocalStorage } from "../store/localStorage";
-import {
-  getAsByteArray,
-  base64ToArray,
-  createAndDownloadBlobFile,
-} from "./file";
+import useMessageStore from "../store/messageStore";
+import { handleWsBoardMsg } from "./board";
+import { getAsByteArray } from "./file";
 
 var socket;
 
-const connect = (cb) => {
+const connect = () => {
   var identity = getLocalStorage("identity");
   socket = new WebSocket(
     `ws://localhost:8080/api/v1/protected/ws/${identity.user_id}`
@@ -21,7 +20,12 @@ const connect = (cb) => {
   socket.onmessage = (msg) => {
     console.log("Successfully receive message");
     const data = JSON.parse(msg.data);
-    cb(data);
+    console.log(data);
+    if (data.type.startsWith("CHAT")) {
+      useMessageStore.getState().pushMessage(data.payload);
+    } else {
+      handleWsBoardMsg(data);
+    }
   };
 
   socket.onclose = (event) => {
@@ -35,7 +39,7 @@ const connect = (cb) => {
   };
 };
 
-let sendMsg = async (type, channelId, creatorId, content) => {
+const sendMsg = async (type, channelId, creatorId, content) => {
   const payload = {
     type,
     channel_id: channelId,
@@ -50,7 +54,25 @@ let sendMsg = async (type, channelId, creatorId, content) => {
     payload.file_bytes = Array.from(result);
   }
   console.log("Sending msg...");
-  socket.send(JSON.stringify(payload));
+  const dto = {
+    type: "CHAT_MESSAGE",
+    payload,
+    sender_id: creatorId,
+  };
+  console.log(dto);
+  socket.send(JSON.stringify(dto));
 };
 
-export { connect, sendMsg };
+const sendBoardMsg = (type, workspaceId, payload) => {
+  const senderId = useIdentityStore.getState().identity.user_id;
+  const dto = {
+    type,
+    workspace_id: workspaceId,
+    payload,
+    sender_id: senderId,
+  };
+  console.log(dto);
+  socket.send(JSON.stringify(dto));
+};
+
+export { connect, sendMsg, sendBoardMsg };

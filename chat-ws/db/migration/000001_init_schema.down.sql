@@ -1,12 +1,12 @@
 DROP TABLE IF EXISTS ticket;
 
-DROP TABLE IF EXISTS task_comment;
+DROP TABLE IF EXISTS card_comment;
 
-DROP TABLE IF EXISTS task_user;
+DROP TABLE IF EXISTS card_user;
 
-DROP TABLE IF EXISTS task;
+DROP TABLE IF EXISTS card;
 
-DROP TABLE IF EXISTS task_tag;
+DROP TABLE IF EXISTS task_list;
 
 DROP TABLE IF EXISTS task_board;
 

@@ -1,4 +1,4 @@
-package chatting
+package websocket
 
 import (
 	"context"
@@ -25,13 +25,6 @@ type UserData struct {
 	UserId string `db:"user_id"`
 }
 
-type UserDetail struct {
-	UserId   string `json:"user_id" db:"user_id"`
-	Username string `json:"username" db:"username"`
-	Email    string `json:"email" db:"email" validate:"email"`
-	PhoneNo  string `json:"phone_no" db:"phone_no"`
-}
-
 func (user *User) readMsg(ctx context.Context, log *zap.Logger) {
 	defer func() {
 		user.conn.Close()
@@ -49,11 +42,11 @@ func (user *User) readMsg(ctx context.Context, log *zap.Logger) {
 			return
 		}
 
-		switch msg.Type {
+		switch msg.MessageType {
 		case UserLeave:
 			user.wsServer.unregister <- user
 			return
-		case Messaging, File:
+		default:
 			user.wsServer.broadcast <- &msg
 		}
 	}

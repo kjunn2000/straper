@@ -25,6 +25,13 @@ type Message struct {
 	CreatedDate time.Time  `json:"created_date" db:"created_date"`
 }
 
+type UserDetail struct {
+	UserId   string `json:"user_id" db:"user_id"`
+	Username string `json:"username" db:"username"`
+	Email    string `json:"email" db:"email" validate:"email"`
+	PhoneNo  string `json:"phone_no" db:"phone_no"`
+}
+
 func (message *Message) Encode() ([]byte, error) {
 	json, err := json.Marshal(message)
 	if err != nil {

@@ -5,7 +5,9 @@ import (
 
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/account"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/auth"
+	"github.com/kjunn2000/straper/chat-ws/pkg/domain/board"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/chatting"
+	"github.com/kjunn2000/straper/chat-ws/pkg/domain/websocket"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/adding"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/editing"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/listing"
@@ -53,7 +55,7 @@ type Querier interface {
 	GetChannelByChannelId(ctx context.Context, channelId string) (listing.Channel, error)
 	GetChannelsByUserId(ctx context.Context, userId string) ([]listing.Channel, error)
 	GetChannelListByWorkspaceId(ctx context.Context, workspaceId string) ([]listing.Channel, error)
-	GetUserListByChannelId(ctx context.Context, channelId string) ([]chatting.UserData, error)
+	// GetUserListByChannelId(ctx context.Context, channelId string) ([]chatting.UserData, error)
 	GetDefaultChannel(ctx context.Context, workspaceId string) (listing.Channel, error)
 	GetDefaultChannelByWorkspaceId(ctx context.Context, workspaceId string) (adding.Channel, error)
 	UpdateChannel(ctx context.Context, channel editing.Channel) error
@@ -66,4 +68,30 @@ type Querier interface {
 	GetAllChannelMessages(ctx context.Context, channelId string) ([]chatting.Message, error)
 	GetAllChannelMessagesByWorkspaceId(ctx context.Context, workspaceId string) ([]chatting.Message, error)
 	UpdateChannelAccessTime(ctx context.Context, channelId string, userId string) error
+
+	// websocket
+	GetUserListByChannelId(ctx context.Context, channelId string) ([]websocket.UserData, error)
+	GetUserListByWorkspaceId(ctx context.Context, workspaceId string) ([]websocket.UserData, error)
+
+	// board
+	CreateBoard(ctx context.Context, board board.TaskBoard) error
+	GetTaskBoardByWorkspaceId(ctx context.Context, workspaceId string) (board.TaskBoard, error)
+	UpdateTaskBoard(ctx context.Context, board board.TaskBoard) error
+
+	CreateTaskList(ctx context.Context, taskList board.TaskList) error
+	GetTaskListsByBoardId(ctx context.Context, boardId string) ([]board.TaskList, error)
+	UpdateTaskList(ctx context.Context, taskList board.UpdateListParams) error
+	UpdateTaskListOrder(ctx context.Context, listId string, orderIndex int) error
+	DeleteTaskList(ctx context.Context, listId string) error
+
+	CreateCard(ctx context.Context, card board.Card) error
+	GetCardListByListId(ctx context.Context, listId string) ([]board.Card, error)
+	UpdateCard(ctx context.Context, params board.UpdateCardParams) error
+	UpdateCardOrder(ctx context.Context, cardId string, orderIndex int, listId string, updateListId bool) error
+	DeleteCard(ctx context.Context, cardId string) error
+	AddUserToCard(ctx context.Context, cardId, userId string) error
+	DeleteUserFromCard(ctx context.Context, cardId, userId string) error
+
+	CreateCardComment(ctx context.Context, comment *board.CardComment) error
+	GetCardComments(ctx context.Context, cardId string) ([]board.CardComment, error)
 }

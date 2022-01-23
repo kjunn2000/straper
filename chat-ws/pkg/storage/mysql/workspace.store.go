@@ -5,6 +5,8 @@ import (
 	"errors"
 	"strings"
 
+	"github.com/google/uuid"
+	"github.com/kjunn2000/straper/chat-ws/pkg/domain/board"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/adding"
 	"go.uber.org/zap"
 )
@@ -28,6 +30,9 @@ func (s *SQLStore) CreateNewWorkspace(ctx context.Context, w adding.Workspace, c
 		if err != nil {
 			return err
 		}
+		boardId, _ := uuid.NewRandom()
+		boardParam := board.TaskBoard{BoardId: boardId.String(), BoardName: "Task Board", WorkspaceId: w.Id}
+		q.CreateBoard(ctx, boardParam)
 		return nil
 	})
 	if err != nil {

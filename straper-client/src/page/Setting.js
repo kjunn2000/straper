@@ -59,7 +59,7 @@ function Setting() {
                 className="w-full py-3 px-5 text-sm font-medium text-left text-gray-300 rounded transition-all duration-300 
                     drop-shadow-lg hover:bg-red-600"
               >
-                Log Out
+                LOG OUT
               </button>
             </Tab.List>
           </div>
