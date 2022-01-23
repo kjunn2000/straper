@@ -22,8 +22,8 @@ export const handleWsBoardMsg = (msg) => {
       boardState.addCard(msg.payload);
       break;
     }
-    case "BOARD_UPDATE_CARD_TITLE": {
-      boardState.updateCardTitle(msg.payload);
+    case "BOARD_UPDATE_CARD": {
+      boardState.updateCardDetail(msg.payload);
       break;
     }
     case "BOARD_ORDER_CARD": {

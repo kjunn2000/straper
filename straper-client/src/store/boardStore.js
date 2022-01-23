@@ -119,6 +119,22 @@ const useBoardStore = create((set) => ({
       return { taskLists: newTaskLists };
     });
   },
+  updateCardDetail: (updateCardParams) => {
+    set((state) => {
+      const list = state.taskLists[updateCardParams.list_id];
+      const card = list.card_list[updateCardParams.card_id];
+      card.title = updateCardParams.title;
+      card.description = updateCardParams.description;
+      card.priority = updateCardParams.priority;
+      list.card_list[updateCardParams.card_id] = card;
+      const newTaskLists = {
+        ...state.taskLists,
+        [updateCardParams.list_id]: list,
+      };
+      setLocalStorage("taskLists", newTaskLists);
+      return { taskLists: newTaskLists };
+    });
+  },
 }));
 
 export default useBoardStore;

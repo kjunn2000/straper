@@ -1,17 +1,12 @@
 import { Dialog, Transition } from "@headlessui/react";
-import { Fragment, useState } from "react";
+import { Fragment } from "react";
 import {
   MdOutlineTitle,
   MdOutlineDescription,
   MdLowPriority,
 } from "react-icons/md";
-import { FaWindowClose } from "react-icons/fa";
 import { sendBoardMsg } from "../../service/websocket";
 import useBoardStore from "../../store/boardStore";
-import { iconStyle } from "../../utils/style/icon";
-import InputField from "../field/InputField";
-import CardHeader from "./CardSection";
-import { ErrorMessage } from "@hookform/error-message";
 import { useForm } from "react-hook-form";
 import { BsFillCalendarDateFill } from "react-icons/bs";
 import { AiFillDelete } from "react-icons/ai";
@@ -19,22 +14,20 @@ import CardComment from "./CardComment";
 
 const CardDialog = ({ open, closeModal, card }) => {
   const board = useBoardStore((state) => state.board);
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    reset,
-  } = useForm();
+  const { register, handleSubmit, setValue } = useForm();
 
   const close = () => {
-    reset();
+    setValue("title", card.title);
+    setValue("description", card.description);
+    setValue("priority", card.priority);
+
     closeModal();
   };
 
   const onSave = (data) => {
     const payload = {
       ...data,
+      list_id: card.list_id,
       card_id: card.card_id,
     };
     sendBoardMsg("BOARD_UPDATE_CARD", board.workspace_id, payload);
@@ -128,10 +121,10 @@ const CardDialog = ({ open, closeModal, card }) => {
                         {...register("priority")}
                         className="rounded-md w-full"
                       >
-                        <option value="NO">No Priority</option>
-                        <option value="LOW">Low Priority</option>
-                        <option value="MEDIUM">Medium Priority</option>
-                        <option value="HIGH">High Priority</option>
+                        <option value="NO">No</option>
+                        <option value="LOW">Low</option>
+                        <option value="MEDIUM">Medium</option>
+                        <option value="HIGH">High</option>
                       </select>
                     </div>
                     <button

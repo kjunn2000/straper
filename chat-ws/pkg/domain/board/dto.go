@@ -11,7 +11,7 @@ type UpdateListParams struct {
 }
 
 type UpdateCardParams struct {
-	ListId      string `json:"list_id" db:"list_id"`
+	ListId      string `json:"list_id"`
 	CardId      string `json:"card_id" db:"card_id"`
 	Title       string `json:"title" db:"title"`
 	Priority    string `json:"priority" db:"priority"`
