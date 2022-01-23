@@ -15,6 +15,7 @@ function TaskBoard() {
   const board = useBoardStore((state) => state.board);
   const setBoard = useBoardStore((state) => state.setBoard);
   const setTaskLists = useBoardStore((state) => state.setTaskLists);
+  const setTaskListsOrder = useBoardStore((state) => state.setTaskListsOrder);
 
   useEffect(() => {
     api.get(`/protected/board/${currWorkspace.workspace_id}`).then((res) => {
@@ -22,7 +23,24 @@ function TaskBoard() {
         const data = res.data.Data;
         setBoard(data.task_board);
         if (!isEmpty(data.task_lists)) {
-          setTaskLists(data.task_lists);
+          const result = data.task_lists.reduce((map, obj) => {
+            if (!obj.card_list) {
+              obj.card_list = [];
+            }
+            obj["card_list_order"] = obj.card_list.map((card) => card.card_id);
+            obj["card_list"] = obj.card_list.reduce(
+              (map, obj) => ((map[obj.card_id] = obj), map),
+              {}
+            );
+            map[obj.list_id] = obj;
+            return map;
+          }, {});
+
+          setTaskLists(result);
+          const taskListsOrder = data.task_lists.map(
+            (taskList) => taskList.list_id
+          );
+          setTaskListsOrder(taskListsOrder);
         }
       }
     });

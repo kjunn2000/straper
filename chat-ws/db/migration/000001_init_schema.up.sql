@@ -90,7 +90,6 @@ CREATE TABLE `task_list` (
 CREATE TABLE `card` (
   `card_id` CHAR(36) PRIMARY KEY,
   `title` VARCHAR(255) NOT NULL,
-  `status` VARCHAR(255) NOT NULL,
   `priority` VARCHAR(6) NOT NULL,
   `list_id` CHAR(36) NOT NULL,
   `description` LONGTEXT NOT NULL,

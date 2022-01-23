@@ -5,7 +5,8 @@ import { getLocalStorage, setLocalStorage } from "./localStorage";
 
 const useBoardStore = create((set) => ({
   board: getLocalStorage("board") || {},
-  taskLists: getLocalStorage("taskLists") || [],
+  taskListsOrder: getLocalStorage("taskListsOrder") || [],
+  taskLists: getLocalStorage("taskLists") || {},
   setBoard: (board) => {
     setLocalStorage("board", board);
     set((state) => ({
@@ -20,114 +21,100 @@ const useBoardStore = create((set) => ({
   },
   addTaskList: (taskList) => {
     set((state) => {
-      const newTaskLists = [...state.taskLists, taskList];
+      taskList.card_list_order = [];
+      taskList.card_list = {};
+      const newTaskLists = { ...state.taskLists, [taskList.list_id]: taskList };
+      const newTaskListsOrder = [...state.taskListsOrder, taskList.list_id];
       setLocalStorage("taskLists", newTaskLists);
-      return { taskLists: newTaskLists };
+      setLocalStorage("taskListsOrder", newTaskListsOrder);
+      return { taskLists: newTaskLists, taskListsOrder: newTaskListsOrder };
     });
   },
   updateTaskList: (taskList) => {
     set((state) => {
-      const newTaskLists = state.taskLists.map((list) => {
-        return list.list_id === taskList.list_id ? taskList : list;
-      });
+      const newTaskList = state.taskLists[taskList.list_id];
+      newTaskList.list_name = taskList.list_name;
+      const newTaskLists = {
+        ...state.taskLists,
+        [taskList.list_id]: newTaskList,
+      };
       setLocalStorage("taskLists", newTaskLists);
       return { taskLists: newTaskLists };
     });
   },
   deleteTaskList: (listId) => {
     set((state) => {
-      const newTaskLists = state.taskLists
-        .filter((taskList) => taskList.list_id !== listId)
-        .map((taskList, i) => {
-          taskList.order_index = i + 1;
-          return taskList;
-        });
-      setLocalStorage("taskLists", newTaskLists);
-      return { taskLists: newTaskLists };
+      delete state.taskLists[listId];
+      const newTaskListsOrder = state.taskListsOrder.filter(
+        (id) => id !== listId
+      );
+      setLocalStorage("taskLists", state.taskLists);
+      setLocalStorage("taskListsOrder", newTaskListsOrder);
+      return { taskLists: state.taskLists, taskListsOrder: newTaskListsOrder };
     });
   },
   orderTaskList: ({ oldListIndex, newListIndex }) => {
     set((state) => {
-      const [removed, result] = removeFromList(state.taskLists, oldListIndex);
-      const newTaskLists = addToList(result, newListIndex, removed);
-      setLocalStorage("taskLists", newTaskLists);
-      return { taskLists: newTaskLists };
+      const [removed, result] = removeFromList(
+        state.taskListsOrder,
+        oldListIndex
+      );
+      const newTaskListsOrder = addToList(result, newListIndex, removed);
+      setLocalStorage("taskListsOrder", newTaskListsOrder);
+      return { taskListsOrder: newTaskListsOrder };
+    });
+  },
+  setTaskListsOrder: (taskListsOrder) => {
+    set((state) => {
+      setLocalStorage("taskListsOrder", taskListsOrder);
+      return { taskListsOrder: taskListsOrder };
     });
   },
   addCard: (card) => {
     set((state) => {
-      const newTaskLists = state.taskLists.map((taskList) => {
-        if (taskList.list_id === card.list_id) {
-          taskList.card_list = taskList.card_list
-            ? [...taskList.card_list, card]
-            : [card];
-        }
-        return taskList;
-      });
-      setLocalStorage("taskLists", newTaskLists);
-      return { taskLists: newTaskLists };
-    });
-  },
-  updateCardTitle: (payload) => {
-    set((state) => {
-      const newTaskLists = state.taskLists.map((taskList) => {
-        if (taskList.list_id === payload.list_id) {
-          const newCardLists = taskList.card_list.map((card) => {
-            if (card.card_id === payload.card_id) {
-              card.title = payload.title;
-            }
-            return card;
-          });
-          taskList.card_list = newCardLists;
-        }
-        return taskList;
-      });
+      const list = state.taskLists[card.list_id];
+      list.card_list[card.card_id] = card;
+      list.card_list_order = [...list.card_list_order, card.card_id];
+      const newTaskLists = {
+        ...state.taskLists,
+        [card.list_id]: list,
+      };
       setLocalStorage("taskLists", newTaskLists);
       return { taskLists: newTaskLists };
     });
   },
   orderCard: ({ sourceListId, destListId, oldCardIndex, newCardIndex }) => {
     set((state) => {
-      const isSameList = sourceListId === destListId;
-      let removedItem;
-      let newTaskLists = state.taskLists.map((taskList) => {
-        if (taskList.list_id === sourceListId) {
-          let [removed, result] = removeFromList(
-            taskList.card_list,
-            oldCardIndex
-          );
-          removedItem = removed;
-          if (isSameList) {
-            result = addToList(result, newCardIndex, removed);
-          }
-          result = result.map((card, i) => {
-            card.order_index = i + 1;
-            return card;
-          });
-          taskList.card_list = result;
-        }
-        return taskList;
-      });
-      if (!isSameList) {
-        newTaskLists = state.taskLists.map((taskList) => {
-          if (taskList.list_id === destListId) {
-            if (isEmpty(taskList.card_list)) {
-              taskList.card_list = [removedItem];
-            } else {
-              taskList.card_list = addToList(
-                taskList.card_list,
-                newCardIndex,
-                removedItem
-              );
-              taskList.card_list = taskList.card_list.map((card, i) => {
-                card.order_index = i + 1;
-                return card;
-              });
-            }
-          }
-          return taskList;
-        });
+      const oldTaskList = state.taskLists[sourceListId];
+      let [removed, result] = removeFromList(
+        oldTaskList.card_list_order,
+        oldCardIndex
+      );
+      const currObj = oldTaskList.card_list[removed];
+      delete oldTaskList.card_list[removed];
+      oldTaskList.card_list_order = result;
+      if (sourceListId === destListId) {
+        oldTaskList.card_list_order = addToList(result, newCardIndex, removed);
+        oldTaskList.card_list[removed] = currObj;
+        const newTaskLists = {
+          ...state.taskLists,
+          [sourceListId]: oldTaskList,
+        };
+        setLocalStorage("taskLists", newTaskLists);
+        return { taskLists: newTaskLists };
       }
+      const newTaskList = state.taskLists[destListId];
+      newTaskList.card_list_order = addToList(
+        newTaskList.card_list_order,
+        newCardIndex,
+        removed
+      );
+      newTaskList.card_list[removed] = currObj;
+      const newTaskLists = {
+        ...state.taskLists,
+        [sourceListId]: oldTaskList,
+        [destListId]: newTaskList,
+      };
       setLocalStorage("taskLists", newTaskLists);
       return { taskLists: newTaskLists };
     });

@@ -1,24 +1,21 @@
 package board
 
-import "time"
-
 type TaskBoardDataResponse struct {
 	TaskBoard TaskBoard  `json:"task_board"`
 	TaskLists []TaskList `json:"task_lists"`
 }
 
-type UpdateCardParams struct {
-	CardId      string    `json:"card_id" db:"card_id"`
-	Title       string    `json:"title" db:"title"`
-	Status      string    `json:"status" db:"status"`
-	Priority    string    `json:"priority" db:"priority"`
-	Description string    `json:"description" db:"description"`
-	DueDate     time.Time `json:"due_date" db:"due_date"`
+type UpdateListParams struct {
+	ListId   string `json:"list_id"`
+	ListName string `json:"list_name"`
 }
 
-type UpdateCardTitleParams struct {
-	CardId string `json:"card_id"`
-	Title  string `json:"title"`
+type UpdateCardParams struct {
+	ListId      string `json:"list_id" db:"list_id"`
+	CardId      string `json:"card_id" db:"card_id"`
+	Title       string `json:"title" db:"title"`
+	Priority    string `json:"priority" db:"priority"`
+	Description string `json:"description" db:"description"`
 }
 
 type OrderListParams struct {

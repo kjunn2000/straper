@@ -20,8 +20,6 @@ import CardComment from "./CardComment";
 const CardDialog = ({ open, closeModal, card }) => {
   const board = useBoardStore((state) => state.board);
 
-  console.log(card);
-
   const {
     register,
     handleSubmit,
@@ -35,7 +33,11 @@ const CardDialog = ({ open, closeModal, card }) => {
   };
 
   const onSave = (data) => {
-    console.log(data);
+    const payload = {
+      ...data,
+      card_id: card.card_id,
+    };
+    sendBoardMsg("BOARD_UPDATE_CARD", board.workspace_id, payload);
   };
 
   const moreActionBtn = (text, action, Icon) => (

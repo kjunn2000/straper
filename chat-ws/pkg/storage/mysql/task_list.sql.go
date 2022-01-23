@@ -41,7 +41,7 @@ func (q *Queries) GetTaskListsByBoardId(ctx context.Context, boardId string) ([]
 	return taskLists, nil
 }
 
-func (q *Queries) UpdateTaskList(ctx context.Context, taskList board.TaskList) error {
+func (q *Queries) UpdateTaskList(ctx context.Context, taskList board.UpdateListParams) error {
 	sql, args, err := sq.Update("task_list").
 		Set("list_name", taskList.ListName).
 		Where(sq.Eq{"list_id": taskList.ListId}).ToSql()

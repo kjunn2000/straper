@@ -22,8 +22,12 @@ const DraggableElement = ({ element, index }) => {
     if (listName === element.list_name) {
       return;
     }
+    const payload = {
+      list_id: element.list_id,
+      list_name: listName,
+    };
     element.list_name = listName;
-    sendBoardMsg("BOARD_UPDATE_LIST", board.workspace_id, element);
+    sendBoardMsg("BOARD_UPDATE_LIST", board.workspace_id, payload);
   };
 
   const handleAddNewCard = (value) => {
@@ -31,7 +35,7 @@ const DraggableElement = ({ element, index }) => {
       title: value,
       list_id: element.list_id,
       creator_id: identity.user_id,
-      order_index: element.card_list ? element.card_list.length + 1 : 1,
+      order_index: element.card_list_order.length + 1,
     };
     sendBoardMsg("BOARD_ADD_CARD", board.workspace_id, payload);
   };
@@ -73,8 +77,12 @@ const DraggableElement = ({ element, index }) => {
                 {(provided) => (
                   <div {...provided.droppableProps} ref={provided.innerRef}>
                     {element.card_list &&
-                      element.card_list.map((card, i) => (
-                        <ListItem key={card.card_id} item={card} index={i} />
+                      element.card_list_order.map((id, i) => (
+                        <ListItem
+                          key={id}
+                          item={element.card_list[id]}
+                          index={i}
+                        />
                       ))}
                     {provided.placeholder}
                     <AddComponent

@@ -22,7 +22,6 @@ type TaskList struct {
 type Card struct {
 	CardId      string    `json:"card_id" db:"card_id"`
 	Title       string    `json:"title" db:"title"`
-	Status      string    `json:"status" db:"status"`
 	Priority    string    `json:"priority" db:"priority"`
 	ListId      string    `json:"list_id" db:"list_id"`
 	Description string    `json:"description" db:"description"`

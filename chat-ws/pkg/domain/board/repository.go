@@ -13,13 +13,12 @@ type Repository interface {
 	GetCardListByListId(ctx context.Context, listId string) ([]Card, error)
 
 	CreateTaskList(ctx context.Context, taskList TaskList) error
-	UpdateTaskList(ctx context.Context, taskList TaskList) error
+	UpdateTaskList(ctx context.Context, taskList UpdateListParams) error
 	UpdateTaskListOrder(ctx context.Context, listId string, orderIndex int) error
 	DeleteTaskList(ctx context.Context, listId string) error
 
 	CreateCard(ctx context.Context, card Card) error
 	UpdateCard(ctx context.Context, params UpdateCardParams) error
-	UpdateCardTitle(ctx context.Context, params UpdateCardTitleParams) error
 	UpdateCardOrder(ctx context.Context, cardId string, orderIndex int, listId string, updateListId bool) error
 	DeleteCard(ctx context.Context, cardId string) error
 	AddUserToCard(ctx context.Context, cardId, userId string) error

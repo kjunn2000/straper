@@ -1,10 +1,6 @@
 package board
 
 const (
-	NoAssign = "NO_ASSIGN"
-)
-
-const (
 	NoPriority     = "NO"
 	LowPriority    = "LOW"
 	MediumPriority = "MEDIUM"

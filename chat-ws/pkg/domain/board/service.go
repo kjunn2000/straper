@@ -89,14 +89,6 @@ func (service *service) HandleBroadcast(ctx context.Context, msg *ws.Message, pu
 		if err := service.handleUpdateCard(ctx, bytePayload); err != nil {
 			return err
 		}
-	case BoardUpdateCardTitle:
-		if err := service.handleUpdateCardTitle(ctx, bytePayload); err != nil {
-			return err
-		}
-	// case BoardUpdateCardDesc:
-	// 	if err := service.handleUpdateCardDesc(ctx, bytePayload); err != nil {
-	// 		return err
-	// 	}
 	case BoardDeleteCard:
 		if err := service.handleDeleteCard(ctx, bytePayload); err != nil {
 			return err
@@ -131,11 +123,11 @@ func (service *service) handleAddList(ctx context.Context, bytePayload []byte) (
 }
 
 func (service *service) handleUpdateList(ctx context.Context, bytePayload []byte) error {
-	var taskList TaskList
-	if err := json.Unmarshal(bytePayload, &taskList); err != nil {
+	var updateListParams UpdateListParams
+	if err := json.Unmarshal(bytePayload, &updateListParams); err != nil {
 		return err
 	}
-	return service.store.UpdateTaskList(ctx, taskList)
+	return service.store.UpdateTaskList(ctx, updateListParams)
 }
 
 func (service *service) handleDeleteList(ctx context.Context, bytePayload []byte) error {
@@ -174,7 +166,6 @@ func (service *service) handleAddCard(ctx context.Context, bytePayload []byte) (
 	}
 	cardId, _ := uuid.NewRandom()
 	card.CardId = cardId.String()
-	card.Status = NoAssign
 	card.Priority = NoPriority
 	card.CreatedDate = time.Now()
 	card.DueDate = time.Now().Add(time.Hour * 24 * 7)
@@ -191,14 +182,6 @@ func (service *service) handleUpdateCard(ctx context.Context, bytePayload []byte
 		return err
 	}
 	return service.store.UpdateCard(ctx, updateCardParams)
-}
-
-func (service *service) handleUpdateCardTitle(ctx context.Context, bytePayload []byte) error {
-	var updateCardTitleParams UpdateCardTitleParams
-	if err := json.Unmarshal(bytePayload, &updateCardTitleParams); err != nil {
-		return err
-	}
-	return service.store.UpdateCardTitle(ctx, updateCardTitleParams)
 }
 
 func (service *service) handleDeleteCard(ctx context.Context, bytePayload []byte) error {

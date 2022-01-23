@@ -13,6 +13,7 @@ const DragDropContextContainer = styled.div`
 
 function DragList() {
   const taskLists = useBoardStore((state) => state.taskLists);
+  const taskListsOrder = useBoardStore((state) => state.taskListsOrder);
   const board = useBoardStore((state) => state.board);
   const orderTaskList = useBoardStore((state) => state.orderTaskList);
   const orderCard = useBoardStore((state) => state.orderCard);
@@ -52,7 +53,7 @@ function DragList() {
     const payload = {
       list_name: value,
       board_id: board.board_id,
-      order_index: taskLists.length + 1,
+      order_index: taskListsOrder.length + 1,
     };
     sendBoardMsg("BOARD_ADD_LIST", board.workspace_id, payload);
   };
@@ -74,10 +75,10 @@ function DragList() {
                 ref={provided.innerRef}
                 className="flex"
               >
-                {taskLists.map((taskList, i) => (
+                {taskListsOrder.map((taskListId, i) => (
                   <DraggableElement
-                    element={taskList}
-                    key={taskList.list_id}
+                    element={taskLists[taskListId]}
+                    key={taskListId}
                     index={i}
                   />
                 ))}
