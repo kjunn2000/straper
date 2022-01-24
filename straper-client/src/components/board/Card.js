@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { AiOutlineClockCircle } from "react-icons/ai";
 import CardDialog from "./CardDialog";
 
 const Card = ({ card }) => {
@@ -13,6 +14,12 @@ const Card = ({ card }) => {
       case "HIGH":
         return "bg-red-600";
     }
+  };
+
+  const dateStringToMonthDate = () => {
+    const date = new Date(card.due_date);
+    const month = date.toLocaleString("default", { month: "short" });
+    return month + " " + date.getDate();
   };
 
   return (
@@ -31,7 +38,12 @@ const Card = ({ card }) => {
         </div>
       )}
       <div className="break-all text-sm p-2">{card.title}</div>
-      <div className="text-right">People involved</div>
+      <div>
+        <div className="bg-indigo-300 flex w-fit rounded-md text-gray-700 py-1 px-3">
+          <AiOutlineClockCircle size={20} />
+          <span>{card.due_date && dateStringToMonthDate()}</span>
+        </div>
+      </div>
       <CardDialog
         open={isDialogOpen}
         closeModal={() => setIsDialogOpen(false)}

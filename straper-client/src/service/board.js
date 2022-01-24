@@ -26,6 +26,10 @@ export const handleWsBoardMsg = (msg) => {
       boardState.updateCardDetail(msg.payload);
       break;
     }
+    case "BOARD_UPDATE_CARD_DUE_DATE": {
+      boardState.updateCardDueDate(msg.payload);
+      break;
+    }
     case "BOARD_ORDER_CARD": {
       boardState.orderCard(msg.payload);
       break;

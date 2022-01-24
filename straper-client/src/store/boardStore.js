@@ -135,6 +135,20 @@ const useBoardStore = create((set) => ({
       return { taskLists: newTaskLists };
     });
   },
+  updateCardDueDate: ({ list_id, card_id, due_date }) => {
+    set((state) => {
+      const list = state.taskLists[list_id];
+      const card = list.card_list[card_id];
+      card.due_date = due_date;
+      list.card_list[card_id] = card;
+      const newTaskLists = {
+        ...state.taskLists,
+        [list_id]: list,
+      };
+      setLocalStorage("taskLists", newTaskLists);
+      return { taskLists: newTaskLists };
+    });
+  },
   deleteCard: ({ list_id, card_id }) => {
     set((state) => {
       const taskList = state.taskLists[list_id];

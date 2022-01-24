@@ -89,6 +89,10 @@ func (service *service) HandleBroadcast(ctx context.Context, msg *ws.Message, pu
 		if err := service.handleUpdateCard(ctx, bytePayload); err != nil {
 			return err
 		}
+	case BoardUpdateCardDueDate:
+		if err := service.handleUpdateCardDueDate(ctx, bytePayload); err != nil {
+			return err
+		}
 	case BoardDeleteCard:
 		if err := service.handleDeleteCard(ctx, bytePayload); err != nil {
 			return err
@@ -182,6 +186,14 @@ func (service *service) handleUpdateCard(ctx context.Context, bytePayload []byte
 		return err
 	}
 	return service.store.UpdateCard(ctx, updateCardParams)
+}
+
+func (service *service) handleUpdateCardDueDate(ctx context.Context, bytePayload []byte) error {
+	var updateCardDueDateParams UpdateCardDueDateParams
+	if err := json.Unmarshal(bytePayload, &updateCardDueDateParams); err != nil {
+		return err
+	}
+	return service.store.UpdateCardDueDate(ctx, updateCardDueDateParams)
 }
 
 func (service *service) handleDeleteCard(ctx context.Context, bytePayload []byte) error {

@@ -2,6 +2,7 @@ package mysql
 
 import (
 	"context"
+	"fmt"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/board"
@@ -49,6 +50,24 @@ func (q *Queries) UpdateCard(ctx context.Context, params board.UpdateCardParams)
 		Set("title", params.Title).
 		Set("priority", params.Priority).
 		Set("description", params.Description).
+		Where(sq.Eq{"card_id": params.CardId}).ToSql()
+	if err != nil {
+		q.log.Info("Failed to create update card sql.", zap.Error(err))
+		return err
+	}
+	_, err = q.db.Exec(sql, args...)
+	if err != nil {
+		q.log.Info("Failed to update card.", zap.Error(err))
+		return err
+	}
+	return nil
+}
+
+func (q *Queries) UpdateCardDueDate(ctx context.Context, params board.UpdateCardDueDateParams) error {
+	fmt.Println(params.DueDate)
+	fmt.Println(params.CardId)
+	sql, args, err := sq.Update("card").
+		Set("due_date", params.DueDate).
 		Where(sq.Eq{"card_id": params.CardId}).ToSql()
 	if err != nil {
 		q.log.Info("Failed to create update card sql.", zap.Error(err))

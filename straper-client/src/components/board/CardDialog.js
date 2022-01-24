@@ -12,6 +12,8 @@ import { BsFillCalendarDateFill } from "react-icons/bs";
 import { AiFillDelete, AiOutlineClose } from "react-icons/ai";
 import CardComment from "./CardComment";
 import ActionDialog from "../dialog/ActionDialog";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 const CardDialog = ({ open, closeModal, card }) => {
   const board = useBoardStore((state) => state.board);
@@ -19,11 +21,13 @@ const CardDialog = ({ open, closeModal, card }) => {
   let initialFocus = useRef(null);
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [dueDate, setDueDate] = useState(new Date(card.due_date));
 
   const close = () => {
     setValue("title", card.title);
     setValue("description", card.description);
     setValue("priority", card.priority);
+    setDueDate(new Date(card.due_date));
 
     closeModal();
   };
@@ -56,6 +60,17 @@ const CardDialog = ({ open, closeModal, card }) => {
       </div>
     </button>
   );
+
+  const handleDueDateUpdate = (date) => {
+    date.setHours(0, 0, 0, 0);
+    setDueDate(date);
+    const payload = {
+      list_id: card.list_id,
+      card_id: card.card_id,
+      due_date: date.toJSON(),
+    };
+    sendBoardMsg("BOARD_UPDATE_CARD_DUE_DATE", board.workspace_id, payload);
+  };
 
   return (
     <>
@@ -107,7 +122,7 @@ const CardDialog = ({ open, closeModal, card }) => {
                     className="col-span-4 rounded-lg flex flex-col space-y-5 justify-center self-center"
                   >
                     <div className="flex flex-col">
-                      <div className="flex p-3 space-x-3">
+                      <div className="flex py-3 space-x-3">
                         <MdOutlineTitle size={20} />
                         <span className="font-semibold text-sm">TITLE</span>
                       </div>
@@ -118,7 +133,7 @@ const CardDialog = ({ open, closeModal, card }) => {
                       />
                     </div>
                     <div className="flex flex-col">
-                      <div className="flex p-3 space-x-3">
+                      <div className="flex py-3 space-x-3">
                         <MdOutlineDescription size={20} />
                         <span className="font-semibold text-sm">
                           DESCRIPTION
@@ -131,14 +146,14 @@ const CardDialog = ({ open, closeModal, card }) => {
                       />
                     </div>
                     <div className="grid grid-cols-5 gap-x-8 gap-y-4">
-                      <div className="col-span-3 flex self-center p-3 space-x-3">
+                      <div className="col-span-3 flex self-center py-3 space-x-3">
                         <MdLowPriority size={20} />
                         <span className="font-semibold text-sm">PRIORITY</span>
                       </div>
                       <select
                         defaultValue={card.priority}
                         {...register("priority")}
-                        className="col-span-2 rounded-md w-full"
+                        className="col-span-2 rounded-lg w-full hover:bg-gray-300 hover:cursor-pointer"
                       >
                         <option value="NO">No</option>
                         <option value="LOW">Low</option>
@@ -156,6 +171,17 @@ const CardDialog = ({ open, closeModal, card }) => {
 
                   <div className="col-span-1">
                     <div>
+                      <div className="flex py-3 space-x-3">
+                        <BsFillCalendarDateFill size={20} />
+                        <span className="font-semibold text-sm">DUE DATE</span>
+                      </div>
+                      <DatePicker
+                        selected={dueDate}
+                        onChange={(date) => handleDueDateUpdate(date)}
+                        className="p-1 rounded-lg hover:bg-gray-300"
+                      />
+                    </div>
+                    <div>
                       <div className="font-semibold text-sm py-3">MEMBERS</div>
                       <div className="flex flex-col space-y-5"></div>
                     </div>
@@ -164,11 +190,6 @@ const CardDialog = ({ open, closeModal, card }) => {
                         MORE ACTION
                       </div>
                       <div className="flex flex-col space-y-5">
-                        {moreActionBtn(
-                          "DUE DATE",
-                          () => {},
-                          BsFillCalendarDateFill
-                        )}
                         {moreActionBtn(
                           "DELETE CARD",
                           () => {
