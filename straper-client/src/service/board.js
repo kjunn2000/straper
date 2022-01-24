@@ -30,6 +30,10 @@ export const handleWsBoardMsg = (msg) => {
       boardState.orderCard(msg.payload);
       break;
     }
+    case "BOARD_DELETE_CARD": {
+      boardState.deleteCard(msg.payload);
+      break;
+    }
     default:
   }
 };

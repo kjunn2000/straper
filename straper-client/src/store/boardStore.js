@@ -135,6 +135,23 @@ const useBoardStore = create((set) => ({
       return { taskLists: newTaskLists };
     });
   },
+  deleteCard: ({ list_id, card_id }) => {
+    set((state) => {
+      const taskList = state.taskLists[list_id];
+      delete taskList.card_list[card_id];
+      const newTaskListOrder = taskList.card_list_order.filter(
+        (id) => id !== card_id
+      );
+      taskList.card_list_order = newTaskListOrder;
+
+      const newTaskLists = {
+        ...state.taskLists,
+        [list_id]: taskList,
+      };
+      setLocalStorage("taskLists", newTaskLists);
+      return { taskLists: newTaskLists };
+    });
+  },
 }));
 
 export default useBoardStore;

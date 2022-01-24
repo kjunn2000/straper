@@ -17,13 +17,14 @@ const Card = ({ card }) => {
 
   return (
     <div
-      className="flex flex-col bg-white rounded-md p-3 m-3"
+      className="flex flex-col bg-white rounded-md p-3"
       onClick={() => setIsDialogOpen(true)}
     >
       {card.priority !== "NO" && (
         <div
           className={
-            "text-white rounded-xl p-1 font-semibold text-sm " + tagColor()
+            "text-white rounded-xl px-3 py-1 font-semibold text-sm " +
+            tagColor()
           }
         >
           {card.priority}

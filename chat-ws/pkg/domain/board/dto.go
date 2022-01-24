@@ -18,6 +18,11 @@ type UpdateCardParams struct {
 	Description string `json:"description" db:"description"`
 }
 
+type DeleteCardParams struct {
+	ListId string `json:"list_id"`
+	CardId string `json:"card_id"`
+}
+
 type OrderListParams struct {
 	BoardId      string `json:"board_id"`
 	OldListIndex int    `json:"oldListIndex"`

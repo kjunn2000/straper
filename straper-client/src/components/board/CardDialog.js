@@ -1,5 +1,5 @@
 import { Dialog, Transition } from "@headlessui/react";
-import { Fragment } from "react";
+import { Fragment, useState, useRef } from "react";
 import {
   MdOutlineTitle,
   MdOutlineDescription,
@@ -9,12 +9,16 @@ import { sendBoardMsg } from "../../service/websocket";
 import useBoardStore from "../../store/boardStore";
 import { useForm } from "react-hook-form";
 import { BsFillCalendarDateFill } from "react-icons/bs";
-import { AiFillDelete } from "react-icons/ai";
+import { AiFillDelete, AiOutlineClose } from "react-icons/ai";
 import CardComment from "./CardComment";
+import ActionDialog from "../dialog/ActionDialog";
 
 const CardDialog = ({ open, closeModal, card }) => {
   const board = useBoardStore((state) => state.board);
   const { register, handleSubmit, setValue } = useForm();
+  let initialFocus = useRef(null);
+
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const close = () => {
     setValue("title", card.title);
@@ -31,6 +35,14 @@ const CardDialog = ({ open, closeModal, card }) => {
       card_id: card.card_id,
     };
     sendBoardMsg("BOARD_UPDATE_CARD", board.workspace_id, payload);
+  };
+
+  const handleDelete = () => {
+    const payload = {
+      list_id: card.list_id,
+      card_id: card.card_id,
+    };
+    sendBoardMsg("BOARD_DELETE_CARD", board.workspace_id, payload);
   };
 
   const moreActionBtn = (text, action, Icon) => (
@@ -51,7 +63,8 @@ const CardDialog = ({ open, closeModal, card }) => {
         <Dialog
           as="div"
           className="fixed inset-0 z-10 overflow-y-auto"
-          onClose={() => close()}
+          onClose={() => {}}
+          initialFocus={initialFocus}
         >
           <div className="min-h-screen px-4 text-center">
             <Transition.Child
@@ -82,10 +95,16 @@ const CardDialog = ({ open, closeModal, card }) => {
               leaveTo="opacity-0 scale-95"
             >
               <div className="inline-block p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl ">
-                <div className="flex space-x-5">
+                <div className="w-full flex justify-end hover:cursor-pointer">
+                  <AiOutlineClose size={30} onClick={() => close()} />
+                </div>
+                <div
+                  ref={initialFocus}
+                  className="grid grid-cols-5 gap-x-8 gap-y-4"
+                >
                   <form
                     onSubmit={handleSubmit(onSave)}
-                    className="rounded-lg flex flex-col space-y-5 justify-center self-center"
+                    className="col-span-4 rounded-lg flex flex-col space-y-5 justify-center self-center"
                   >
                     <div className="flex flex-col">
                       <div className="flex p-3 space-x-3">
@@ -111,15 +130,15 @@ const CardDialog = ({ open, closeModal, card }) => {
                         {...register("description")}
                       />
                     </div>
-                    <div className="flex">
-                      <div className="flex self-center p-3 space-x-3">
+                    <div className="grid grid-cols-5 gap-x-8 gap-y-4">
+                      <div className="col-span-3 flex self-center p-3 space-x-3">
                         <MdLowPriority size={20} />
                         <span className="font-semibold text-sm">PRIORITY</span>
                       </div>
                       <select
                         defaultValue={card.priority}
                         {...register("priority")}
-                        className="rounded-md w-full"
+                        className="col-span-2 rounded-md w-full"
                       >
                         <option value="NO">No</option>
                         <option value="LOW">Low</option>
@@ -129,13 +148,13 @@ const CardDialog = ({ open, closeModal, card }) => {
                     </div>
                     <button
                       type="submit"
-                      className="bg-indigo-600 self-end p-3 rounded text-gray-200 hover:bg-indigo-400"
+                      className="self-end bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-full"
                     >
                       SAVE
                     </button>
                   </form>
 
-                  <div>
+                  <div className="col-span-1">
                     <div>
                       <div className="font-semibold text-sm py-3">MEMBERS</div>
                       <div className="flex flex-col space-y-5"></div>
@@ -150,7 +169,13 @@ const CardDialog = ({ open, closeModal, card }) => {
                           () => {},
                           BsFillCalendarDateFill
                         )}
-                        {moreActionBtn("DELETE CARD", () => {}, AiFillDelete)}
+                        {moreActionBtn(
+                          "DELETE CARD",
+                          () => {
+                            setIsDeleteDialogOpen(true);
+                          },
+                          AiFillDelete
+                        )}
                       </div>
                     </div>
                   </div>
@@ -161,6 +186,16 @@ const CardDialog = ({ open, closeModal, card }) => {
           </div>
         </Dialog>
       </Transition>
+      <ActionDialog
+        isOpen={isDeleteDialogOpen}
+        setIsOpen={setIsDeleteDialogOpen}
+        title="Confirm Delete Card"
+        content="The card that you deleted cannot be recovered."
+        buttonText="Delete"
+        buttonStatus="fail"
+        buttonAction={() => handleDelete()}
+        closeButtonText="Close"
+      />
     </>
   );
 };

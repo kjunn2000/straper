@@ -185,11 +185,11 @@ func (service *service) handleUpdateCard(ctx context.Context, bytePayload []byte
 }
 
 func (service *service) handleDeleteCard(ctx context.Context, bytePayload []byte) error {
-	var cardId string
-	if err := json.Unmarshal(bytePayload, &cardId); err != nil {
+	var deleteCardParams DeleteCardParams
+	if err := json.Unmarshal(bytePayload, &deleteCardParams); err != nil {
 		return err
 	}
-	return service.store.DeleteTaskList(ctx, cardId)
+	return service.store.DeleteCard(ctx, deleteCardParams.CardId)
 }
 
 func (service *service) handleOrderCard(ctx context.Context, bytePayload []byte) error {
