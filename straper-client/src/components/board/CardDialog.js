@@ -1,5 +1,5 @@
 import { Dialog, Transition } from "@headlessui/react";
-import { Fragment, useState, useRef } from "react";
+import { Fragment, useState, useRef, useEffect } from "react";
 import {
   MdOutlineTitle,
   MdOutlineDescription,
@@ -8,12 +8,13 @@ import {
 import { sendBoardMsg } from "../../service/websocket";
 import useBoardStore from "../../store/boardStore";
 import { useForm } from "react-hook-form";
-import { BsFillCalendarDateFill } from "react-icons/bs";
+import { BsCardChecklist } from "react-icons/bs";
 import { AiFillDelete, AiOutlineClose } from "react-icons/ai";
 import CardComment from "./CardComment";
 import ActionDialog from "../dialog/ActionDialog";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import AddMember from "./AddMember";
 
 const CardDialog = ({ open, closeModal, card }) => {
   const board = useBoardStore((state) => state.board);
@@ -121,21 +122,18 @@ const CardDialog = ({ open, closeModal, card }) => {
                     onSubmit={handleSubmit(onSave)}
                     className="col-span-4 rounded-lg flex flex-col space-y-5 justify-center self-center"
                   >
-                    <div className="flex flex-col">
-                      <div className="flex py-3 space-x-3">
-                        <MdOutlineTitle size={20} />
-                        <span className="font-semibold text-sm">TITLE</span>
-                      </div>
+                    <div className="flex space-x-2">
+                      <MdOutlineTitle size={30} />
                       <input
-                        className="p-1 rounded-lg hover:bg-gray-300"
+                        className="p-1 rounded-lg hover:bg-gray-300 text-2xl font-bold"
                         defaultValue={card.title}
                         {...register("title")}
                       />
                     </div>
                     <div className="flex flex-col">
                       <div className="flex py-3 space-x-3">
-                        <MdOutlineDescription size={20} />
-                        <span className="font-semibold text-sm">
+                        <MdOutlineDescription size={30} />
+                        <span className="font-semibold text-lg">
                           DESCRIPTION
                         </span>
                       </div>
@@ -147,8 +145,8 @@ const CardDialog = ({ open, closeModal, card }) => {
                     </div>
                     <div className="grid grid-cols-5 gap-x-8 gap-y-4">
                       <div className="col-span-3 flex self-center py-3 space-x-3">
-                        <MdLowPriority size={20} />
-                        <span className="font-semibold text-sm">PRIORITY</span>
+                        <MdLowPriority size={30} />
+                        <span className="font-semibold text-lg">PRIORITY</span>
                       </div>
                       <select
                         defaultValue={card.priority}
@@ -163,7 +161,7 @@ const CardDialog = ({ open, closeModal, card }) => {
                     </div>
                     <button
                       type="submit"
-                      className="self-end bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-full"
+                      className="self-end bg-indigo-400 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-full"
                     >
                       SAVE
                     </button>
@@ -172,8 +170,9 @@ const CardDialog = ({ open, closeModal, card }) => {
                   <div className="col-span-1">
                     <div>
                       <div className="flex py-3 space-x-3">
-                        <BsFillCalendarDateFill size={20} />
-                        <span className="font-semibold text-sm">DUE DATE</span>
+                        <span className="font-semibold text-gray-400">
+                          DUE DATE
+                        </span>
                       </div>
                       <DatePicker
                         selected={dueDate}
@@ -181,13 +180,18 @@ const CardDialog = ({ open, closeModal, card }) => {
                         className="p-1 rounded-lg hover:bg-gray-300"
                       />
                     </div>
-                    <div>
-                      <div className="font-semibold text-sm py-3">MEMBERS</div>
-                      <div className="flex flex-col space-y-5"></div>
+                    <div className="flex py-3 space-x-3">
+                      <span className="font-semibold text-gray-400">
+                        MEMBER
+                      </span>
+                      <AddMember card={card} />
                     </div>
-                    <div>
-                      <div className="font-semibold text-sm py-3">
+                    <div className="flex flex-col space-y-2">
+                      <div className="font-semibold text-gray-400 py-3">
                         MORE ACTION
+                      </div>
+                      <div className="flex flex-col space-y-5">
+                        {moreActionBtn("CHECKLIST", () => {}, BsCardChecklist)}
                       </div>
                       <div className="flex flex-col space-y-5">
                         {moreActionBtn(

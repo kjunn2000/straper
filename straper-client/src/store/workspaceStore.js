@@ -5,6 +5,7 @@ const useWorkspaceStore = create((set) => ({
   workspaces: getLocalStorage("workspaces") || [],
   currWorkspace: getLocalStorage("currWorkspace") || {},
   currChannel: getLocalStorage("currChannel") || {},
+  currAccountList: getLocalStorage("currAccountList") || {},
   selectedChannelIds:
     new Map(getLocalStorage("selectedChannelIds")) || new Map(),
   setWorkspaces: (workspaces) => {
@@ -143,6 +144,14 @@ const useWorkspaceStore = create((set) => ({
     setLocalStorage("currWorkspace", {});
     setLocalStorage("currChannel", {});
     setLocalStorage("selectedChannelIds", []);
+    setLocalStorage("currAccountList", {});
+  },
+
+  setCurrAccountList: (accountList) => {
+    setLocalStorage("currAccountList", accountList);
+    set((state) => ({
+      currAccountList: accountList,
+    }));
   },
 
   // updateLastAccess: (workspaceId, channelId) => {

@@ -13,6 +13,7 @@ import (
 
 type Service interface {
 	GetTaskBoardData(ctx context.Context, workspaceId string) (TaskBoardDataResponse, error)
+	GetCardMember(ctx context.Context, cardId string) ([]string, error)
 	HandleBroadcast(ctx context.Context, msg *ws.Message, publishPubSub func(context.Context, *ws.Message) error) error
 	GetBoarcastUserListByMessageType(ctx context.Context, msg *ws.Message) ([]ws.UserData, error)
 }
@@ -49,6 +50,14 @@ func (service *service) GetTaskBoardData(ctx context.Context, workspaceId string
 	}
 	taskBoardData.TaskLists = taskLists
 	return taskBoardData, err
+}
+
+func (service *service) GetCardMember(ctx context.Context, cardId string) ([]string, error) {
+	userIdList, err := service.store.GetUserFromCard(ctx, cardId)
+	if err != nil {
+		return []string{}, err
+	}
+	return userIdList, err
 }
 
 func (service *service) HandleBroadcast(ctx context.Context, msg *ws.Message, publishPubSub func(context.Context, *ws.Message) error) error {

@@ -20,6 +20,7 @@ type Querier interface {
 	CreateUserAccessInfo(ctx context.Context, params CreateUserAccessInfo) error
 	GetUserDetailByUsername(ctx context.Context, username string) (account.UserDetail, error)
 	GetUserDetailByUserId(ctx context.Context, userId string) (account.UserDetail, error)
+	GetUserInfoListByWorkspaceId(ctx context.Context, workspaceId string) ([]account.UserInfo, error)
 	GetUserInfoByUserId(ctx context.Context, userId string) (chatting.UserDetail, error)
 	GetUserDetailByEmail(ctx context.Context, email string) (account.UserDetail, error)
 	GetUserCredentialByUsername(ctx context.Context, username string) (auth.User, error)
@@ -91,6 +92,7 @@ type Querier interface {
 	UpdateCardOrder(ctx context.Context, cardId string, orderIndex int, listId string, updateListId bool) error
 	DeleteCard(ctx context.Context, cardId string) error
 	AddUserToCard(ctx context.Context, cardId, userId string) error
+	GetUserFromCard(ctx context.Context, cardId string) ([]string, error)
 	DeleteUserFromCard(ctx context.Context, cardId, userId string) error
 
 	CreateCardComment(ctx context.Context, comment *board.CardComment) error

@@ -129,6 +129,23 @@ func (q *Queries) AddUserToCard(ctx context.Context, cardId, userId string) erro
 	return nil
 }
 
+func (q *Queries) GetUserFromCard(ctx context.Context, cardId string) ([]string, error) {
+	sql, args, err := sq.Select("user_id").From("card_user").
+		Where(sq.Eq{"card_id": cardId}).
+		ToSql()
+	if err != nil {
+		q.log.Info("Unable to create select card user sql.", zap.Error(err))
+		return []string{}, err
+	}
+	var userList []string
+	err = q.db.Select(&userList, sql, args...)
+	if err != nil {
+		q.log.Info("Unable to create select card user sql.", zap.Error(err))
+		return []string{}, err
+	}
+	return userList, nil
+}
+
 func (q *Queries) DeleteUserFromCard(ctx context.Context, cardId, userId string) error {
 	sql, args, err := sq.Delete("card").
 		Where(sq.Eq{"card_id": cardId}).

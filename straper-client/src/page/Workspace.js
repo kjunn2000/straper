@@ -1,9 +1,7 @@
-import { useParams } from "react-router";
 import ChatRoom from "../components/chat/ChatRoom";
 import Sidebar from "../components/sideBar/Sidebar";
 import useWorkspaceStore from "../store/workspaceStore";
 import { ReactComponent as Welcome } from "../asset/img/welcome.svg";
-import { ReactComponent as NotFound } from "../asset/img/notfound.svg";
 import { useEffect } from "react";
 import {
   fetchWorkspaceData,

@@ -119,6 +119,25 @@ func (q *Queries) GetUserDetailByEmail(ctx context.Context, email string) (accou
 	return user, nil
 }
 
+func (q *Queries) GetUserInfoListByWorkspaceId(ctx context.Context, workspaceId string) ([]account.UserInfo, error) {
+	var userList []account.UserInfo
+	sta, arg, err := sq.Select("wu.user_id", "username", "email", "phone_no").
+		From("user_detail").
+		InnerJoin("workspace_user wu on user_detail.user_id = wu.user_id").
+		Where(sq.Eq{"workspace_id": workspaceId}).
+		ToSql()
+	if err != nil {
+		q.log.Warn("Failed to create select sql.")
+		return []account.UserInfo{}, err
+	}
+	err = q.db.Select(&userList, sta, arg...)
+	if err != nil {
+		q.log.Warn("Failed to get user info list.", zap.Error(err))
+		return []account.UserInfo{}, err
+	}
+	return userList, nil
+}
+
 func (q *Queries) GetUserCredentialByUserId(ctx context.Context, userId string) (auth.User, error) {
 	var user auth.User
 	sta, arg, err := sq.Select("credential_id", "user_id", "password", "role", "status", "created_date", "updated_date").

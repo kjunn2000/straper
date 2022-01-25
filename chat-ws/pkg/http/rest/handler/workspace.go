@@ -145,9 +145,9 @@ func (server *Server) DeleteWorkspace(ls listing.Service, ds deleting.Service, c
 func (server *Server) LeaveWorkspace(ds deleting.Service) func(http.ResponseWriter, *http.Request) {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
-		id, ok := vars["workspace_id"]
+		workspaceId, ok := vars["workspace_id"]
 		if !ok {
-			rest.AddResponseToResponseWritter(rw, nil, "Id not found.")
+			rest.AddResponseToResponseWritter(rw, nil, "Workspace ID not found.")
 			return
 		}
 		userId, err := server.getUserIdFromToken(r)
@@ -155,7 +155,7 @@ func (server *Server) LeaveWorkspace(ds deleting.Service) func(http.ResponseWrit
 			rest.AddResponseToResponseWritter(rw, nil, err.Error())
 			return
 		}
-		err = ds.LeaveWorkspace(r.Context(), id, userId)
+		err = ds.LeaveWorkspace(r.Context(), workspaceId, userId)
 		if err != nil {
 			rest.AddResponseToResponseWritter(rw, nil, err.Error())
 			return

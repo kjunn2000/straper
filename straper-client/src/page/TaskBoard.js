@@ -16,8 +16,17 @@ function TaskBoard() {
   const setBoard = useBoardStore((state) => state.setBoard);
   const setTaskLists = useBoardStore((state) => state.setTaskLists);
   const setTaskListsOrder = useBoardStore((state) => state.setTaskListsOrder);
+  const setCurrAccountList = useWorkspaceStore(
+    (state) => state.setCurrAccountList
+  );
 
   useEffect(() => {
+    getBoardData();
+    getWorkspaceUsersInfo();
+    connect();
+  }, []);
+
+  const getBoardData = () => {
     api.get(`/protected/board/${currWorkspace.workspace_id}`).then((res) => {
       if (res.data.Success) {
         const data = res.data.Data;
@@ -44,8 +53,24 @@ function TaskBoard() {
         }
       }
     });
-    connect();
-  }, []);
+  };
+
+  const getWorkspaceUsersInfo = () => {
+    api
+      .get(`/protected/account/list/${currWorkspace.workspace_id}`)
+      .then((res) => {
+        if (res.data.Success) {
+          const data = res.data.Data;
+          if (!isEmpty(data)) {
+            const userListMap = data.reduce((map, obj) => {
+              map[obj.user_id] = obj;
+              return map;
+            }, {});
+            setCurrAccountList(userListMap);
+          }
+        }
+      });
+  };
 
   return (
     <div className="w-full h-screen grid grid-cols-10" style={darkGrayBg}>

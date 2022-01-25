@@ -14,6 +14,7 @@ import (
 type Service interface {
 	Register(ctx context.Context, params CreateUserParam) error
 	GetUserByUserId(ctx context.Context, userId string) (UserDetail, error)
+	GetAccountListByWorkspaceId(ctx context.Context, workspaceId string) ([]UserInfo, error)
 	UpdateUser(ctx context.Context, param UpdateUserParam) error
 
 	ResetAccountPassword(ctx context.Context, email string) error
@@ -63,6 +64,10 @@ func (us *service) Register(ctx context.Context, params CreateUserParam) error {
 
 func (us *service) GetUserByUserId(ctx context.Context, userId string) (UserDetail, error) {
 	return us.ur.GetUserDetailByUserId(ctx, userId)
+}
+
+func (us *service) GetAccountListByWorkspaceId(ctx context.Context, workspaceId string) ([]UserInfo, error) {
+	return us.ur.GetUserInfoListByWorkspaceId(ctx, workspaceId)
 }
 
 func (us *service) UpdateUser(ctx context.Context, params UpdateUserParam) error {

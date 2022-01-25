@@ -39,8 +39,8 @@ const Card = ({ card }) => {
       )}
       <div className="break-all text-sm p-2">{card.title}</div>
       <div>
-        <div className="bg-indigo-300 flex w-fit rounded-md text-gray-700 py-1 px-3">
-          <AiOutlineClockCircle size={20} />
+        <div className="bg-indigo-300 flex space-x-1 align-center w-fit rounded-md text-gray-700 py-1 px-3">
+          <AiOutlineClockCircle size={25} />
           <span>{card.due_date && dateStringToMonthDate()}</span>
         </div>
       </div>

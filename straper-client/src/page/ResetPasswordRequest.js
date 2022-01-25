@@ -5,12 +5,11 @@ import { useForm } from "react-hook-form";
 import SimpleDialog from "../components/dialog/SimpleDialog";
 import { ErrorMessage } from "@hookform/error-message";
 
-const ResetPassword= () => {
+const ResetPassword = () => {
   const history = useHistory();
   const {
     handleSubmit,
     register,
-    watch,
     formState: { errors },
   } = useForm();
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
@@ -34,7 +33,9 @@ const ResetPassword= () => {
               break;
             }
             case "password_reset_attempt_in_past_15_min": {
-              setDialogErrMsg("Password reset request has been sent to your email inbox in the past 15 minutes. Please check it out.")
+              setDialogErrMsg(
+                "Password reset request has been sent to your email inbox in the past 15 minutes. Please check it out."
+              );
               break;
             }
             default: {
