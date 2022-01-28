@@ -20,16 +20,17 @@ type TaskList struct {
 }
 
 type Card struct {
-	CardId      string    `json:"card_id" db:"card_id"`
-	Title       string    `json:"title" db:"title"`
-	Priority    string    `json:"priority" db:"priority"`
-	ListId      string    `json:"list_id" db:"list_id"`
-	Description string    `json:"description" db:"description"`
-	CreatorId   string    `json:"creator_id" db:"creator_id"`
-	CreatedDate time.Time `json:"created_date" db:"created_date"`
-	DueDate     time.Time `json:"due_date" db:"due_date"`
-	OrderIndex  int       `json:"order_index" db:"order_index"`
-	MemberList  []string  `json:"member_list"`
+	CardId      string              `json:"card_id" db:"card_id"`
+	Title       string              `json:"title" db:"title"`
+	Priority    string              `json:"priority" db:"priority"`
+	ListId      string              `json:"list_id" db:"list_id"`
+	Description string              `json:"description" db:"description"`
+	CreatorId   string              `json:"creator_id" db:"creator_id"`
+	CreatedDate time.Time           `json:"created_date" db:"created_date"`
+	DueDate     time.Time           `json:"due_date" db:"due_date"`
+	OrderIndex  int                 `json:"order_index" db:"order_index"`
+	MemberList  []string            `json:"member_list"`
+	Checklist   []CardChecklistItem `json:"checklist"`
 }
 
 func (card *Card) Encode() ([]byte, error) {

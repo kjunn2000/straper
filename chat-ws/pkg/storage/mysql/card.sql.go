@@ -166,24 +166,24 @@ func (q *Queries) DeleteUserFromCard(ctx context.Context, cardId, userId string)
 	return nil
 }
 
-func (q *Queries) GetChecklistItemsByCardId(ctx context.Context, cardId string) ([]string, error) {
+func (q *Queries) GetChecklistItemsByCardId(ctx context.Context, cardId string) ([]board.CardChecklistItem, error) {
 	sql, args, err := sq.Select("item_id", "content", "is_checked", "card_id").From("checklist_item").
 		Where(sq.Eq{"card_id": cardId}).
 		ToSql()
 	if err != nil {
 		q.log.Info("Unable to create select checklist items sql.", zap.Error(err))
-		return []string{}, err
+		return []board.CardChecklistItem{}, err
 	}
-	var userList []string
-	err = q.db.Select(&userList, sql, args...)
+	var checklist []board.CardChecklistItem
+	err = q.db.Select(&checklist, sql, args...)
 	if err != nil {
 		q.log.Info("Unable to create select checklist items sql.", zap.Error(err))
-		return []string{}, err
+		return []board.CardChecklistItem{}, err
 	}
-	return userList, nil
+	return checklist, nil
 }
 
-func (q *Queries) CreateChecklistItem(ctx context.Context, checklistItem board.CardChecklistItem) error {
+func (q *Queries) CreateChecklistItem(ctx context.Context, checklistItem board.CardChecklistItemDto) error {
 	sql, args, err := sq.Insert("checklist_item").
 		Columns("item_id", "content", "is_checked", "card_id").
 		Values(checklistItem.CardId, checklistItem.Content, checklistItem.IsChecked, checklistItem.CardId).
@@ -200,7 +200,7 @@ func (q *Queries) CreateChecklistItem(ctx context.Context, checklistItem board.C
 	return nil
 }
 
-func (q *Queries) UpdateChecklistItem(ctx context.Context, checklistItem board.CardChecklistItem) error {
+func (q *Queries) UpdateChecklistItem(ctx context.Context, checklistItem board.CardChecklistItemDto) error {
 	sql, args, err := sq.Update("checklist_item").
 		Set("content", checklistItem.Content).
 		Set("is_checked", checklistItem.IsChecked).

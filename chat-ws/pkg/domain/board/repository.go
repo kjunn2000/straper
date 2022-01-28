@@ -27,8 +27,8 @@ type Repository interface {
 	AddUserListToCard(ctx context.Context, cardId string, userIdList []string) error
 	DeleteUserFromCard(ctx context.Context, cardId, userId string) error
 
-	GetChecklistItemsByCardId(ctx context.Context, cardId string) ([]string, error)
-	CreateChecklistItem(ctx context.Context, checklistItem CardChecklistItem) error
-	UpdateChecklistItem(ctx context.Context, checklistItem CardChecklistItem) error
+	GetChecklistItemsByCardId(ctx context.Context, cardId string) ([]CardChecklistItem, error)
+	CreateChecklistItem(ctx context.Context, checklistItem CardChecklistItemDto) error
+	UpdateChecklistItem(ctx context.Context, checklistItem CardChecklistItemDto) error
 	DeleteChecklistItem(ctx context.Context, itemId string) error
 }

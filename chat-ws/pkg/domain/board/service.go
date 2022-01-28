@@ -52,6 +52,11 @@ func (service *service) GetTaskBoardData(ctx context.Context, workspaceId string
 				return TaskBoardDataResponse{}, err
 			}
 			cardList[i].MemberList = memberList
+			checklist, err := service.store.GetChecklistItemsByCardId(ctx, card.CardId)
+			if err != nil {
+				return TaskBoardDataResponse{}, err
+			}
+			cardList[i].Checklist = checklist
 		}
 		taskLists[i].CardList = cardList
 	}
@@ -123,6 +128,22 @@ func (service *service) HandleBroadcast(ctx context.Context, msg *ws.Message, pu
 		}
 	case BoardCardRemoveMember:
 		if err := service.handleCardRemoveMember(ctx, bytePayload); err != nil {
+			return err
+		}
+	case BoardCardAddChecklistItem:
+		if newPayload, err := service.handleCardAddChecklistItem(ctx, bytePayload); err != nil {
+			return err
+		} else {
+			if err := msg.Payload.UnmarshalJSON(newPayload); err != nil {
+				return err
+			}
+		}
+	case BoardCardUpdateChecklistItem:
+		if err := service.handleCardUpdateChecklistItem(ctx, bytePayload); err != nil {
+			return err
+		}
+	case BoardCardDeleteChecklistItem:
+		if err := service.handleCardDeleteChecklistItem(ctx, bytePayload); err != nil {
 			return err
 		}
 	}
@@ -285,5 +306,37 @@ func (service *service) handleCardRemoveMember(ctx context.Context, bytePayload 
 	if err := json.Unmarshal(bytePayload, &cardRemoveMemberParams); err != nil {
 		return err
 	}
-	return service.store.DeleteUserFromCard(ctx, cardRemoveMemberParams.Cardid, cardRemoveMemberParams.MemberId)
+	return service.store.DeleteUserFromCard(ctx, cardRemoveMemberParams.CardId, cardRemoveMemberParams.MemberId)
+}
+
+func (service *service) handleCardAddChecklistItem(ctx context.Context, bytePayload []byte) ([]byte, error) {
+	var cardCheckListItemDto CardChecklistItemDto
+	if err := json.Unmarshal(bytePayload, &cardCheckListItemDto); err != nil {
+		return []byte{}, err
+	}
+	itemId, _ := uuid.NewUUID()
+	cardCheckListItemDto.ItemId = itemId.String()
+	cardCheckListItemDto.IsChecked = false
+	err := service.store.CreateChecklistItem(ctx, cardCheckListItemDto)
+	if err != nil {
+		return []byte{}, err
+	}
+	newPayload, _ := json.Marshal(cardCheckListItemDto)
+	return newPayload, nil
+}
+
+func (service *service) handleCardUpdateChecklistItem(ctx context.Context, bytePayload []byte) error {
+	var cardCheckListItemDto CardChecklistItemDto
+	if err := json.Unmarshal(bytePayload, &cardCheckListItemDto); err != nil {
+		return err
+	}
+	return service.store.UpdateChecklistItem(ctx, cardCheckListItemDto)
+}
+
+func (service *service) handleCardDeleteChecklistItem(ctx context.Context, bytePayload []byte) error {
+	var cardDeleteChecklistParams CardDeleteChecklistItemParams
+	if err := json.Unmarshal(bytePayload, &cardDeleteChecklistParams); err != nil {
+		return err
+	}
+	return service.store.DeleteChecklistItem(ctx, cardDeleteChecklistParams.ItemId)
 }

@@ -51,7 +51,21 @@ type CardAddMembersParams struct {
 }
 
 type CardRemoveMemberParams struct {
-	Listid   string `json:"list_id"`
-	Cardid   string `json:"card_id"`
+	ListId   string `json:"list_id"`
+	CardId   string `json:"card_id"`
 	MemberId string `json:"member_id"`
+}
+
+type CardChecklistItemDto struct {
+	Listid    string `json:"list_id"`
+	ItemId    string `json:"item_id" db:"item_id"`
+	Content   string `json:"content" db:"content"`
+	IsChecked bool   `json:"is_checked" db:"is_checked"`
+	CardId    string `json:"card_id" db:"card_id"`
+}
+
+type CardDeleteChecklistItemParams struct {
+	Listid string `json:"list_id"`
+	Cardid string `json:"card_id"`
+	ItemId string `json:"item_id" db:"item_id"`
 }
