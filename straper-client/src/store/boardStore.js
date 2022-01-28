@@ -199,6 +199,63 @@ const useBoardStore = create((set) => ({
       return { taskLists: newTaskLists };
     });
   },
+  addChecklistItem: (payload) => {
+    set((state) => {
+      const list = state.taskLists[payload.list_id];
+      const card = list.card_list[payload.card_id];
+      if (!card.checklist) {
+        card.checklist = [];
+      }
+      delete payload.list_id;
+      card.checklist = [...card.checklist, payload];
+      list.card_list[card.card_id] = card;
+      const newTaskLists = {
+        ...state.taskLists,
+        [list.list_id]: list,
+      };
+      setLocalStorage("taskLists", newTaskLists);
+      return { taskLists: newTaskLists };
+    });
+  },
+  updateChecklistItem: (payload) => {
+    set((state) => {
+      const list = state.taskLists[payload.list_id];
+      const card = list.card_list[payload.card_id];
+      if (!card.checklist) {
+        card.checklist = [];
+      }
+      card.checklist = card.checklist.map((item) => {
+        if (item.item_id === payload.item_id) {
+          item.content = payload.content;
+          item.is_checked = payload.is_checked;
+        }
+        return item;
+      });
+      list.card_list[card.card_id] = card;
+      const newTaskLists = {
+        ...state.taskLists,
+        [list.list_id]: list,
+      };
+      setLocalStorage("taskLists", newTaskLists);
+      return { taskLists: newTaskLists };
+    });
+  },
+  deleteCheckList: (payload) => {
+    set((state) => {
+      const list = state.taskLists[payload.list_id];
+      const card = list.card_list[payload.card_id];
+      card.checklist = card.checklist.filter(
+        (item) => item.id !== payload.item_id
+      );
+      list.card_list[card.card_id] = card;
+      const newTaskLists = {
+        ...state.taskLists,
+        [list.list_id]: list,
+      };
+      setLocalStorage("taskLists", newTaskLists);
+      return { taskLists: newTaskLists };
+    });
+  },
 }));
 
 export default useBoardStore;

@@ -186,7 +186,7 @@ func (q *Queries) GetChecklistItemsByCardId(ctx context.Context, cardId string) 
 func (q *Queries) CreateChecklistItem(ctx context.Context, checklistItem board.CardChecklistItemDto) error {
 	sql, args, err := sq.Insert("checklist_item").
 		Columns("item_id", "content", "is_checked", "card_id").
-		Values(checklistItem.CardId, checklistItem.Content, checklistItem.IsChecked, checklistItem.CardId).
+		Values(checklistItem.ItemId, checklistItem.Content, checklistItem.IsChecked, checklistItem.CardId).
 		ToSql()
 	if err != nil {
 		q.log.Info("Unable to create insert sql.", zap.Error(err))

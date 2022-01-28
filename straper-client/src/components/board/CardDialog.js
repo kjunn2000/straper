@@ -258,7 +258,12 @@ const CardDialog = ({ open, closeModal, card }) => {
                     </div>
                   </div>
                 </div>
-                <Checklist show={isChecklistOpen} />
+                <Checklist
+                  show={isChecklistOpen}
+                  checklist={card.checklist}
+                  listId={card.list_id}
+                  cardId={card.card_id}
+                />
                 <CardComment />
               </div>
             </Transition.Child>

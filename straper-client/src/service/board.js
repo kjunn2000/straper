@@ -46,6 +46,18 @@ export const handleWsBoardMsg = (msg) => {
       boardState.removeMemberFromCard(msg.payload);
       break;
     }
+    case "BOARD_CARD_ADD_CHECKLIST_ITEM": {
+      boardState.addChecklistItem(msg.payload);
+      break;
+    }
+    case "BOARD_CARD_UPDATE_CHECKLIST_ITEM": {
+      boardState.updateChecklistItem(msg.payload);
+      break;
+    }
+    case "BOARD_CARD_DELETE_CHECKLIST_ITEM": {
+      boardState.deleteChecklistItem(msg.payload);
+      break;
+    }
     default:
   }
 };
