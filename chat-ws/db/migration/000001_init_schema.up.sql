@@ -174,7 +174,7 @@ ALTER TABLE `card_user` ADD FOREIGN KEY (`card_id`) REFERENCES `card` (`card_id`
 
 ALTER TABLE `card_user` ADD FOREIGN KEY (`user_id`) REFERENCES `user_detail` (`user_id`) ON DELETE CASCADE;
 
-ALTER TABLE `checklist_item` ADD FOREIGN KEY (`item_id`) REFERENCES `card` (`card_id`) ON DELETE CASCADE;
+ALTER TABLE `checklist_item` ADD FOREIGN KEY (`card_id`) REFERENCES `card` (`card_id`) ON DELETE CASCADE;
 
 ALTER TABLE `card_comment` ADD FOREIGN KEY (`card_id`) REFERENCES `card` (`card_id`) ON DELETE CASCADE;
 

@@ -184,6 +184,7 @@ func (q *Queries) GetChecklistItemsByCardId(ctx context.Context, cardId string) 
 }
 
 func (q *Queries) CreateChecklistItem(ctx context.Context, checklistItem board.CardChecklistItemDto) error {
+	fmt.Println(checklistItem)
 	sql, args, err := sq.Insert("checklist_item").
 		Columns("item_id", "content", "is_checked", "card_id").
 		Values(checklistItem.ItemId, checklistItem.Content, checklistItem.IsChecked, checklistItem.CardId).
@@ -204,6 +205,7 @@ func (q *Queries) UpdateChecklistItem(ctx context.Context, checklistItem board.C
 	sql, args, err := sq.Update("checklist_item").
 		Set("content", checklistItem.Content).
 		Set("is_checked", checklistItem.IsChecked).
+		Where(sq.Eq{"item_id": checklistItem.ItemId}).
 		ToSql()
 	if err != nil {
 		q.log.Info("Failed to create update checklist sql.", zap.Error(err))

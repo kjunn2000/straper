@@ -23,6 +23,6 @@ const (
 	BoardCardRemoveMember = "BOARD_CARD_REMOVE_MEMBER"
 
 	BoardCardAddChecklistItem    = "BOARD_CARD_ADD_CHECKLIST_ITEM"
-	BoardCardUpdateChecklistItem = "BOARD_CARD_UDPATE_CHECKLIST_ITEM"
+	BoardCardUpdateChecklistItem = "BOARD_CARD_UPDATE_CHECKLIST_ITEM"
 	BoardCardDeleteChecklistItem = "BOARD_CARD_DELETE_CHECKLIST_ITEM"
 )

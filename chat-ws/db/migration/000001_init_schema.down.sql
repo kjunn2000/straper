@@ -2,6 +2,8 @@ DROP TABLE IF EXISTS ticket;
 
 DROP TABLE IF EXISTS card_comment;
 
+DROP TABLE IF EXISTS checklist_item;
+
 DROP TABLE IF EXISTS card_user;
 
 DROP TABLE IF EXISTS card;
