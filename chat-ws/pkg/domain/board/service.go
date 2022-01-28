@@ -13,7 +13,7 @@ import (
 
 type Service interface {
 	GetTaskBoardData(ctx context.Context, workspaceId string) (TaskBoardDataResponse, error)
-	GetCardMember(ctx context.Context, cardId string) ([]string, error)
+	getCardMember(ctx context.Context, cardId string) ([]string, error)
 	HandleBroadcast(ctx context.Context, msg *ws.Message, publishPubSub func(context.Context, *ws.Message) error) error
 	GetBoarcastUserListByMessageType(ctx context.Context, msg *ws.Message) ([]ws.UserData, error)
 }
@@ -46,13 +46,20 @@ func (service *service) GetTaskBoardData(ctx context.Context, workspaceId string
 		if err != nil && err != sql.ErrNoRows {
 			return TaskBoardDataResponse{}, err
 		}
+		for i, card := range cardList {
+			memberList, err := service.getCardMember(ctx, card.CardId)
+			if err != nil {
+				return TaskBoardDataResponse{}, err
+			}
+			cardList[i].MemberList = memberList
+		}
 		taskLists[i].CardList = cardList
 	}
 	taskBoardData.TaskLists = taskLists
 	return taskBoardData, err
 }
 
-func (service *service) GetCardMember(ctx context.Context, cardId string) ([]string, error) {
+func (service *service) getCardMember(ctx context.Context, cardId string) ([]string, error) {
 	userIdList, err := service.store.GetUserFromCard(ctx, cardId)
 	if err != nil {
 		return []string{}, err
@@ -108,6 +115,14 @@ func (service *service) HandleBroadcast(ctx context.Context, msg *ws.Message, pu
 		}
 	case BoardOrderCard:
 		if err := service.handleOrderCard(ctx, bytePayload); err != nil {
+			return err
+		}
+	case BoardCardAddMembers:
+		if err := service.handleCardAddMembers(ctx, bytePayload); err != nil {
+			return err
+		}
+	case BoardCardRemoveMember:
+		if err := service.handleCardRemoveMember(ctx, bytePayload); err != nil {
 			return err
 		}
 	}
@@ -255,4 +270,20 @@ func (service *service) updateCardListOrderIndex(ctx context.Context, cardList [
 		}
 	}
 	return nil
+}
+
+func (service *service) handleCardAddMembers(ctx context.Context, bytePayload []byte) error {
+	var cardAddMemberParams CardAddMembersParams
+	if err := json.Unmarshal(bytePayload, &cardAddMemberParams); err != nil {
+		return err
+	}
+	return service.store.AddUserListToCard(ctx, cardAddMemberParams.CardId, cardAddMemberParams.MemberList)
+}
+
+func (service *service) handleCardRemoveMember(ctx context.Context, bytePayload []byte) error {
+	var cardRemoveMemberParams CardRemoveMemberParams
+	if err := json.Unmarshal(bytePayload, &cardRemoveMemberParams); err != nil {
+		return err
+	}
+	return service.store.DeleteUserFromCard(ctx, cardRemoveMemberParams.Cardid, cardRemoveMemberParams.MemberId)
 }

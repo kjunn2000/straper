@@ -43,3 +43,15 @@ type OrderCardParams struct {
 	OldCardIndex int    `json:"oldCardIndex"`
 	NewCardIndex int    `json:"newCardIndex"`
 }
+
+type CardAddMembersParams struct {
+	ListId     string   `json:"list_id"`
+	CardId     string   `json:"card_id"`
+	MemberList []string `json:"member_list"`
+}
+
+type CardRemoveMemberParams struct {
+	Listid   string `json:"list_id"`
+	Cardid   string `json:"card_id"`
+	MemberId string `json:"member_id"`
+}

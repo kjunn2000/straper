@@ -4,6 +4,7 @@ import {
   MdOutlineTitle,
   MdOutlineDescription,
   MdLowPriority,
+  MdRemoveCircle,
 } from "react-icons/md";
 import { sendBoardMsg } from "../../service/websocket";
 import useBoardStore from "../../store/boardStore";
@@ -15,6 +16,8 @@ import ActionDialog from "../dialog/ActionDialog";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import AddMember from "./AddMember";
+import useWorkspaceStore from "../../store/workspaceStore";
+import { iconStyle } from "../../utils/style/icon";
 
 const CardDialog = ({ open, closeModal, card }) => {
   const board = useBoardStore((state) => state.board);
@@ -23,6 +26,7 @@ const CardDialog = ({ open, closeModal, card }) => {
 
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [dueDate, setDueDate] = useState(new Date(card.due_date));
+  const currAccountList = useWorkspaceStore((state) => state.currAccountList);
 
   const close = () => {
     setValue("title", card.title);
@@ -71,6 +75,15 @@ const CardDialog = ({ open, closeModal, card }) => {
       due_date: date.toJSON(),
     };
     sendBoardMsg("BOARD_UPDATE_CARD_DUE_DATE", board.workspace_id, payload);
+  };
+
+  const removeUserFromCard = (userId) => {
+    const payload = {
+      list_id: card.list_id,
+      card_id: card.card_id,
+      member_id: userId,
+    };
+    sendBoardMsg("BOARD_CARD_REMOVE_MEMBER", board.workspace_id, payload);
   };
 
   return (
@@ -180,11 +193,43 @@ const CardDialog = ({ open, closeModal, card }) => {
                         className="p-1 rounded-lg hover:bg-gray-300"
                       />
                     </div>
-                    <div className="flex py-3 space-x-3">
-                      <span className="font-semibold text-gray-400">
-                        MEMBER
-                      </span>
-                      <AddMember card={card} />
+                    <div>
+                      <div className="flex py-3 space-x-3">
+                        <span className="font-semibold text-gray-400">
+                          MEMBER
+                        </span>
+                        <AddMember card={card} />
+                      </div>
+                      <div>
+                        <ul className="flex flex-col space-y-2">
+                          {card.member_list &&
+                            card.member_list.map((userId) => {
+                              const user = currAccountList[userId];
+                              return (
+                                user && (
+                                  <li
+                                    key={user.user_id}
+                                    className="group flex justify-between hover:bg-gray-200 
+                                    rounded transition duration-300 p-2 font-semibold"
+                                  >
+                                    {user.username}
+                                    <span
+                                      className="opacity-0 group-hover:opacity-100 cursor-pointer pl-3"
+                                      onClick={() => {
+                                        removeUserFromCard(user.user_id);
+                                      }}
+                                    >
+                                      <MdRemoveCircle
+                                        size={25}
+                                        className="text-red-500"
+                                      />
+                                    </span>
+                                  </li>
+                                )
+                              );
+                            })}
+                        </ul>
+                      </div>
                     </div>
                     <div className="flex flex-col space-y-2">
                       <div className="font-semibold text-gray-400 py-3">

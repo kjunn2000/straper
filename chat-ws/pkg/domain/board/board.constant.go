@@ -18,4 +18,6 @@ const (
 	BoardUpdateCardDueDate = "BOARD_UPDATE_CARD_DUE_DATE"
 	BoardDeleteCard        = "BOARD_DELETE_CARD"
 	BoardOrderCard         = "BOARD_ORDER_CARD"
+	BoardCardAddMembers    = "BOARD_CARD_ADD_MEMBERS"
+	BoardCardRemoveMember  = "BOARD_CARD_REMOVE_MEMBER"
 )

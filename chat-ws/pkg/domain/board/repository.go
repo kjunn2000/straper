@@ -23,7 +23,7 @@ type Repository interface {
 	UpdateCardOrder(ctx context.Context, cardId string, orderIndex int, listId string, updateListId bool) error
 	DeleteCard(ctx context.Context, cardId string) error
 
-	AddUserToCard(ctx context.Context, cardId, userId string) error
 	GetUserFromCard(ctx context.Context, cardId string) ([]string, error)
+	AddUserListToCard(ctx context.Context, cardId string, userIdList []string) error
 	DeleteUserFromCard(ctx context.Context, cardId, userId string) error
 }

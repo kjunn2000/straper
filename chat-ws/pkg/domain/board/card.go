@@ -29,6 +29,7 @@ type Card struct {
 	CreatedDate time.Time `json:"created_date" db:"created_date"`
 	DueDate     time.Time `json:"due_date" db:"due_date"`
 	OrderIndex  int       `json:"order_index" db:"order_index"`
+	MemberList  []string  `json:"member_list"`
 }
 
 func (card *Card) Encode() ([]byte, error) {

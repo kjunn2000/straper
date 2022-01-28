@@ -114,21 +114,6 @@ func (q *Queries) DeleteCard(ctx context.Context, cardId string) error {
 	return nil
 }
 
-func (q *Queries) AddUserToCard(ctx context.Context, cardId, userId string) error {
-	sql, args, err := sq.Insert("card_user").Columns("card_id", "user_id").
-		Values(cardId, userId).ToSql()
-	if err != nil {
-		q.log.Info("Unable to create insert sql.", zap.Error(err))
-		return err
-	}
-	_, err = q.db.Exec(sql, args...)
-	if err != nil {
-		q.log.Info("Failed to user to card.", zap.Error(err))
-		return err
-	}
-	return nil
-}
-
 func (q *Queries) GetUserFromCard(ctx context.Context, cardId string) ([]string, error) {
 	sql, args, err := sq.Select("user_id").From("card_user").
 		Where(sq.Eq{"card_id": cardId}).
@@ -146,8 +131,26 @@ func (q *Queries) GetUserFromCard(ctx context.Context, cardId string) ([]string,
 	return userList, nil
 }
 
+func (q *Queries) AddUserListToCard(ctx context.Context, cardId string, userIdList []string) error {
+	builder := sq.Insert("card_user").Columns("card_id", "user_id")
+	for _, userId := range userIdList {
+		builder = builder.Values(cardId, userId)
+	}
+	sql, args, err := builder.ToSql()
+	if err != nil {
+		q.log.Info("Unable to create insert sql.", zap.Error(err))
+		return err
+	}
+	_, err = q.db.Exec(sql, args...)
+	if err != nil {
+		q.log.Info("Failed to users to card.", zap.Error(err))
+		return err
+	}
+	return nil
+}
+
 func (q *Queries) DeleteUserFromCard(ctx context.Context, cardId, userId string) error {
-	sql, args, err := sq.Delete("card").
+	sql, args, err := sq.Delete("card_user").
 		Where(sq.Eq{"card_id": cardId}).
 		Where(sq.Eq{"user_id": userId}).
 		ToSql()

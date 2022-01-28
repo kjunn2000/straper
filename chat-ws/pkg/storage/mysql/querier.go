@@ -79,20 +79,23 @@ type Querier interface {
 	GetTaskBoardByWorkspaceId(ctx context.Context, workspaceId string) (board.TaskBoard, error)
 	UpdateTaskBoard(ctx context.Context, board board.TaskBoard) error
 
+	// task list
 	CreateTaskList(ctx context.Context, taskList board.TaskList) error
 	GetTaskListsByBoardId(ctx context.Context, boardId string) ([]board.TaskList, error)
 	UpdateTaskList(ctx context.Context, taskList board.UpdateListParams) error
 	UpdateTaskListOrder(ctx context.Context, listId string, orderIndex int) error
 	DeleteTaskList(ctx context.Context, listId string) error
 
+	// card
 	CreateCard(ctx context.Context, card board.Card) error
 	GetCardListByListId(ctx context.Context, listId string) ([]board.Card, error)
 	UpdateCard(ctx context.Context, params board.UpdateCardParams) error
 	UpdateCardDueDate(ctx context.Context, params board.UpdateCardDueDateParams) error
 	UpdateCardOrder(ctx context.Context, cardId string, orderIndex int, listId string, updateListId bool) error
 	DeleteCard(ctx context.Context, cardId string) error
-	AddUserToCard(ctx context.Context, cardId, userId string) error
+
 	GetUserFromCard(ctx context.Context, cardId string) ([]string, error)
+	AddUserListToCard(ctx context.Context, cardId string, userIdList []string) error
 	DeleteUserFromCard(ctx context.Context, cardId, userId string) error
 
 	CreateCardComment(ctx context.Context, comment *board.CardComment) error

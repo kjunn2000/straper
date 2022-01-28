@@ -109,6 +109,7 @@ const useBoardStore = create((set) => ({
         newCardIndex,
         removed
       );
+      currObj.list_id = destListId;
       newTaskList.card_list[removed] = currObj;
       const newTaskLists = {
         ...state.taskLists,
@@ -161,6 +162,38 @@ const useBoardStore = create((set) => ({
       const newTaskLists = {
         ...state.taskLists,
         [list_id]: taskList,
+      };
+      setLocalStorage("taskLists", newTaskLists);
+      return { taskLists: newTaskLists };
+    });
+  },
+  addMembersToCard: ({ list_id, card_id, member_list }) => {
+    set((state) => {
+      const list = state.taskLists[list_id];
+      const card = list.card_list[card_id];
+      if (card.member_list) {
+        card.member_list = [...card.member_list, ...member_list];
+      } else {
+        card.member_list = member_list;
+      }
+      list.card_list[card_id] = card;
+      const newTaskLists = {
+        ...state.taskLists,
+        [list_id]: list,
+      };
+      setLocalStorage("taskLists", newTaskLists);
+      return { taskLists: newTaskLists };
+    });
+  },
+  removeMemberFromCard: ({ list_id, card_id, member_id }) => {
+    set((state) => {
+      const list = state.taskLists[list_id];
+      const card = list.card_list[card_id];
+      card.member_list = card.member_list.filter((id) => id !== member_id);
+      list.card_list[card_id] = card;
+      const newTaskLists = {
+        ...state.taskLists,
+        [list_id]: list,
       };
       setLocalStorage("taskLists", newTaskLists);
       return { taskLists: newTaskLists };

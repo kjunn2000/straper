@@ -38,6 +38,14 @@ export const handleWsBoardMsg = (msg) => {
       boardState.deleteCard(msg.payload);
       break;
     }
+    case "BOARD_CARD_ADD_MEMBERS": {
+      boardState.addMembersToCard(msg.payload);
+      break;
+    }
+    case "BOARD_CARD_REMOVE_MEMBER": {
+      boardState.removeMemberFromCard(msg.payload);
+      break;
+    }
     default:
   }
 };
