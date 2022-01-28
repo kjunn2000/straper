@@ -100,4 +100,9 @@ type Querier interface {
 
 	CreateCardComment(ctx context.Context, comment *board.CardComment) error
 	GetCardComments(ctx context.Context, cardId string) ([]board.CardComment, error)
+
+	GetChecklistItemsByCardId(ctx context.Context, cardId string) ([]string, error)
+	CreateChecklistItem(ctx context.Context, checklistItem board.CardChecklistItem) error
+	UpdateChecklistItem(ctx context.Context, checklistItem board.CardChecklistItem) error
+	DeleteChecklistItem(ctx context.Context, itemId string) error
 }

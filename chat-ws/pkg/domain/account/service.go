@@ -45,20 +45,21 @@ func (us *service) Register(ctx context.Context, params CreateUserParam) error {
 	}
 	params.Password = hashedPassword
 	params.Role = RoleUser
-	params.Status = StatusVerifying
+	// params.Status = StatusVerifying
+	params.Status = StatusActive
 	params.CreatedDate = time.Now()
 	err = us.ur.CreateUser(ctx, params)
 	if err != nil {
 		return us.verigyUserFieldError(err)
 	}
-	user, err := us.ur.GetUserDetailByUsername(ctx, params.Username)
-	if err != nil {
-		return err
-	}
-	err = us.CreateAndSendVerifyEmailToken(ctx, user)
-	if err != nil {
-		return err
-	}
+	// user, err := us.ur.GetUserDetailByUsername(ctx, params.Username)
+	// if err != nil {
+	// 	return err
+	// }
+	// err = us.CreateAndSendVerifyEmailToken(ctx, user)
+	// if err != nil {
+	// 	return err
+	// }
 	return nil
 }
 

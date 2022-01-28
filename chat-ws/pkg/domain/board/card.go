@@ -40,6 +40,13 @@ func (card *Card) Encode() ([]byte, error) {
 	return json, nil
 }
 
+type CardChecklistItem struct {
+	ItemId    string `json:"item_id" db:"item_id"`
+	Content   string `json:"content" db:"content"`
+	IsChecked bool   `json:"is_checked" db:"is_checked"`
+	CardId    string `json:"card_id" db:"card_id"`
+}
+
 type CardComment struct {
 	CommentId   string     `json:"comment_id" db:"comment_id"`
 	Type        string     `json:"type" db:"type"`

@@ -1,5 +1,5 @@
 import { Dialog, Transition } from "@headlessui/react";
-import { Fragment, useState, useRef, useEffect } from "react";
+import { Fragment, useState, useRef } from "react";
 import {
   MdOutlineTitle,
   MdOutlineDescription,
@@ -17,15 +17,17 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import AddMember from "./AddMember";
 import useWorkspaceStore from "../../store/workspaceStore";
-import { iconStyle } from "../../utils/style/icon";
+import Checklist from "./Checklist";
 
 const CardDialog = ({ open, closeModal, card }) => {
-  const board = useBoardStore((state) => state.board);
-  const { register, handleSubmit, setValue } = useForm();
   let initialFocus = useRef(null);
+  const { register, handleSubmit, setValue } = useForm();
 
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [dueDate, setDueDate] = useState(new Date(card.due_date));
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isChecklistOpen, setIsChecklistOpen] = useState(false);
+
+  const board = useBoardStore((state) => state.board);
   const currAccountList = useWorkspaceStore((state) => state.currAccountList);
 
   const close = () => {
@@ -236,7 +238,13 @@ const CardDialog = ({ open, closeModal, card }) => {
                         MORE ACTION
                       </div>
                       <div className="flex flex-col space-y-5">
-                        {moreActionBtn("CHECKLIST", () => {}, BsCardChecklist)}
+                        {moreActionBtn(
+                          "CHECKLIST",
+                          () => {
+                            setIsChecklistOpen((state) => !state);
+                          },
+                          BsCardChecklist
+                        )}
                       </div>
                       <div className="flex flex-col space-y-5">
                         {moreActionBtn(
@@ -250,6 +258,7 @@ const CardDialog = ({ open, closeModal, card }) => {
                     </div>
                   </div>
                 </div>
+                <Checklist show={isChecklistOpen} />
                 <CardComment />
               </div>
             </Transition.Child>

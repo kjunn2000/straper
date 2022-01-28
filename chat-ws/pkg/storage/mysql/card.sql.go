@@ -143,7 +143,7 @@ func (q *Queries) AddUserListToCard(ctx context.Context, cardId string, userIdLi
 	}
 	_, err = q.db.Exec(sql, args...)
 	if err != nil {
-		q.log.Info("Failed to users to card.", zap.Error(err))
+		q.log.Info("Failed to add users to card.", zap.Error(err))
 		return err
 	}
 	return nil
@@ -161,6 +161,73 @@ func (q *Queries) DeleteUserFromCard(ctx context.Context, cardId, userId string)
 	_, err = q.db.Exec(sql, args...)
 	if err != nil {
 		q.log.Info("Failed to delete user from card.", zap.Error(err))
+		return err
+	}
+	return nil
+}
+
+func (q *Queries) GetChecklistItemsByCardId(ctx context.Context, cardId string) ([]string, error) {
+	sql, args, err := sq.Select("item_id", "content", "is_checked", "card_id").From("checklist_item").
+		Where(sq.Eq{"card_id": cardId}).
+		ToSql()
+	if err != nil {
+		q.log.Info("Unable to create select checklist items sql.", zap.Error(err))
+		return []string{}, err
+	}
+	var userList []string
+	err = q.db.Select(&userList, sql, args...)
+	if err != nil {
+		q.log.Info("Unable to create select checklist items sql.", zap.Error(err))
+		return []string{}, err
+	}
+	return userList, nil
+}
+
+func (q *Queries) CreateChecklistItem(ctx context.Context, checklistItem board.CardChecklistItem) error {
+	sql, args, err := sq.Insert("checklist_item").
+		Columns("item_id", "content", "is_checked", "card_id").
+		Values(checklistItem.CardId, checklistItem.Content, checklistItem.IsChecked, checklistItem.CardId).
+		ToSql()
+	if err != nil {
+		q.log.Info("Unable to create insert sql.", zap.Error(err))
+		return err
+	}
+	_, err = q.db.Exec(sql, args...)
+	if err != nil {
+		q.log.Info("Failed to add checklist item to card.", zap.Error(err))
+		return err
+	}
+	return nil
+}
+
+func (q *Queries) UpdateChecklistItem(ctx context.Context, checklistItem board.CardChecklistItem) error {
+	sql, args, err := sq.Update("checklist_item").
+		Set("content", checklistItem.Content).
+		Set("is_checked", checklistItem.IsChecked).
+		ToSql()
+	if err != nil {
+		q.log.Info("Failed to create update checklist sql.", zap.Error(err))
+		return err
+	}
+	_, err = q.db.Exec(sql, args...)
+	if err != nil {
+		q.log.Info("Failed to update checklist.", zap.Error(err))
+		return err
+	}
+	return nil
+}
+
+func (q *Queries) DeleteChecklistItem(ctx context.Context, itemId string) error {
+	sql, args, err := sq.Delete("checklist_item").
+		Where(sq.Eq{"item_id": itemId}).
+		ToSql()
+	if err != nil {
+		q.log.Info("Unable to create delete sql.", zap.Error(err))
+		return err
+	}
+	_, err = q.db.Exec(sql, args...)
+	if err != nil {
+		q.log.Info("Failed to delete checklist item from card.", zap.Error(err))
 		return err
 	}
 	return nil
