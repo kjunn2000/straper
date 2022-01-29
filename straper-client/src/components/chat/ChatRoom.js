@@ -80,7 +80,6 @@ const ChatRoom = () => {
       .map((msg) => <Message key={msg.message_id} msg={msg} />);
 
   const scrollToBottom = () => {
-    console.log("execute...");
     if (messagesEndRef) {
       messagesEndRef.current.scrollIntoView({
         behavior: "smooth",

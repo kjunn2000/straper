@@ -80,17 +80,14 @@ const Checklist = ({ show, cardId, listId, checklist }) => {
         <BsCardChecklist size={30} />
         <span className="font-semibold text-lg">TO DO's</span>
       </div>
-      {checklist && (
+      {checklist && checklist.length > 0 && (
         <div className="flex flex-col space-y-3 p-2">
           <ProgressBar progressPercentage={percentage} />
           {checklist.map((item) => (
-            <div
-              key={item.item_id}
-              className="group inline-flex items-center w-2/5 space-x-5 justify-between"
-            >
+            <div key={item.item_id} className="group w-2/5 grid grid-cols-6">
               <input
                 type="checkbox"
-                className="w-6 h-6 rounded hover:cursor-pointer"
+                className="col-span-1 rounded hover:cursor-pointer"
                 onChange={(e) =>
                   handleUpdateChecklistItem(
                     item.item_id,
@@ -100,12 +97,24 @@ const Checklist = ({ show, cardId, listId, checklist }) => {
                 }
                 checked={item.is_checked}
               />
-              <span
-                className={"ml-2 " + (item.is_checked ? "line-through" : "")}
-              >
-                {item.content}
-              </span>
-              <span>
+              <input
+                defaultValue={item.content}
+                className={
+                  "col-span-4 rounded p-1 bg-gray-200 " +
+                  (item.is_checked ? "line-through" : "")
+                }
+                onBlur={(e) => {
+                  if (e.target.value === item.content) {
+                    return;
+                  }
+                  handleUpdateChecklistItem(
+                    item.item_id,
+                    e.target.value,
+                    item.is_checked
+                  );
+                }}
+              />
+              <span className="col-span-1">
                 <IoIosRemoveCircleOutline
                   size={30}
                   className="opacity-0 text-red-600 group-hover:opacity-100 hover:cursor-pointer"
