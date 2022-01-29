@@ -17,7 +17,6 @@ const AddMember = ({ card }) => {
   }, [card.member_list]);
 
   const getCardMember = () => {
-    console.log(currAccountList);
     if (!card.member_list) {
       setMemberOptions(convertAccountListToOptions(currAccountList));
       return;

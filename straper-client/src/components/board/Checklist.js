@@ -8,6 +8,7 @@ import {
   secondaryButtonStyle,
 } from "../../utils/style/button";
 import ProgressBar from "./ProgressBar";
+import { IoIosRemoveCircleOutline } from "react-icons/io";
 
 const Checklist = ({ show, cardId, listId, checklist }) => {
   const [percentage, setPercentage] = useState(100);
@@ -60,6 +61,19 @@ const Checklist = ({ show, cardId, listId, checklist }) => {
     );
   };
 
+  const handleDeleteChecklistItem = (itemId) => {
+    const payload = {
+      list_id: listId,
+      card_id: cardId,
+      item_id: itemId,
+    };
+    sendBoardMsg(
+      "BOARD_CARD_DELETE_CHECKLIST_ITEM",
+      board.workspace_id,
+      payload
+    );
+  };
+
   return (
     <div className={show ? "" : "hidden"}>
       <div className="flex self-center py-3 space-x-3">
@@ -70,7 +84,10 @@ const Checklist = ({ show, cardId, listId, checklist }) => {
         <div className="flex flex-col space-y-3 p-2">
           <ProgressBar progressPercentage={percentage} />
           {checklist.map((item) => (
-            <div key={item.item_id} className="inline-flex items-center">
+            <div
+              key={item.item_id}
+              className="group inline-flex items-center w-2/5 space-x-5 justify-between"
+            >
               <input
                 type="checkbox"
                 className="w-6 h-6 rounded hover:cursor-pointer"
@@ -87,6 +104,13 @@ const Checklist = ({ show, cardId, listId, checklist }) => {
                 className={"ml-2 " + (item.is_checked ? "line-through" : "")}
               >
                 {item.content}
+              </span>
+              <span>
+                <IoIosRemoveCircleOutline
+                  size={30}
+                  className="opacity-0 text-red-600 group-hover:opacity-100 hover:cursor-pointer"
+                  onClick={() => handleDeleteChecklistItem(item.item_id)}
+                />
               </span>
             </div>
           ))}

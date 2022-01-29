@@ -240,12 +240,12 @@ const useBoardStore = create((set) => ({
       return { taskLists: newTaskLists };
     });
   },
-  deleteCheckList: (payload) => {
+  deleteChecklistItem: (payload) => {
     set((state) => {
       const list = state.taskLists[payload.list_id];
       const card = list.card_list[payload.card_id];
       card.checklist = card.checklist.filter(
-        (item) => item.id !== payload.item_id
+        (item) => item.item_id !== payload.item_id
       );
       list.card_list[card.card_id] = card;
       const newTaskLists = {
