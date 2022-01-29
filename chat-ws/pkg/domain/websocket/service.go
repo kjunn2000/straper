@@ -59,11 +59,11 @@ func (s *service) SetUpWSServer(ctx context.Context) error {
 			case user := <-s.wsServer.unregister:
 				s.handleUnregister(ctx, user.UserId)
 			case msg := <-s.wsServer.broadcast:
-				if strings.HasPrefix(msg.MessageType, "CHAT") {
+				if msg.MessageType == ChatMessage || msg.MessageType == BoardCardComment {
 					if err := s.chattingService.HandleBroadcast(ctx, msg, s.publishPubSub); err != nil {
 						return err
 					}
-				} else if strings.HasPrefix(msg.MessageType, "BOARD") {
+				} else {
 					if err := s.broadcastService.HandleBroadcast(ctx, msg, s.publishPubSub); err != nil {
 						return err
 					}

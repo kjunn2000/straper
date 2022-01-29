@@ -98,11 +98,11 @@ type Querier interface {
 	AddUserListToCard(ctx context.Context, cardId string, userIdList []string) error
 	DeleteUserFromCard(ctx context.Context, cardId, userId string) error
 
-	CreateCardComment(ctx context.Context, comment *board.CardComment) error
-	GetCardComments(ctx context.Context, cardId string) ([]board.CardComment, error)
-
 	GetChecklistItemsByCardId(ctx context.Context, cardId string) ([]board.CardChecklistItem, error)
 	CreateChecklistItem(ctx context.Context, checklistItem board.CardChecklistItemDto) error
 	UpdateChecklistItem(ctx context.Context, checklistItem board.CardChecklistItemDto) error
 	DeleteChecklistItem(ctx context.Context, itemId string) error
+
+	CreateCardComment(ctx context.Context, comment *chatting.CardComment) error
+	GetCardComments(ctx context.Context, cardId string) ([]chatting.CardComment, error)
 }

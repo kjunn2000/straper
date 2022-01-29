@@ -48,19 +48,6 @@ type CardChecklistItem struct {
 	CardId    string `json:"card_id" db:"card_id"`
 }
 
-type CardComment struct {
-	CommentId   string     `json:"comment_id" db:"comment_id"`
-	Type        string     `json:"type" db:"type"`
-	CardId      string     `json:"card_id" db:"card_id"`
-	CreatorId   string     `json:"creator_id" db:"creator_id"`
-	UserDetail  UserDetail `json:"user_detail"`
-	Content     string     `json:"content" db:"content"`
-	FileName    string     `json:"file_name" db:"file_name"`
-	FileType    string     `json:"file_type" db:"file_type"`
-	FileBytes   []byte     `json:"file_bytes"`
-	CreatedDate time.Time  `json:"created_date" db:"created_date"`
-}
-
 type UserDetail struct {
 	UserId   string `json:"user_id" db:"user_id"`
 	Username string `json:"username" db:"username"`

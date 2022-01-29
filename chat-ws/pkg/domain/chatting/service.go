@@ -26,8 +26,8 @@ var (
 
 type Service interface {
 	HandleBroadcast(ctx context.Context, msg *ws.Message, publishPubSub func(context.Context, *ws.Message) error) error
-	GetChannelMessages(ctx context.Context, channelId string, userId string, limit, offset uint64) ([]Message, error)
 	GetBoarcastUserListByMessageType(ctx context.Context, msg *ws.Message) ([]ws.UserData, error)
+	GetChannelMessages(ctx context.Context, channelId string, userId string, limit, offset uint64) ([]Message, error)
 	DeleteSeaweedfsMessagesByChannelId(ctx context.Context, channelId string) error
 	DeleteSeaweedfsMessagesByWorkspaceId(ctx context.Context, workspaceId string) error
 }
@@ -92,16 +92,24 @@ func (s *service) HandleBroadcast(ctx context.Context, msg *ws.Message, publishP
 }
 
 func (s *service) saveAndUpdateMessage(ctx context.Context, msg *ws.Message) (*ws.Message, error) {
-	messageId, err := uuid.NewRandom()
+	newId, err := uuid.NewRandom()
 	if err != nil {
 		return &ws.Message{}, err
 	}
+	if msg.MessageType == ws.ChatMessage {
+		return s.handleChatMessage(ctx, newId.String(), msg)
+	} else if msg.MessageType == ws.BoardCardComment {
+		return s.handleBoardComment(ctx, newId.String(), msg)
+	}
+	return nil, errors.New("invalid.msg.type")
+}
+
+func (s *service) handleChatMessage(ctx context.Context, newId string, msg *ws.Message) (*ws.Message, error) {
 	message, err := s.convertByteArrayToMessage(ctx, msg)
 	if err != nil {
 		return &ws.Message{}, err
 	}
-
-	message.MessageId = messageId.String()
+	message.MessageId = newId
 	message.CreatedDate = time.Now()
 	if message.Type == File {
 		fid, err := s.saveFile(ctx, message.FileBytes)
@@ -127,12 +135,29 @@ func (s *service) saveAndUpdateMessage(ctx context.Context, msg *ws.Message) (*w
 	return msg, nil
 }
 
-func (s *service) GetBoarcastUserListByMessageType(ctx context.Context, msg *ws.Message) ([]ws.UserData, error) {
-	message, err := s.convertByteArrayToMessage(ctx, msg)
+func (s *service) handleBoardComment(ctx context.Context, newId string, msg *ws.Message) (*ws.Message, error) {
+	comment, err := s.convertByteArrayToCardComment(ctx, msg)
 	if err != nil {
-		return []ws.UserData{}, err
+		return &ws.Message{}, err
 	}
-	return s.store.GetUserListByChannelId(ctx, message.ChannelId)
+	comment.CommentId = newId
+	comment.CreatedDate = time.Now()
+	if comment.Type == File {
+		fid, err := s.saveFile(ctx, comment.FileBytes)
+		if err != nil {
+			return &ws.Message{}, err
+		}
+		comment.Content = fid
+	}
+	if err := s.store.CreateCardComment(ctx, &comment); err != nil {
+		return &ws.Message{}, err
+	}
+	newMsg, err := json.Marshal(comment)
+	if err != nil {
+		return &ws.Message{}, err
+	}
+	msg.Payload.UnmarshalJSON(newMsg)
+	return msg, nil
 }
 
 func (s *service) convertByteArrayToMessage(ctx context.Context, msg *ws.Message) (Message, error) {
@@ -145,6 +170,18 @@ func (s *service) convertByteArrayToMessage(ctx context.Context, msg *ws.Message
 		return Message{}, err
 	}
 	return message, nil
+}
+
+func (s *service) convertByteArrayToCardComment(ctx context.Context, msg *ws.Message) (CardComment, error) {
+	bytePayload, err := msg.Payload.MarshalJSON()
+	if err != nil {
+		return CardComment{}, err
+	}
+	var cardComment CardComment
+	if err := json.Unmarshal(bytePayload, &cardComment); err != nil {
+		return CardComment{}, err
+	}
+	return cardComment, nil
 }
 
 func (s *service) saveFile(ctx context.Context, fileBytes []byte) (string, error) {
@@ -196,6 +233,14 @@ func (s *service) SendMultiPartRequest(fileBytes []byte, url string) error {
 		return err
 	}
 	return nil
+}
+
+func (s *service) GetBoarcastUserListByMessageType(ctx context.Context, msg *ws.Message) ([]ws.UserData, error) {
+	message, err := s.convertByteArrayToMessage(ctx, msg)
+	if err != nil {
+		return []ws.UserData{}, err
+	}
+	return s.store.GetUserListByChannelId(ctx, message.ChannelId)
 }
 
 func (s *service) GetChannelMessages(ctx context.Context, channelId string, userId string, limit, offset uint64) ([]Message, error) {

@@ -14,4 +14,7 @@ type Repository interface {
 	GetAllChannelMessages(ctx context.Context, channelId string) ([]Message, error)
 	GetAllChannelMessagesByWorkspaceId(ctx context.Context, workspaceId string) ([]Message, error)
 	UpdateChannelAccessTime(ctx context.Context, channelId string, userId string) error
+
+	CreateCardComment(ctx context.Context, comment *CardComment) error
+	GetCardComments(ctx context.Context, cardId string) ([]CardComment, error)
 }

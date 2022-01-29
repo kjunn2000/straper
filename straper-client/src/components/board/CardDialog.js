@@ -9,7 +9,7 @@ import {
 import { sendBoardMsg } from "../../service/websocket";
 import useBoardStore from "../../store/boardStore";
 import { useForm } from "react-hook-form";
-import { BsCardChecklist } from "react-icons/bs";
+import { BsCardChecklist, BsFillChatDotsFill } from "react-icons/bs";
 import { AiFillDelete, AiOutlineClose } from "react-icons/ai";
 import CardComment from "./CardComment";
 import ActionDialog from "../dialog/ActionDialog";
@@ -264,7 +264,13 @@ const CardDialog = ({ open, closeModal, card }) => {
                   listId={card.list_id}
                   cardId={card.card_id}
                 />
-                <CardComment />
+                <div>
+                  <div className="flex self-center py-3 space-x-3">
+                    <BsFillChatDotsFill size={30} />
+                    <span className="font-semibold text-lg">ADD COMMENTS</span>
+                  </div>
+                  <CardComment />
+                </div>
               </div>
             </Transition.Child>
           </div>

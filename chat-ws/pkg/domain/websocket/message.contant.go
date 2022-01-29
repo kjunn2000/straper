@@ -6,5 +6,6 @@ const (
 )
 
 const (
-	ChatMessage = "CHAT_MESSAGE"
+	ChatMessage      = "CHAT_MESSAGE"
+	BoardCardComment = "BOARD_CARD_COMMENT"
 )

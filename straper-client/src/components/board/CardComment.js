@@ -1,13 +1,12 @@
 import React from "react";
 import { BsFillChatDotsFill } from "react-icons/bs";
+import ChatRoom from "../chat/ChatRoom";
+import CommentInput from "./CommentInput";
 
 const CardComment = () => {
   return (
-    <div>
-      <div className="flex self-center py-3 space-x-3">
-        <BsFillChatDotsFill size={30} />
-        <span className="font-semibold text-lg">ADD COMMENTS</span>
-      </div>
+    <div className="flex flex-col">
+      <CommentInput />
     </div>
   );
 };
