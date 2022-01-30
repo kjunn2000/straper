@@ -1,9 +1,16 @@
 import React, { useState } from "react";
 import { AiOutlineClockCircle } from "react-icons/ai";
+import api from "../../axios/api";
 import CardDialog from "./CardDialog";
+import useCommentStore from "../../store/commentStore";
 
 const Card = ({ card }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [offset, setOffset] = useState(0);
+  const [isBottom, setIsBottom] = useState(false);
+
+  const pushComments = useCommentStore((state) => state.pushComments);
+  const clearComments = useCommentStore((state) => state.clearComments);
 
   const tagColor = () => {
     switch (card.priority) {
@@ -22,10 +29,36 @@ const Card = ({ card }) => {
     return month + " " + date.getDate();
   };
 
+  const openCardDialog = async () => {
+    await fetchComments(true, 10, 0);
+    setIsDialogOpen(true);
+  };
+
+  const fetchComments = async (firstTime, limit, offset) => {
+    if (isBottom && !firstTime) {
+      return;
+    }
+    api
+      .get(
+        `/protected/board/card/comments/${card.card_id}?limit=${limit}&offset=${offset}`
+      )
+      .then((res) => {
+        const fetchedData = res.data.Data;
+        if (fetchedData.length == 0 && !firstTime) {
+          setIsBottom(true);
+          return;
+        } else if (firstTime) {
+          clearComments();
+        }
+        pushComments(fetchedData);
+        setOffset((offset) => offset + 25);
+      });
+  };
+
   return (
     <div
       className="flex flex-col bg-white rounded-md p-3"
-      onClick={() => setIsDialogOpen(true)}
+      onClick={() => openCardDialog()}
     >
       {card.priority !== "NO" && (
         <div

@@ -16,5 +16,5 @@ type Repository interface {
 	UpdateChannelAccessTime(ctx context.Context, channelId string, userId string) error
 
 	CreateCardComment(ctx context.Context, comment *CardComment) error
-	GetCardComments(ctx context.Context, cardId string) ([]CardComment, error)
+	GetCardComments(ctx context.Context, cardId string, limit, offset uint64) ([]CardComment, error)
 }

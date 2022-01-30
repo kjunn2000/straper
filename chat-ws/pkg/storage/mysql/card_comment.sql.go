@@ -27,11 +27,11 @@ func (q *Queries) CreateCardComment(ctx context.Context, comment *chatting.CardC
 	return nil
 }
 
-func (q *Queries) GetCardComments(ctx context.Context, cardId string) ([]chatting.CardComment, error) {
+func (q *Queries) GetCardComments(ctx context.Context, cardId string, limit, offset uint64) ([]chatting.CardComment, error) {
 	var cardComments []chatting.CardComment
 	sql, arg, err := sq.Select("comment_id", "type", "card_id", "creator_id", "content", "file_name",
 		"file_type", "created_date").
-		From("card_comment").Where(sq.Eq{"cardId": cardId}).ToSql()
+		From("card_comment").Where(sq.Eq{"card_id": cardId}).OrderBy("created_date desc").Limit(limit).Offset(offset).ToSql()
 	if err != nil {
 		q.log.Warn("Failed to create select sql.")
 		return []chatting.CardComment{}, err

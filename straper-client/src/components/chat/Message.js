@@ -8,7 +8,7 @@ import {
 import useIdentityStore from "../../store/identityStore";
 import FileMessage from "./FileMessage";
 
-const Message = ({ msg }) => {
+const Message = ({ msg, creatorRight }) => {
   const identity = useIdentityStore((state) => state.identity);
   const [file, setFile] = useState({});
 
@@ -46,12 +46,14 @@ const Message = ({ msg }) => {
     <div className="chat-message">
       <div
         className={`flex ${
-          isCreator() ? "items-end justify-end" : "items-start justify-start"
+          isCreator() && creatorRight
+            ? "items-end justify-end"
+            : "items-start justify-start"
         }`}
       >
         <div
           className={`flex flex-col max-w-xs mx-2 group ${
-            isCreator() ? "items-end" : "items-start"
+            isCreator() && creatorRight ? "items-end" : "items-start"
           }`}
         >
           <span className="inline-block text-gray-300 pb-3">

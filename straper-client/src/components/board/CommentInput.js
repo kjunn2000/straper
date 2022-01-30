@@ -1,50 +1,66 @@
-import React, { useRef, useState } from "react";
+import React, { useRef } from "react";
 import UploadButton from "../button/UploadButton";
-import { IoSendSharp } from "react-icons/io5";
-import { isEmpty } from "../../service/object";
+import useIdentityStore from "../../store/identityStore";
+import { getAsByteArray } from "../../service/file";
+import { sendBoardMsg } from "../../service/websocket";
+import useBoardStore from "../../store/boardStore";
 
-const CommentInput = ({ scrollToBottom }) => {
+const CommentInput = ({ cardId, scrollToTop }) => {
   const inputRef = useRef(null);
+  const identity = useIdentityStore((state) => state.identity);
+  const board = useBoardStore((state) => state.board);
 
   const handleKeyDown = (event) => {
     if (event.key !== "Enter") {
       return;
     }
+    sendComment("MESSAGE", inputRef.current.value);
   };
 
-  const sendComment = (type, msg) => {
+  const sendComment = async (type, msg) => {
     if (type === "MESSAGE") {
       msg = msg.trim();
     }
-    if (!msg || msg === "" || isEmpty(msg)) {
+    if (!msg || msg === "") {
       return;
     }
-    // sendMsg(type, currChannel.channel_id, identity.user_id, msg);
+    const payload = {
+      type,
+      card_id: cardId,
+      creator_id: identity.user_id,
+    };
+    if (type === "MESSAGE") {
+      payload.content = msg;
+    } else if (type === "FILE") {
+      const result = await getAsByteArray(msg);
+      payload.file_name = msg.name;
+      payload.file_type = msg.type;
+      payload.file_bytes = Array.from(result);
+    }
+    sendBoardMsg("BOARD_CARD_COMMENT", board.workspace_id, payload);
     inputRef.current.value = "";
-    scrollToBottom();
   };
 
   return (
-    <div className="relative flex w-4/5">
-      <div className="p-3 w-full flex">
-        <div className="bg-gray-800 bg-opacity-40 rounded-lg w-full">
-          <input
-            ref={inputRef}
-            className="p-3 w-full focus:outline-none bg-gray-200 rounded"
-            // placeholder={defaultPlaceHolder}
-            onKeyDown={(e) => handleKeyDown(e)}
-          />
-        </div>
+    <div className="relative flex flex-col space-y-3 w-4/5">
+      <div className="w-full flex">
+        <input
+          ref={inputRef}
+          className="p-3 w-full focus:outline-none bg-gray-200 rounded"
+          placeholder="Add a comment..."
+          onKeyDown={(e) => handleKeyDown(e)}
+        />
       </div>
-      <div className="absolute right-0 items-center inset-y-0 hidden sm:flex">
-        <UploadButton handleFileAction={(file) => sendComment("FILE", file)} />
+      <div className="flex items-center">
         <button
           type="button"
-          className="inline-flex items-center justify-center rounded-full h-12 w-12 transition duration-500 ease-in-out text-white bg-indigo-500 hover:bg-indigo-400 focus:outline-none"
+          className="items-center rounded transition duration-500 ease-in-out text-white 
+          bg-indigo-500 hover:bg-indigo-400 focus:outline-none p-2"
           onClick={() => sendComment("MESSAGE", inputRef.current.value)}
         >
-          <IoSendSharp size="25" />
+          Save
         </button>
+        <UploadButton handleFileAction={(file) => sendComment("FILE", file)} />
       </div>
     </div>
   );

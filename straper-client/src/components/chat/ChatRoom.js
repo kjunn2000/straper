@@ -45,9 +45,8 @@ const ChatRoom = () => {
           setSeenMsgs([]);
           setUnSeenMsgs([]);
         }
-        const data = res.data.Data;
-        pushMessages(data);
-        splitSeenMsgs(data);
+        pushMessages(fetchedData);
+        splitSeenMsgs(fetchedData);
         setOffset((offset) => offset + 25);
       });
   };
@@ -77,7 +76,9 @@ const ChatRoom = () => {
     msgs
       .slice(0)
       .reverse()
-      .map((msg) => <Message key={msg.message_id} msg={msg} />);
+      .map((msg) => (
+        <Message key={msg.message_id} msg={msg} creatorRight={true} />
+      ));
 
   const scrollToBottom = () => {
     if (messagesEndRef) {

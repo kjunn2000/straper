@@ -269,7 +269,7 @@ const CardDialog = ({ open, closeModal, card }) => {
                     <BsFillChatDotsFill size={30} />
                     <span className="font-semibold text-lg">ADD COMMENTS</span>
                   </div>
-                  <CardComment />
+                  <CardComment cardId={card.card_id} />
                 </div>
               </div>
             </Transition.Child>

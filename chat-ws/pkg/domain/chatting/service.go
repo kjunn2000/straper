@@ -28,6 +28,7 @@ type Service interface {
 	HandleBroadcast(ctx context.Context, msg *ws.Message, publishPubSub func(context.Context, *ws.Message) error) error
 	GetBoarcastUserListByMessageType(ctx context.Context, msg *ws.Message) ([]ws.UserData, error)
 	GetChannelMessages(ctx context.Context, channelId string, userId string, limit, offset uint64) ([]Message, error)
+	GetCardComments(ctx context.Context, cardId string, limit, offset uint64) ([]CardComment, error)
 	DeleteSeaweedfsMessagesByChannelId(ctx context.Context, channelId string) error
 	DeleteSeaweedfsMessagesByWorkspaceId(ctx context.Context, workspaceId string) error
 }
@@ -252,33 +253,11 @@ func (s *service) GetChannelMessages(ctx context.Context, channelId string, user
 	}
 	for i, msg := range msgs {
 		if msg.Type == "FILE" {
-			fid := strings.Split(msg.Content, ",")
-			resp, err := http.Get("http://localhost:9333/dir/lookup?volumeId=" + fid[0])
+			bytesData, err := s.getSeaweedfsFile(ctx, msg.Content)
 			if err != nil {
-				s.log.Warn("Seaweedfs look up volume failed", zap.Error(err))
 				return []Message{}, err
 			}
-			defer resp.Body.Close()
-			body, err := ioutil.ReadAll(resp.Body)
-			if err != nil {
-				s.log.Warn("Read response body failed", zap.Error(err))
-				return []Message{}, err
-			}
-			var weedVolumeLoopUpResponse WeedVolumeLoopUpResponse
-			json.Unmarshal(body, &weedVolumeLoopUpResponse)
-
-			resp, err = http.Get("http://" + weedVolumeLoopUpResponse.Locations[0].PublicUrl + "/" + msg.Content)
-			if err != nil {
-				s.log.Warn("Seaweedfs get file failed", zap.Error(err))
-				return []Message{}, err
-			}
-			defer resp.Body.Close()
-			body, err = ioutil.ReadAll(resp.Body)
-			if err != nil {
-				s.log.Warn("Read response body failed", zap.Error(err))
-				return []Message{}, err
-			}
-			msg.FileBytes = body
+			msg.FileBytes = bytesData
 			msgs[i] = msg
 		}
 		userDetail, err := s.store.GetUserInfoByUserId(ctx, msg.CreatorId)
@@ -292,6 +271,56 @@ func (s *service) GetChannelMessages(ctx context.Context, channelId string, user
 		return []Message{}, err
 	}
 	return msgs, nil
+}
+
+func (s *service) GetCardComments(ctx context.Context, cardId string, limit, offset uint64) ([]CardComment, error) {
+	msgs, err := s.store.GetCardComments(ctx, cardId, limit, offset)
+	if err == sql.ErrNoRows {
+		return []CardComment{}, errors.New("no.card.comment.available")
+	} else if err != nil {
+		return []CardComment{}, err
+	}
+	for i, msg := range msgs {
+		if msg.Type == "FILE" {
+			bytesData, err := s.getSeaweedfsFile(ctx, msg.Content)
+			if err != nil {
+				return []CardComment{}, err
+			}
+			msg.FileBytes = bytesData
+			msgs[i] = msg
+		}
+	}
+	return msgs, nil
+}
+
+func (s *service) getSeaweedfsFile(ctx context.Context, fid string) ([]byte, error) {
+	fidArr := strings.Split(fid, ",")
+	resp, err := http.Get("http://localhost:9333/dir/lookup?volumeId=" + fidArr[0])
+	if err != nil {
+		s.log.Warn("Seaweedfs look up volume failed", zap.Error(err))
+		return []byte{}, err
+	}
+	defer resp.Body.Close()
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		s.log.Warn("Read response body failed", zap.Error(err))
+		return []byte{}, err
+	}
+	var weedVolumeLoopUpResponse WeedVolumeLoopUpResponse
+	json.Unmarshal(body, &weedVolumeLoopUpResponse)
+
+	resp, err = http.Get("http://" + weedVolumeLoopUpResponse.Locations[0].PublicUrl + "/" + fid)
+	if err != nil {
+		s.log.Warn("Seaweedfs get file failed", zap.Error(err))
+		return []byte{}, err
+	}
+	defer resp.Body.Close()
+	body, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		s.log.Warn("Read response body failed", zap.Error(err))
+		return []byte{}, err
+	}
+	return body, nil
 }
 
 func (s *service) DeleteSeaweedfsMessagesByChannelId(ctx context.Context, channelId string) error {

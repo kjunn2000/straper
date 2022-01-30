@@ -104,5 +104,5 @@ type Querier interface {
 	DeleteChecklistItem(ctx context.Context, itemId string) error
 
 	CreateCardComment(ctx context.Context, comment *chatting.CardComment) error
-	GetCardComments(ctx context.Context, cardId string) ([]chatting.CardComment, error)
+	GetCardComments(ctx context.Context, cardId string, limit, offset uint64) ([]chatting.CardComment, error)
 }
