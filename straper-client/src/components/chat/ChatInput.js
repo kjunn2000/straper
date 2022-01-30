@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { sendMsg } from "../../service/websocket";
 import useIdentityStore from "../../store/identityStore";
 import useWorkspaceStore from "../../store/workspaceStore";
@@ -6,7 +6,7 @@ import UploadButton from "../button/UploadButton";
 import { IoSendSharp } from "react-icons/io5";
 import { isEmpty } from "../../service/object";
 
-const ChatInput = ({ scrollToBottom }) => {
+const ChatInput = () => {
   const currChannel = useWorkspaceStore((state) => state.currChannel);
   const identity = useIdentityStore((state) => state.identity);
 
@@ -30,7 +30,6 @@ const ChatInput = ({ scrollToBottom }) => {
     }
     sendMsg(type, currChannel.channel_id, identity.user_id, msg);
     inputRef.current.value = "";
-    scrollToBottom();
   };
 
   return (

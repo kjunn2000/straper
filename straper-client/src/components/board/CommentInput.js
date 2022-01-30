@@ -4,6 +4,7 @@ import useIdentityStore from "../../store/identityStore";
 import { getAsByteArray } from "../../service/file";
 import { sendBoardMsg } from "../../service/websocket";
 import useBoardStore from "../../store/boardStore";
+import { IoSendSharp } from "react-icons/io5";
 
 const CommentInput = ({ cardId, scrollToTop }) => {
   const inputRef = useRef(null);
@@ -42,7 +43,7 @@ const CommentInput = ({ cardId, scrollToTop }) => {
   };
 
   return (
-    <div className="relative flex flex-col space-y-3 w-4/5">
+    <div className="relative flex space-x-2 space-y-2 bg-gray-200 rounded items-center">
       <div className="w-full flex">
         <input
           ref={inputRef}
@@ -51,16 +52,18 @@ const CommentInput = ({ cardId, scrollToTop }) => {
           onKeyDown={(e) => handleKeyDown(e)}
         />
       </div>
-      <div className="flex items-center">
+      <div className="flex">
+        <UploadButton
+          handleFileAction={(file) => sendComment("FILE", file)}
+          className="text-gray-500"
+        />
         <button
           type="button"
-          className="items-center rounded transition duration-500 ease-in-out text-white 
-          bg-indigo-500 hover:bg-indigo-400 focus:outline-none p-2"
+          className="inline-flex items-center justify-center rounded-full h-12 w-12 transition duration-500 ease-in-out focus:outline-none"
           onClick={() => sendComment("MESSAGE", inputRef.current.value)}
         >
-          Save
+          <IoSendSharp size="25" className="text-gray-500" />
         </button>
-        <UploadButton handleFileAction={(file) => sendComment("FILE", file)} />
       </div>
     </div>
   );

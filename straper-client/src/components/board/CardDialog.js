@@ -125,69 +125,96 @@ const CardDialog = ({ open, closeModal, card }) => {
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <div className="inline-block p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl ">
+              <div className="inline-block p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-gray-300 shadow-xl rounded-2xl ">
                 <div className="w-full flex justify-end hover:cursor-pointer">
-                  <AiOutlineClose size={30} onClick={() => close()} />
+                  <AiOutlineClose
+                    size={30}
+                    onClick={() => close()}
+                    className="text-gray-500"
+                  />
                 </div>
                 <div
                   ref={initialFocus}
                   className="grid grid-cols-5 gap-x-8 gap-y-4"
                 >
-                  <form
-                    onSubmit={handleSubmit(onSave)}
-                    className="col-span-4 rounded-lg flex flex-col space-y-5 justify-center self-center"
-                  >
-                    <div className="flex space-x-2">
-                      <MdOutlineTitle size={30} />
-                      <input
-                        className="p-1 rounded-lg hover:bg-gray-300 text-2xl font-bold"
-                        defaultValue={card.title}
-                        {...register("title")}
-                      />
-                    </div>
-                    <div className="flex flex-col">
-                      <div className="flex py-3 space-x-3">
-                        <MdOutlineDescription size={30} />
+                  <div className="col-span-4">
+                    <form
+                      onSubmit={handleSubmit(onSave)}
+                      className="rounded-lg flex flex-col space-y-5 justify-center self-center"
+                    >
+                      <div className="flex space-x-2">
+                        <MdOutlineTitle size={30} className="text-gray-500" />
+                        <input
+                          className="p-1 rounded-lg bg-gray-200 text-xl font-bold"
+                          defaultValue={card.title}
+                          {...register("title")}
+                        />
+                      </div>
+                      <div className="flex flex-col">
+                        <div className="flex py-3 space-x-3">
+                          <MdOutlineDescription
+                            size={30}
+                            className="text-gray-500"
+                          />
+                          <span className="font-semibold text-lg">
+                            DESCRIPTION
+                          </span>
+                        </div>
+                        <textarea
+                          className="p-1 rounded-lg bg-gray-200"
+                          defaultValue={card.description}
+                          {...register("description")}
+                        />
+                      </div>
+                      <div className="grid grid-cols-5 gap-x-8 gap-y-4">
+                        <div className="col-span-3 flex self-center py-3 space-x-3">
+                          <MdLowPriority size={30} className="text-gray-500" />
+                          <span className="font-semibold text-lg">
+                            PRIORITY
+                          </span>
+                        </div>
+                        <select
+                          defaultValue={card.priority}
+                          {...register("priority")}
+                          className="col-span-2 rounded-lg w-full bg-gray-200 hover:cursor-pointer"
+                        >
+                          <option value="NO">No</option>
+                          <option value="LOW">Low</option>
+                          <option value="MEDIUM">Medium</option>
+                          <option value="HIGH">High</option>
+                        </select>
+                      </div>
+                      <button
+                        type="submit"
+                        className="self-end bg-indigo-400 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-full"
+                      >
+                        SAVE
+                      </button>
+                    </form>
+
+                    <Checklist
+                      show={isChecklistOpen}
+                      checklist={card.checklist}
+                      listId={card.list_id}
+                      cardId={card.card_id}
+                    />
+                    <div>
+                      <div className="flex self-center py-3 space-x-3">
+                        <BsFillChatDotsFill
+                          size={30}
+                          className="text-gray-500"
+                        />
                         <span className="font-semibold text-lg">
-                          DESCRIPTION
+                          ADD COMMENTS
                         </span>
                       </div>
-                      <textarea
-                        className="p-1 rounded-lg bg-gray-200 hover:bg-gray-300"
-                        defaultValue={card.description}
-                        {...register("description")}
-                      />
+                      <CardComment cardId={card.card_id} />
                     </div>
-                    <div className="grid grid-cols-5 gap-x-8 gap-y-4">
-                      <div className="col-span-3 flex self-center py-3 space-x-3">
-                        <MdLowPriority size={30} />
-                        <span className="font-semibold text-lg">PRIORITY</span>
-                      </div>
-                      <select
-                        defaultValue={card.priority}
-                        {...register("priority")}
-                        className="col-span-2 rounded-lg w-full hover:bg-gray-300 hover:cursor-pointer"
-                      >
-                        <option value="NO">No</option>
-                        <option value="LOW">Low</option>
-                        <option value="MEDIUM">Medium</option>
-                        <option value="HIGH">High</option>
-                      </select>
-                    </div>
-                    <button
-                      type="submit"
-                      className="self-end bg-indigo-400 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-full"
-                    >
-                      SAVE
-                    </button>
-                  </form>
-
+                  </div>
                   <div className="col-span-1">
                     <div>
                       <div className="flex py-3 space-x-3">
-                        <span className="font-semibold text-gray-400">
-                          DUE DATE
-                        </span>
+                        <span className="font-semibold ">DUE DATE</span>
                       </div>
                       <DatePicker
                         selected={dueDate}
@@ -197,9 +224,7 @@ const CardDialog = ({ open, closeModal, card }) => {
                     </div>
                     <div>
                       <div className="flex py-3 space-x-3">
-                        <span className="font-semibold text-gray-400">
-                          MEMBER
-                        </span>
+                        <span className="font-semibold ">MEMBER</span>
                         <AddMember card={card} />
                       </div>
                       <div>
@@ -234,9 +259,7 @@ const CardDialog = ({ open, closeModal, card }) => {
                       </div>
                     </div>
                     <div className="flex flex-col space-y-2">
-                      <div className="font-semibold text-gray-400 py-3">
-                        MORE ACTION
-                      </div>
+                      <div className="font-semibold py-3">MORE ACTION</div>
                       <div className="flex flex-col space-y-5">
                         {moreActionBtn(
                           "CHECKLIST",
@@ -257,19 +280,6 @@ const CardDialog = ({ open, closeModal, card }) => {
                       </div>
                     </div>
                   </div>
-                </div>
-                <Checklist
-                  show={isChecklistOpen}
-                  checklist={card.checklist}
-                  listId={card.list_id}
-                  cardId={card.card_id}
-                />
-                <div>
-                  <div className="flex self-center py-3 space-x-3">
-                    <BsFillChatDotsFill size={30} />
-                    <span className="font-semibold text-lg">ADD COMMENTS</span>
-                  </div>
-                  <CardComment cardId={card.card_id} />
                 </div>
               </div>
             </Transition.Child>

@@ -1,6 +1,8 @@
 import useBoardStore from "../store/boardStore";
+import useCommentStore from "../store/commentStore";
 export const handleWsBoardMsg = (msg) => {
   const boardState = useBoardStore.getState();
+  const commentState = useCommentStore.getState();
   switch (msg.type) {
     case "BOARD_ADD_LIST": {
       boardState.addTaskList(msg.payload);
@@ -56,6 +58,10 @@ export const handleWsBoardMsg = (msg) => {
     }
     case "BOARD_CARD_DELETE_CHECKLIST_ITEM": {
       boardState.deleteChecklistItem(msg.payload);
+      break;
+    }
+    case "BOARD_CARD_COMMENT": {
+      commentState.pushComment(msg.payload);
       break;
     }
     default:

@@ -27,6 +27,10 @@ const ChatRoom = () => {
     fetchMessages(true, 25, 0);
   }, [currChannel]);
 
+  useEffect(() => {
+    setTimeout(() => scrollToBottom(), 100);
+  }, [msgs]);
+
   const fetchMessages = (firstTime, limit, offset) => {
     if (isTop && !firstTime) {
       return;
@@ -81,7 +85,7 @@ const ChatRoom = () => {
       ));
 
   const scrollToBottom = () => {
-    if (messagesEndRef) {
+    if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({
         behavior: "smooth",
         block: "end",

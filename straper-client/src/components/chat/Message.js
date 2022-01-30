@@ -56,16 +56,20 @@ const Message = ({ msg, creatorRight }) => {
             isCreator() && creatorRight ? "items-end" : "items-start"
           }`}
         >
-          <span className="inline-block text-gray-300 pb-3">
+          <span
+            className={
+              "inline-block pb-3 " + creatorRight ? "" : "text-gray-300"
+            }
+          >
             {msg?.user_detail.username}
           </span>
 
           {msg.type === "MESSAGE" ? (
             <p
               className={`px-3 py-2 rounded-lg inline-block text-white max-w-sm break-words ${
-                isCreator()
+                isCreator() && creatorRight
                   ? "rounded-br-none bg-indigo-500"
-                  : "rounded-bl-none bg-gray-500"
+                  : "rounded-bl-none bg-gray-500 text-white"
               }`}
             >
               {msg.content}

@@ -153,6 +153,12 @@ func (s *service) handleBoardComment(ctx context.Context, newId string, msg *ws.
 	if err := s.store.CreateCardComment(ctx, &comment); err != nil {
 		return &ws.Message{}, err
 	}
+	userDetail, err := s.store.GetUserInfoByUserId(ctx, comment.CreatorId)
+	if err != nil {
+		s.log.Warn("Fail to fetch user data.", zap.Error(err))
+		return &ws.Message{}, err
+	}
+	comment.UserDetail = userDetail
 	newMsg, err := json.Marshal(comment)
 	if err != nil {
 		return &ws.Message{}, err
@@ -288,6 +294,12 @@ func (s *service) GetCardComments(ctx context.Context, cardId string, limit, off
 			}
 			msg.FileBytes = bytesData
 			msgs[i] = msg
+		}
+		userDetail, err := s.store.GetUserInfoByUserId(ctx, msg.CreatorId)
+		if err != nil {
+			return []CardComment{}, err
+		} else {
+			msgs[i].UserDetail = userDetail
 		}
 	}
 	return msgs, nil
