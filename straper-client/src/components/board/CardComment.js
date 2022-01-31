@@ -1,16 +1,25 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import api from "../../axios/api";
 import useCommentStore from "../../store/commentStore";
 import Message from "../chat/Message";
 import CommentInput from "./CommentInput";
 
 const CardComment = ({ cardId }) => {
+  const [offset, setOffset] = useState(0);
+  const [isBottom, setIsBottom] = useState(false);
   const comments = useCommentStore((state) => state.comments);
   const commentsRef = useRef(null);
   const commentsStartRef = useRef(null);
 
-  useEffect(() => {
-    setTimeout(() => scrollToTop(), 100);
-  }, [comments]);
+  const clearComments = useCommentStore((state) => state.clearComments);
+  const pushComments = useCommentStore((state) => state.pushComments);
+
+  useEffect(async () => {
+    setOffset(0);
+    setIsBottom(false);
+    await fetchComments(true, 10, 0);
+    scrollToTop();
+  }, []);
 
   const scrollToTop = () => {
     if (commentsStartRef.current) {
@@ -21,10 +30,31 @@ const CardComment = ({ cardId }) => {
     }
   };
 
+  const fetchComments = async (firstTime, limit, offset) => {
+    if (isBottom && !firstTime) {
+      return;
+    }
+    api
+      .get(
+        `/protected/board/card/comments/${cardId}?limit=${limit}&offset=${offset}`
+      )
+      .then((res) => {
+        const fetchedData = res.data.Data;
+        if (!fetchedData && !firstTime) {
+          setIsBottom(true);
+          return;
+        } else if (firstTime) {
+          clearComments();
+        }
+        pushComments(fetchedData);
+        setOffset((offset) => offset + 10);
+      });
+  };
+
   const handleScroll = () => {
-    // if (messagesRef.current.scrollTop === 0) {
-    //   fetchMessages(false, 25, offset);
-    // }
+    if (commentsRef.current.scrollTop == commentsRef.current.scrollTopMax) {
+      fetchComments(false, 10, offset);
+    }
   };
 
   return (
