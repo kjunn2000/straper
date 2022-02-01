@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 
 	"github.com/kjunn2000/straper/chat-ws/configs"
 	"go.uber.org/zap"
@@ -90,14 +91,16 @@ func (as *service) Login(ctx context.Context, req LoginRequest) (LoginResponse, 
 func (as *service) RefreshToken(ctx context.Context, refreshToken string) (string, error) {
 	payload, err := as.tokenMaker.VerifyToken(refreshToken)
 	if err != nil {
+		fmt.Println("invalid refresh token")
 		return "", err
 	}
 
 	accessToken, err := as.tokenMaker.CreateToken(payload.UserId, payload.Username, as.config.AccessTokenDuration)
 	if err != nil {
+		fmt.Println("fail to create token")
 		return "", err
 	}
-
+	fmt.Println(accessToken)
 	return accessToken, nil
 }
 

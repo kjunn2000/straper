@@ -38,6 +38,7 @@ func (maker *PasetoMaker) VerifyToken(token string) (*Payload, error) {
 	if err != nil {
 		return nil, ErrInvalidToken
 	}
+	fmt.Println(payload.ExpiredAt)
 	err = payload.Valid()
 	if err != nil {
 		return nil, err

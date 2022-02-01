@@ -57,6 +57,14 @@ const CardComment = ({ cardId }) => {
     }
   };
 
+  const handleEditComment = () => {
+    console.log("editing comment...");
+  };
+
+  const handleDeleteComment = () => {
+    console.log("deleting comment...");
+  };
+
   return (
     <div className="flex flex-col space-y-5">
       <CommentInput cardId={cardId} />
@@ -69,7 +77,12 @@ const CardComment = ({ cardId }) => {
         {comments &&
           comments.length > 1 &&
           comments.map((msg) => (
-            <Message key={msg.comment_id} msg={msg} creatorRight={false} />
+            <Message
+              key={msg.comment_id}
+              msg={msg}
+              editMsg={handleEditComment}
+              deleteMsg={handleDeleteComment}
+            />
           ))}
       </div>
     </div>

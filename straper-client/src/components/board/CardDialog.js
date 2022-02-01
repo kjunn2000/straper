@@ -219,7 +219,7 @@ const CardDialog = ({ open, closeModal, card }) => {
                       <DatePicker
                         selected={dueDate}
                         onChange={(date) => handleDueDateUpdate(date)}
-                        className="p-1 rounded-lg hover:bg-gray-300"
+                        className="p-1 rounded-lg bg-gray-200"
                       />
                     </div>
                     <div>

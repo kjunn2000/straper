@@ -7,8 +7,9 @@ import {
 } from "../../service/file";
 import useIdentityStore from "../../store/identityStore";
 import FileMessage from "./FileMessage";
+import MessageMenu from "../board/MessageMenu";
 
-const Message = ({ msg, creatorRight }) => {
+const Message = ({ msg, editMsg, deleteMsg }) => {
   const identity = useIdentityStore((state) => state.identity);
   const [file, setFile] = useState({});
 
@@ -46,28 +47,26 @@ const Message = ({ msg, creatorRight }) => {
     <div className="chat-message">
       <div
         className={`flex ${
-          isCreator() && creatorRight
-            ? "items-end justify-end"
-            : "items-start justify-start"
+          isCreator() ? "items-end justify-end" : "items-start justify-start"
         }`}
       >
         <div
           className={`flex flex-col max-w-xs mx-2 group ${
-            isCreator() && creatorRight ? "items-end" : "items-start"
+            isCreator() ? "items-end" : "items-start"
           }`}
         >
-          <span
-            className={
-              "inline-block pb-3 " + creatorRight ? "" : "text-gray-300"
-            }
-          >
-            {msg?.user_detail.username}
-          </span>
+          {isCreator() ? (
+            <MessageMenu editMsg={editMsg} deleteMsg={deleteMsg} />
+          ) : (
+            <span className={"inline-block pb-3 text-gray-400 font-semibold"}>
+              {msg?.user_detail.username}
+            </span>
+          )}
 
           {msg.type === "MESSAGE" ? (
             <p
               className={`px-3 py-2 rounded-lg inline-block text-white max-w-sm break-words ${
-                isCreator() && creatorRight
+                isCreator()
                   ? "rounded-br-none bg-indigo-500"
                   : "rounded-bl-none bg-gray-500 text-white"
               }`}
@@ -83,9 +82,9 @@ const Message = ({ msg, creatorRight }) => {
               )}
             </button>
           )}
-          <span className="invisible text-gray-400 group-hover:visible transition duration-150">
-            {convertToDateString(msg.created_date)}
-          </span>
+          <div className="flex flex-col invisible text-gray-400 group-hover:visible transition duration-150">
+            <div>{convertToDateString(msg.created_date)}</div>
+          </div>
         </div>
       </div>
     </div>

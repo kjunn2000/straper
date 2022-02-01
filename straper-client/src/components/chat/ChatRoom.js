@@ -76,12 +76,25 @@ const ChatRoom = () => {
     </div>
   );
 
+  const handleEditMessage = () => {
+    console.log("editing message...");
+  };
+
+  const handleDeleteMessage = () => {
+    console.log("deleting message...");
+  };
+
   const loadMessages = (msgs) =>
     msgs
       .slice(0)
       .reverse()
       .map((msg) => (
-        <Message key={msg.message_id} msg={msg} creatorRight={true} />
+        <Message
+          key={msg.message_id}
+          msg={msg}
+          editMsg={handleEditMessage}
+          deleteMsg={handleDeleteMessage}
+        />
       ));
 
   const scrollToBottom = () => {

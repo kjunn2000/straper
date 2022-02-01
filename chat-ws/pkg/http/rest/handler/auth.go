@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 
@@ -55,6 +56,7 @@ func (server *Server) RefreshToken(as auth.Service) func(http.ResponseWriter, *h
 	return func(w http.ResponseWriter, r *http.Request) {
 		rt, err := r.Cookie("refresh_token")
 		if err != nil {
+			fmt.Println("not refresh token")
 			rest.AddResponseToResponseWritter(w, nil, err.Error())
 			return
 		}
@@ -66,6 +68,7 @@ func (server *Server) RefreshToken(as auth.Service) func(http.ResponseWriter, *h
 		}
 		ats, err := as.RefreshToken(r.Context(), v)
 		if err != nil {
+			fmt.Println("fail to refresh token")
 			rest.AddResponseToResponseWritter(w, nil, err.Error())
 			return
 		}
