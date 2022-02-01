@@ -38,7 +38,7 @@ const CommentInput = ({ cardId, scrollToTop }) => {
       payload.file_type = msg.type;
       payload.file_bytes = Array.from(result);
     }
-    sendBoardMsg("BOARD_CARD_COMMENT", board.workspace_id, payload);
+    sendBoardMsg("BOARD_CARD_ADD_COMMENT", board.workspace_id, payload);
     inputRef.current.value = "";
   };
 

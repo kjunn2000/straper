@@ -55,7 +55,7 @@ const sendMsg = async (type, channelId, creatorId, content) => {
   }
   console.log("Sending msg...");
   const dto = {
-    type: "CHAT_MESSAGE",
+    type: "CHAT_ADD_MESSAGE",
     payload,
     sender_id: creatorId,
   };

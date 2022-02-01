@@ -25,4 +25,13 @@ const (
 	BoardCardAddChecklistItem    = "BOARD_CARD_ADD_CHECKLIST_ITEM"
 	BoardCardUpdateChecklistItem = "BOARD_CARD_UPDATE_CHECKLIST_ITEM"
 	BoardCardDeleteChecklistItem = "BOARD_CARD_DELETE_CHECKLIST_ITEM"
+
+	BoardCardAddComment    = "BOARD_CARD_ADD_COMMENT"
+	BoardCardEditComment   = "BOARD_CARD_EDIT_COMMENT"
+	BoardCardDeleteComment = "BOARD_CARD_DELETE_COMMENT"
+)
+
+const (
+	TypeMessage = "MESSAGE"
+	TypeFile    = "FILE"
 )

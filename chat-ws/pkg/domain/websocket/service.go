@@ -23,7 +23,7 @@ type Service interface {
 
 type HandlingService interface {
 	HandleBroadcast(ctx context.Context, msg *Message, publishPubSub func(context.Context, *Message) error) error
-	GetBoarcastUserListByMessageType(ctx context.Context, msg *Message) ([]UserData, error)
+	GetBroadcastUserListByMessageType(ctx context.Context, msg *Message) ([]UserData, error)
 }
 
 type PubSub interface {
@@ -59,7 +59,7 @@ func (s *service) SetUpWSServer(ctx context.Context) error {
 			case user := <-s.wsServer.unregister:
 				s.handleUnregister(ctx, user.UserId)
 			case msg := <-s.wsServer.broadcast:
-				if msg.MessageType == ChatMessage || msg.MessageType == BoardCardComment {
+				if strings.HasPrefix(msg.MessageType, "CHAT") {
 					if err := s.chattingService.HandleBroadcast(ctx, msg, s.publishPubSub); err != nil {
 						return err
 					}
@@ -78,56 +78,6 @@ func (s *service) SetUpUserConnection(ctx context.Context, userId string, conn *
 	user := NewUser(userId, conn, s.wsServer)
 	s.wsServer.register <- user
 	go user.readMsg(ctx, s.log)
-}
-
-func (s *service) handleRegister(ctx context.Context, user *User) {
-	s.wsServer.activeUser[user.UserId] = user
-}
-
-func (s *service) handleUnregister(ctx context.Context, userId string) {
-	delete(s.wsServer.activeUser, userId)
-}
-
-func (s *service) handleBroadcast(ctx context.Context, msg *Message) error {
-	userList, err := s.getBoarcastUserList(ctx, msg)
-	if err != nil {
-		return err
-	}
-	for _, user := range userList {
-		if strings.HasPrefix(msg.MessageType, "BOARD_ORDER") &&
-			user.UserId == msg.SenderId {
-			continue
-		}
-		u, ok := s.wsServer.activeUser[user.UserId]
-		if !ok {
-			continue
-		}
-		err := s.broadcastMessage(ctx, u.UserId, u.conn, msg)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (s *service) getBoarcastUserList(ctx context.Context, msg *Message) ([]UserData, error) {
-	if strings.HasPrefix(msg.MessageType, "CHAT") {
-		return s.chattingService.GetBoarcastUserListByMessageType(ctx, msg)
-	} else if strings.HasPrefix(msg.MessageType, "BOARD") {
-		return s.broadcastService.GetBoarcastUserListByMessageType(ctx, msg)
-	} else {
-		return []UserData{}, errors.New("invalid.message.type")
-	}
-}
-
-func (s *service) broadcastMessage(ctx context.Context, userId string, conn *websocket.Conn, msg *Message) error {
-	err := conn.WriteJSON(msg)
-	if err != nil {
-		s.log.Info("Unable to write json message.")
-		return err
-	}
-	s.log.Info("Sent message to user id : ", zap.String("user_id", userId))
-	return nil
 }
 
 func (s *service) subscribePubSub(ctx context.Context) error {
@@ -158,5 +108,55 @@ func (s *service) publishPubSub(ctx context.Context, msg *Message) error {
 		s.log.Warn("Fail to publish message to pub sub server", zap.Error(err))
 		return err
 	}
+	return nil
+}
+
+func (s *service) handleRegister(ctx context.Context, user *User) {
+	s.wsServer.activeUser[user.UserId] = user
+}
+
+func (s *service) handleUnregister(ctx context.Context, userId string) {
+	delete(s.wsServer.activeUser, userId)
+}
+
+func (s *service) handleBroadcast(ctx context.Context, msg *Message) error {
+	userList, err := s.getBroadcastUserList(ctx, msg)
+	if err != nil {
+		return err
+	}
+	for _, user := range userList {
+		if strings.HasPrefix(msg.MessageType, "BOARD_ORDER") &&
+			user.UserId == msg.SenderId {
+			continue
+		}
+		u, ok := s.wsServer.activeUser[user.UserId]
+		if !ok {
+			continue
+		}
+		err := s.broadcastMessage(ctx, u.UserId, u.conn, msg)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (s *service) getBroadcastUserList(ctx context.Context, msg *Message) ([]UserData, error) {
+	if strings.HasPrefix(msg.MessageType, "CHAT") {
+		return s.chattingService.GetBroadcastUserListByMessageType(ctx, msg)
+	} else if strings.HasPrefix(msg.MessageType, "BOARD") {
+		return s.broadcastService.GetBroadcastUserListByMessageType(ctx, msg)
+	} else {
+		return []UserData{}, errors.New("invalid.message.type")
+	}
+}
+
+func (s *service) broadcastMessage(ctx context.Context, userId string, conn *websocket.Conn, msg *Message) error {
+	err := conn.WriteJSON(msg)
+	if err != nil {
+		s.log.Info("Unable to write json message.")
+		return err
+	}
+	s.log.Info("Sent message to user id : ", zap.String("user_id", userId))
 	return nil
 }

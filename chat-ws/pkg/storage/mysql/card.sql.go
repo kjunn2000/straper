@@ -2,7 +2,6 @@ package mysql
 
 import (
 	"context"
-	"fmt"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/board"
@@ -64,8 +63,6 @@ func (q *Queries) UpdateCard(ctx context.Context, params board.UpdateCardParams)
 }
 
 func (q *Queries) UpdateCardDueDate(ctx context.Context, params board.UpdateCardDueDateParams) error {
-	fmt.Println(params.DueDate)
-	fmt.Println(params.CardId)
 	sql, args, err := sq.Update("card").
 		Set("due_date", params.DueDate).
 		Where(sq.Eq{"card_id": params.CardId}).ToSql()
@@ -184,7 +181,6 @@ func (q *Queries) GetChecklistItemsByCardId(ctx context.Context, cardId string) 
 }
 
 func (q *Queries) CreateChecklistItem(ctx context.Context, checklistItem board.CardChecklistItemDto) error {
-	fmt.Println(checklistItem)
 	sql, args, err := sq.Insert("checklist_item").
 		Columns("item_id", "content", "is_checked", "card_id").
 		Values(checklistItem.ItemId, checklistItem.Content, checklistItem.IsChecked, checklistItem.CardId).

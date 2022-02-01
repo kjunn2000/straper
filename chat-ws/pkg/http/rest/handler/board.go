@@ -6,15 +6,14 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/board"
-	"github.com/kjunn2000/straper/chat-ws/pkg/domain/chatting"
 	"github.com/kjunn2000/straper/chat-ws/pkg/http/rest"
 	"github.com/kjunn2000/straper/chat-ws/pkg/http/rest/middleware"
 )
 
-func (server *Server) SetUpBoardRouter(mr *mux.Router, bs board.Service, cs chatting.Service) {
+func (server *Server) SetUpBoardRouter(mr *mux.Router, bs board.Service) {
 	br := mr.PathPrefix("/protected/board").Subrouter()
 	br.HandleFunc("/{workspace_id}", server.GetBoardData(bs)).Methods("GET")
-	br.HandleFunc("/card/comments/{card_id}", server.GetCardComments(cs)).Methods("GET")
+	br.HandleFunc("/card/comments/{card_id}", server.GetCardComments(bs)).Methods("GET")
 	br.Use(middleware.TokenVerifier(server.tokenMaker))
 }
 
@@ -35,7 +34,7 @@ func (server *Server) GetBoardData(bs board.Service) func(http.ResponseWriter, *
 	}
 }
 
-func (server *Server) GetCardComments(cs chatting.Service) func(w http.ResponseWriter, r *http.Request) {
+func (server *Server) GetCardComments(bs board.Service) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		cardId, ok := vars["card_id"]
@@ -53,7 +52,7 @@ func (server *Server) GetCardComments(cs chatting.Service) func(w http.ResponseW
 			rest.AddResponseToResponseWritter(w, nil, "invalid.offset")
 			return
 		}
-		msgs, err := cs.GetCardComments(r.Context(), cardId, limit, offset)
+		msgs, err := bs.GetCardComments(r.Context(), cardId, limit, offset)
 		if err != nil {
 			rest.AddResponseToResponseWritter(w, nil, err.Error())
 			return

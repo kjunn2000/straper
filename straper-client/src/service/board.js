@@ -60,7 +60,7 @@ export const handleWsBoardMsg = (msg) => {
       boardState.deleteChecklistItem(msg.payload);
       break;
     }
-    case "BOARD_CARD_COMMENT": {
+    case "BOARD_CARD_ADD_COMMENT": {
       commentState.pushComment(msg.payload);
       break;
     }

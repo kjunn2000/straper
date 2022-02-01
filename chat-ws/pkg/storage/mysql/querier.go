@@ -21,7 +21,8 @@ type Querier interface {
 	GetUserDetailByUsername(ctx context.Context, username string) (account.UserDetail, error)
 	GetUserDetailByUserId(ctx context.Context, userId string) (account.UserDetail, error)
 	GetUserInfoListByWorkspaceId(ctx context.Context, workspaceId string) ([]account.UserInfo, error)
-	GetUserInfoByUserId(ctx context.Context, userId string) (chatting.UserDetail, error)
+	GetChatUserInfoByUserId(ctx context.Context, userId string) (chatting.UserDetail, error)
+	GetBoardUserInfoByUserId(ctx context.Context, userId string) (board.UserDetail, error)
 	GetUserDetailByEmail(ctx context.Context, email string) (account.UserDetail, error)
 	GetUserCredentialByUsername(ctx context.Context, username string) (auth.User, error)
 	GetUserCredentialByUserId(ctx context.Context, userId string) (auth.User, error)
@@ -103,6 +104,6 @@ type Querier interface {
 	UpdateChecklistItem(ctx context.Context, checklistItem board.CardChecklistItemDto) error
 	DeleteChecklistItem(ctx context.Context, itemId string) error
 
-	CreateCardComment(ctx context.Context, comment *chatting.CardComment) error
-	GetCardComments(ctx context.Context, cardId string, limit, offset uint64) ([]chatting.CardComment, error)
+	CreateCardComment(ctx context.Context, comment *board.CardComment) error
+	GetCardComments(ctx context.Context, cardId string, limit, offset uint64) ([]board.CardComment, error)
 }

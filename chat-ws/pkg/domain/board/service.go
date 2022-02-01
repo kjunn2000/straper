@@ -3,30 +3,36 @@ package board
 import (
 	"context"
 	"database/sql"
-	"encoding/json"
-	"time"
+	"errors"
 
-	"github.com/google/uuid"
 	ws "github.com/kjunn2000/straper/chat-ws/pkg/domain/websocket"
 	"go.uber.org/zap"
 )
 
 type Service interface {
-	GetTaskBoardData(ctx context.Context, workspaceId string) (TaskBoardDataResponse, error)
-	getCardMember(ctx context.Context, cardId string) ([]string, error)
 	HandleBroadcast(ctx context.Context, msg *ws.Message, publishPubSub func(context.Context, *ws.Message) error) error
-	GetBoarcastUserListByMessageType(ctx context.Context, msg *ws.Message) ([]ws.UserData, error)
+	GetTaskBoardData(ctx context.Context, workspaceId string) (TaskBoardDataResponse, error)
+	GetBroadcastUserListByMessageType(ctx context.Context, msg *ws.Message) ([]ws.UserData, error)
+	GetCardComments(ctx context.Context, cardId string, limit, offset uint64) ([]CardComment, error)
+}
+
+type SeaweedfsClient interface {
+	SaveSeaweedfsFile(ctx context.Context, fileBytes []byte) (string, error)
+	GetSeaweedfsFile(ctx context.Context, fid string) ([]byte, error)
+	DeleteSeaweedfsFile(ctx context.Context, fid string) error
 }
 
 type service struct {
 	log   *zap.Logger
 	store Repository
+	sc    SeaweedfsClient
 }
 
-func NewService(log *zap.Logger, store Repository) *service {
+func NewService(log *zap.Logger, store Repository, sc SeaweedfsClient) *service {
 	return &service{
 		log:   log,
 		store: store,
+		sc:    sc,
 	}
 }
 
@@ -146,6 +152,22 @@ func (service *service) HandleBroadcast(ctx context.Context, msg *ws.Message, pu
 		if err := service.handleCardDeleteChecklistItem(ctx, bytePayload); err != nil {
 			return err
 		}
+	case BoardCardAddComment:
+		if newPayload, err := service.handleBoardAddComment(ctx, bytePayload); err != nil {
+			return err
+		} else {
+			if err := msg.Payload.UnmarshalJSON(newPayload); err != nil {
+				return err
+			}
+		}
+	case BoardCardEditComment:
+		if err := service.handleCardDeleteChecklistItem(ctx, bytePayload); err != nil {
+			return err
+		}
+	case BoardCardDeleteComment:
+		if err := service.handleCardDeleteChecklistItem(ctx, bytePayload); err != nil {
+			return err
+		}
 	}
 	if err := publishPubSub(ctx, msg); err != nil {
 		return err
@@ -153,190 +175,32 @@ func (service *service) HandleBroadcast(ctx context.Context, msg *ws.Message, pu
 	return nil
 }
 
-func (s *service) GetBoarcastUserListByMessageType(ctx context.Context, msg *ws.Message) ([]ws.UserData, error) {
+func (s *service) GetBroadcastUserListByMessageType(ctx context.Context, msg *ws.Message) ([]ws.UserData, error) {
 	return s.store.GetUserListByWorkspaceId(ctx, msg.WorkspaceId)
 }
 
-func (service *service) handleAddList(ctx context.Context, bytePayload []byte) ([]byte, error) {
-	var taskList TaskList
-	if err := json.Unmarshal(bytePayload, &taskList); err != nil {
-		return []byte{}, err
+func (s *service) GetCardComments(ctx context.Context, cardId string, limit, offset uint64) ([]CardComment, error) {
+	msgs, err := s.store.GetCardComments(ctx, cardId, limit, offset)
+	if err == sql.ErrNoRows {
+		return []CardComment{}, errors.New("no.card.comment.available")
+	} else if err != nil {
+		return []CardComment{}, err
 	}
-	listId, _ := uuid.NewRandom()
-	taskList.ListId = listId.String()
-	if err := service.store.CreateTaskList(ctx, taskList); err != nil {
-		return []byte{}, err
-	}
-	newPayload, _ := json.Marshal(taskList)
-	return newPayload, nil
-}
-
-func (service *service) handleUpdateList(ctx context.Context, bytePayload []byte) error {
-	var updateListParams UpdateListParams
-	if err := json.Unmarshal(bytePayload, &updateListParams); err != nil {
-		return err
-	}
-	return service.store.UpdateTaskList(ctx, updateListParams)
-}
-
-func (service *service) handleDeleteList(ctx context.Context, bytePayload []byte) error {
-	var listId string
-	if err := json.Unmarshal(bytePayload, &listId); err != nil {
-		return err
-	}
-	return service.store.DeleteTaskList(ctx, listId)
-}
-
-func (service *service) handleOrderList(ctx context.Context, bytePayload []byte) error {
-	var orderListParams OrderListParams
-	if err := json.Unmarshal(bytePayload, &orderListParams); err != nil {
-		return err
-	}
-	taskLists, err := service.store.GetTaskListsByBoardId(ctx, orderListParams.BoardId)
-	if err != nil {
-		return err
-	}
-	target := taskLists[orderListParams.OldListIndex]
-	taskLists = append(taskLists[:orderListParams.OldListIndex], taskLists[orderListParams.OldListIndex+1:]...)
-	taskLists = append(taskLists[:orderListParams.NewListIndex],
-		append([]TaskList{target}, taskLists[orderListParams.NewListIndex:]...)...)
-	for i, taskList := range taskLists {
-		if err := service.store.UpdateTaskListOrder(ctx, taskList.ListId, i+1); err != nil {
-			return err
+	for i, msg := range msgs {
+		if msg.Type == TypeFile {
+			bytesData, err := s.sc.GetSeaweedfsFile(ctx, msg.Content)
+			if err != nil {
+				return []CardComment{}, err
+			}
+			msg.FileBytes = bytesData
+			msgs[i] = msg
 		}
-	}
-	return nil
-}
-
-func (service *service) handleAddCard(ctx context.Context, bytePayload []byte) ([]byte, error) {
-	var card Card
-	if err := json.Unmarshal(bytePayload, &card); err != nil {
-		return []byte{}, err
-	}
-	cardId, _ := uuid.NewRandom()
-	card.CardId = cardId.String()
-	card.Priority = NoPriority
-	card.CreatedDate = time.Now()
-	card.DueDate = time.Now().Add(time.Hour * 24 * 7)
-	if err := service.store.CreateCard(ctx, card); err != nil {
-		return []byte{}, err
-	}
-	newPayload, _ := json.Marshal(card)
-	return newPayload, nil
-}
-
-func (service *service) handleUpdateCard(ctx context.Context, bytePayload []byte) error {
-	var updateCardParams UpdateCardParams
-	if err := json.Unmarshal(bytePayload, &updateCardParams); err != nil {
-		return err
-	}
-	return service.store.UpdateCard(ctx, updateCardParams)
-}
-
-func (service *service) handleUpdateCardDueDate(ctx context.Context, bytePayload []byte) error {
-	var updateCardDueDateParams UpdateCardDueDateParams
-	if err := json.Unmarshal(bytePayload, &updateCardDueDateParams); err != nil {
-		return err
-	}
-	return service.store.UpdateCardDueDate(ctx, updateCardDueDateParams)
-}
-
-func (service *service) handleDeleteCard(ctx context.Context, bytePayload []byte) error {
-	var deleteCardParams DeleteCardParams
-	if err := json.Unmarshal(bytePayload, &deleteCardParams); err != nil {
-		return err
-	}
-	return service.store.DeleteCard(ctx, deleteCardParams.CardId)
-}
-
-func (service *service) handleOrderCard(ctx context.Context, bytePayload []byte) error {
-	var orderCardParams OrderCardParams
-	if err := json.Unmarshal(bytePayload, &orderCardParams); err != nil {
-		return err
-	}
-	cardList, err := service.store.GetCardListByListId(ctx, orderCardParams.SourceListId)
-	if err != nil {
-		return err
-	}
-
-	target := cardList[orderCardParams.OldCardIndex]
-
-	cardList = append(cardList[:orderCardParams.OldCardIndex], cardList[orderCardParams.OldCardIndex+1:]...)
-	if orderCardParams.SourceListId == orderCardParams.DestListId {
-		cardList = append(cardList[:orderCardParams.NewCardIndex],
-			append([]Card{target}, cardList[orderCardParams.NewCardIndex:]...)...)
-	}
-	if err := service.updateCardListOrderIndex(ctx, cardList, orderCardParams.SourceListId); err != nil {
-		return err
-	}
-
-	if orderCardParams.SourceListId != orderCardParams.DestListId {
-		destCardList, err := service.store.GetCardListByListId(ctx, orderCardParams.DestListId)
+		userDetail, err := s.store.GetBoardUserInfoByUserId(ctx, msg.CreatorId)
 		if err != nil {
-			return err
-		}
-		destCardList = append(destCardList[:orderCardParams.NewCardIndex],
-			append([]Card{target}, destCardList[orderCardParams.NewCardIndex:]...)...)
-		if err := service.updateCardListOrderIndex(ctx, destCardList, orderCardParams.DestListId); err != nil {
-			return err
+			return []CardComment{}, err
+		} else {
+			msgs[i].UserDetail = userDetail
 		}
 	}
-	return nil
-}
-
-func (service *service) updateCardListOrderIndex(ctx context.Context, cardList []Card, listId string) error {
-	for i, card := range cardList {
-		if err := service.store.UpdateCardOrder(ctx, card.CardId, i+1, listId, card.ListId != listId); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (service *service) handleCardAddMembers(ctx context.Context, bytePayload []byte) error {
-	var cardAddMemberParams CardAddMembersParams
-	if err := json.Unmarshal(bytePayload, &cardAddMemberParams); err != nil {
-		return err
-	}
-	return service.store.AddUserListToCard(ctx, cardAddMemberParams.CardId, cardAddMemberParams.MemberList)
-}
-
-func (service *service) handleCardRemoveMember(ctx context.Context, bytePayload []byte) error {
-	var cardRemoveMemberParams CardRemoveMemberParams
-	if err := json.Unmarshal(bytePayload, &cardRemoveMemberParams); err != nil {
-		return err
-	}
-	return service.store.DeleteUserFromCard(ctx, cardRemoveMemberParams.CardId, cardRemoveMemberParams.MemberId)
-}
-
-func (service *service) handleCardAddChecklistItem(ctx context.Context, bytePayload []byte) ([]byte, error) {
-	var cardCheckListItemDto CardChecklistItemDto
-	if err := json.Unmarshal(bytePayload, &cardCheckListItemDto); err != nil {
-		return []byte{}, err
-	}
-	itemId, _ := uuid.NewUUID()
-	cardCheckListItemDto.ItemId = itemId.String()
-	cardCheckListItemDto.IsChecked = false
-	err := service.store.CreateChecklistItem(ctx, cardCheckListItemDto)
-	if err != nil {
-		return []byte{}, err
-	}
-	newPayload, _ := json.Marshal(cardCheckListItemDto)
-	return newPayload, nil
-}
-
-func (service *service) handleCardUpdateChecklistItem(ctx context.Context, bytePayload []byte) error {
-	var cardCheckListItemDto CardChecklistItemDto
-	if err := json.Unmarshal(bytePayload, &cardCheckListItemDto); err != nil {
-		return err
-	}
-	return service.store.UpdateChecklistItem(ctx, cardCheckListItemDto)
-}
-
-func (service *service) handleCardDeleteChecklistItem(ctx context.Context, bytePayload []byte) error {
-	var cardDeleteChecklistParams CardDeleteChecklistItemParams
-	if err := json.Unmarshal(bytePayload, &cardDeleteChecklistParams); err != nil {
-		return err
-	}
-	return service.store.DeleteChecklistItem(ctx, cardDeleteChecklistParams.ItemId)
+	return msgs, nil
 }

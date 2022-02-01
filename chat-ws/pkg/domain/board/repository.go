@@ -31,4 +31,9 @@ type Repository interface {
 	CreateChecklistItem(ctx context.Context, checklistItem CardChecklistItemDto) error
 	UpdateChecklistItem(ctx context.Context, checklistItem CardChecklistItemDto) error
 	DeleteChecklistItem(ctx context.Context, itemId string) error
+
+	CreateCardComment(ctx context.Context, comment *CardComment) error
+	GetCardComments(ctx context.Context, cardId string, limit, offset uint64) ([]CardComment, error)
+
+	GetBoardUserInfoByUserId(ctx context.Context, userId string) (UserDetail, error)
 }
