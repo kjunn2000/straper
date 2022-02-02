@@ -1,8 +1,7 @@
 import useIdentityStore from "../store/identityStore";
 import { getLocalStorage } from "../store/localStorage";
-import useMessageStore from "../store/messageStore";
 import { handleWsBoardMsg } from "./board";
-import { getAsByteArray } from "./file";
+import { handleWsChatMsg } from "./chat";
 
 var socket;
 
@@ -22,7 +21,7 @@ const connect = () => {
     const data = JSON.parse(msg.data);
     console.log(data);
     if (data.type.startsWith("CHAT")) {
-      useMessageStore.getState().pushMessage(data.payload);
+      handleWsChatMsg(data);
     } else {
       handleWsBoardMsg(data);
     }
@@ -39,25 +38,13 @@ const connect = () => {
   };
 };
 
-const sendMsg = async (type, channelId, creatorId, content) => {
-  const payload = {
+const sendChatMsg = (type, channelId, payload) => {
+  const senderId = useIdentityStore.getState().identity.user_id;
+  const dto = {
     type,
     channel_id: channelId,
-    creator_id: creatorId,
-  };
-  if (type === "MESSAGE") {
-    payload.content = content;
-  } else if (type === "FILE") {
-    const result = await getAsByteArray(content);
-    payload.file_name = content.name;
-    payload.file_type = content.type;
-    payload.file_bytes = Array.from(result);
-  }
-  console.log("Sending msg...");
-  const dto = {
-    type: "CHAT_ADD_MESSAGE",
     payload,
-    sender_id: creatorId,
+    sender_id: senderId,
   };
   console.log(dto);
   socket.send(JSON.stringify(dto));
@@ -74,5 +61,4 @@ const sendBoardMsg = (type, workspaceId, payload) => {
   console.log(dto);
   socket.send(JSON.stringify(dto));
 };
-
-export { connect, sendMsg, sendBoardMsg };
+export { connect, sendChatMsg, sendBoardMsg };

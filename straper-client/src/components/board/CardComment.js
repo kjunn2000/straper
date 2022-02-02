@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import api from "../../axios/api";
+import { sendBoardMsg } from "../../service/websocket";
+import useBoardStore from "../../store/boardStore";
 import useCommentStore from "../../store/commentStore";
 import Message from "../chat/Message";
 import CommentInput from "./CommentInput";
@@ -11,6 +13,7 @@ const CardComment = ({ cardId }) => {
   const commentsRef = useRef(null);
   const commentsStartRef = useRef(null);
 
+  const board = useBoardStore((state) => state.board);
   const clearComments = useCommentStore((state) => state.clearComments);
   const pushComments = useCommentStore((state) => state.pushComments);
 
@@ -52,7 +55,7 @@ const CardComment = ({ cardId }) => {
   };
 
   const handleScroll = () => {
-    if (commentsRef.current.scrollTop == commentsRef.current.scrollTopMax) {
+    if (commentsRef.current.scrollTop === commentsRef.current.scrollTopMax) {
       fetchComments(false, 10, offset);
     }
   };
@@ -61,8 +64,13 @@ const CardComment = ({ cardId }) => {
     console.log("editing comment...");
   };
 
-  const handleDeleteComment = () => {
-    console.log("deleting comment...");
+  const handleDeleteComment = (commentId, type, content) => {
+    const payload = {
+      comment_id: commentId,
+      type,
+      fid: content,
+    };
+    sendBoardMsg("BOARD_CARD_DELETE_COMMENT", board.workspace_id, payload);
   };
 
   return (
@@ -81,7 +89,9 @@ const CardComment = ({ cardId }) => {
               key={msg.comment_id}
               msg={msg}
               editMsg={handleEditComment}
-              deleteMsg={handleDeleteComment}
+              deleteMsg={() =>
+                handleDeleteComment(msg.comment_id, msg.type, msg.content)
+              }
             />
           ))}
       </div>

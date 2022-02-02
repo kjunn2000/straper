@@ -165,7 +165,7 @@ func (service *service) HandleBroadcast(ctx context.Context, msg *ws.Message, pu
 			return err
 		}
 	case BoardCardDeleteComment:
-		if err := service.handleCardDeleteChecklistItem(ctx, bytePayload); err != nil {
+		if err := service.handleCardDeleteComment(ctx, bytePayload); err != nil {
 			return err
 		}
 	}

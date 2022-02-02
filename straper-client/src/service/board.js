@@ -64,6 +64,10 @@ export const handleWsBoardMsg = (msg) => {
       commentState.pushComment(msg.payload);
       break;
     }
+    case "BOARD_CARD_DELETE_COMMENT": {
+      commentState.deleteComment(msg.payload);
+      break;
+    }
     default:
   }
 };

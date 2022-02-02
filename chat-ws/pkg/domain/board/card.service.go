@@ -172,3 +172,16 @@ func (s *service) handleBoardAddComment(ctx context.Context, bytePayload []byte)
 	}
 	return newMsg, nil
 }
+
+func (service *service) handleCardDeleteComment(ctx context.Context, bytePayload []byte) error {
+	var cardDeleteCommentParams CardDeleteCommentParams
+	if err := json.Unmarshal(bytePayload, &cardDeleteCommentParams); err != nil {
+		return err
+	}
+	if cardDeleteCommentParams.Type == TypeFile {
+		if err := service.sc.DeleteSeaweedfsFile(ctx, cardDeleteCommentParams.Fid); err != nil {
+			return err
+		}
+	}
+	return service.store.DeleteCardComment(ctx, cardDeleteCommentParams.CommentId)
+}

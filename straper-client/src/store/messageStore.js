@@ -27,6 +27,17 @@ const useMessageStore = create((set) => ({
       };
     });
   },
+  deleteMessage: ({ message_id }) => {
+    set((state) => {
+      const newMessages = state.messages.filter(
+        (msg) => msg.message_id !== message_id
+      );
+      setLocalStorage("messages", newMessages);
+      return {
+        messages: newMessages,
+      };
+    });
+  },
 }));
 
 export default useMessageStore;

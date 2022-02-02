@@ -42,3 +42,19 @@ func (q *Queries) GetCardComments(ctx context.Context, cardId string, limit, off
 	}
 	return cardComments, nil
 }
+
+func (q *Queries) DeleteCardComment(ctx context.Context, commentId string) error {
+	sql, args, err := sq.Delete("card_comment").
+		Where(sq.Eq{"comment_id": commentId}).
+		ToSql()
+	if err != nil {
+		q.log.Info("Unable to create delete sql.", zap.Error(err))
+		return err
+	}
+	_, err = q.db.Exec(sql, args...)
+	if err != nil {
+		q.log.Info("Failed to delete comment from card.", zap.Error(err))
+		return err
+	}
+	return nil
+}

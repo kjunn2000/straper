@@ -6,10 +6,12 @@ import { ReactComponent as Text } from "../../asset/img/text.svg";
 import useMessageStore from "../../store/messageStore";
 import { useRef } from "react/cjs/react.development";
 import api from "../../axios/api";
+import { sendChatMsg } from "../../service/websocket";
 
 const ChatRoom = () => {
   const [offset, setOffset] = useState(0);
   const [isTop, setIsTop] = useState(false);
+
   const currChannel = useWorkspaceStore((state) => state.currChannel);
   const msgs = useMessageStore((state) => state.messages);
   const pushMessages = useMessageStore((state) => state.pushMessages);
@@ -41,7 +43,7 @@ const ChatRoom = () => {
       )
       .then((res) => {
         const fetchedData = res.data.Data;
-        if (fetchedData.length == 0 && !firstTime) {
+        if (fetchedData.length === 0 && !firstTime) {
           setIsTop(true);
           return;
         } else if (firstTime) {
@@ -80,8 +82,13 @@ const ChatRoom = () => {
     console.log("editing message...");
   };
 
-  const handleDeleteMessage = () => {
-    console.log("deleting message...");
+  const handleDeleteMessage = (messageId, type, content) => {
+    const payload = {
+      message_id: messageId,
+      type,
+      fid: content,
+    };
+    sendChatMsg("CHAT_DELETE_MESSAGE", currChannel.channel_id, payload);
   };
 
   const loadMessages = (msgs) =>
@@ -93,7 +100,9 @@ const ChatRoom = () => {
           key={msg.message_id}
           msg={msg}
           editMsg={handleEditMessage}
-          deleteMsg={handleDeleteMessage}
+          deleteMsg={() =>
+            handleDeleteMessage(msg.message_id, msg.type, msg.content)
+          }
         />
       ));
 
@@ -123,7 +132,7 @@ const ChatRoom = () => {
             </div>
           </div>
         </div>
-        {msgs.length == 0 ? (
+        {msgs.length === 0 ? (
           emptyMessage
         ) : (
           <div

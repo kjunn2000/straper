@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Popover } from "@headlessui/react";
 import { BsPlusLg } from "react-icons/bs";
 import Select from "react-select";
@@ -13,10 +13,6 @@ const AddMember = ({ card }) => {
   const currAccountList = useWorkspaceStore((state) => state.currAccountList);
 
   useEffect(() => {
-    getCardMember();
-  }, [card.member_list]);
-
-  const getCardMember = () => {
     if (!card.member_list) {
       setMemberOptions(convertAccountListToOptions(currAccountList));
       return;
@@ -27,7 +23,7 @@ const AddMember = ({ card }) => {
     });
     setMemberOptions(convertAccountListToOptions(newMemberOptions));
     setToAddMembers([]);
-  };
+  }, [card.member_list, currAccountList]);
 
   const convertAccountListToOptions = (accountList) => {
     return Object.entries(accountList).map((entry) => ({

@@ -69,6 +69,7 @@ type Querier interface {
 	GetChannelMessages(ctx context.Context, channelId string, limit, offset uint64) ([]chatting.Message, error)
 	GetAllChannelMessages(ctx context.Context, channelId string) ([]chatting.Message, error)
 	GetAllChannelMessagesByWorkspaceId(ctx context.Context, workspaceId string) ([]chatting.Message, error)
+	DeleteMessage(ctx context.Context, messageId string) error
 	UpdateChannelAccessTime(ctx context.Context, channelId string, userId string) error
 
 	// websocket
@@ -106,4 +107,5 @@ type Querier interface {
 
 	CreateCardComment(ctx context.Context, comment *board.CardComment) error
 	GetCardComments(ctx context.Context, cardId string, limit, offset uint64) ([]board.CardComment, error)
+	DeleteCardComment(ctx context.Context, commentId string) error
 }

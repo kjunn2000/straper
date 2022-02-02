@@ -58,12 +58,16 @@ func (s *service) HandleBroadcast(ctx context.Context, msg *ws.Message, publishP
 	}
 	switch msg.MessageType {
 	case ChatAddMessage:
-		if newPayload, err := s.handleAddChatMessage(ctx, bytePayload); err != nil {
+		if newPayload, err := s.handleAddMessage(ctx, bytePayload); err != nil {
 			return err
 		} else {
 			if err := msg.Payload.UnmarshalJSON(newPayload); err != nil {
 				return err
 			}
+		}
+	case ChatDeleteMessage:
+		if err := s.handleDeleteMessage(ctx, bytePayload); err != nil {
+			return err
 		}
 	}
 	if err := publishPubSub(ctx, msg); err != nil {
@@ -72,7 +76,7 @@ func (s *service) HandleBroadcast(ctx context.Context, msg *ws.Message, publishP
 	return nil
 }
 
-func (s *service) handleAddChatMessage(ctx context.Context, bytePayload []byte) ([]byte, error) {
+func (s *service) handleAddMessage(ctx context.Context, bytePayload []byte) ([]byte, error) {
 	var message Message
 	if err := json.Unmarshal(bytePayload, &message); err != nil {
 		return []byte{}, err
@@ -106,16 +110,21 @@ func (s *service) handleAddChatMessage(ctx context.Context, bytePayload []byte) 
 	return newMsg, nil
 }
 
+func (service *service) handleDeleteMessage(ctx context.Context, bytePayload []byte) error {
+	var deleteChatMessageParams DeleteChatMessageParams
+	if err := json.Unmarshal(bytePayload, &deleteChatMessageParams); err != nil {
+		return err
+	}
+	if deleteChatMessageParams.Type == TypeFile {
+		if err := service.sc.DeleteSeaweedfsFile(ctx, deleteChatMessageParams.Fid); err != nil {
+			return err
+		}
+	}
+	return service.store.DeleteMessage(ctx, deleteChatMessageParams.MessageId)
+}
+
 func (s *service) GetBroadcastUserListByMessageType(ctx context.Context, msg *ws.Message) ([]ws.UserData, error) {
-	var message Message
-	bytePayload, err := msg.Payload.MarshalJSON()
-	if err := json.Unmarshal(bytePayload, &message); err != nil {
-		return []ws.UserData{}, err
-	}
-	if err != nil {
-		return []ws.UserData{}, err
-	}
-	return s.store.GetUserListByChannelId(ctx, message.ChannelId)
+	return s.store.GetUserListByChannelId(ctx, msg.ChannelId)
 }
 
 func (s *service) GetChannelMessages(ctx context.Context, channelId string, userId string, limit, offset uint64) ([]Message, error) {

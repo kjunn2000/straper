@@ -27,6 +27,17 @@ const useCommentStore = create((set) => ({
       };
     });
   },
+  deleteComment: ({ comment_id }) => {
+    set((state) => {
+      const newComments = state.comments.filter(
+        (comment) => comment.comment_id !== comment_id
+      );
+      setLocalStorage("comments", newComments);
+      return {
+        comments: newComments,
+      };
+    });
+  },
 }));
 
 export default useCommentStore;
