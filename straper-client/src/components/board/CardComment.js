@@ -9,6 +9,9 @@ import CommentInput from "./CommentInput";
 const CardComment = ({ cardId }) => {
   const [offset, setOffset] = useState(0);
   const [isBottom, setIsBottom] = useState(false);
+  const [currEditMsgId, setCurrEditMsgId] = useState("");
+  const [editedMsg, setEditedMsg] = useState("");
+
   const comments = useCommentStore((state) => state.comments);
   const commentsRef = useRef(null);
   const commentsStartRef = useRef(null);
@@ -60,8 +63,17 @@ const CardComment = ({ cardId }) => {
     }
   };
 
-  const handleEditComment = () => {
-    console.log("editing comment...");
+  const handleEditComment = (msgId, oriContent) => {
+    if (oriContent === editedMsg) {
+      return;
+    }
+    const payload = {
+      comment_id: msgId,
+      content: editedMsg,
+    };
+    sendBoardMsg("BOARD_CARD_EDIT_COMMENT", board.workspace_id, payload);
+    setCurrEditMsgId("");
+    setEditedMsg("");
   };
 
   const handleDeleteComment = (commentId, type, content) => {
@@ -84,16 +96,47 @@ const CardComment = ({ cardId }) => {
         <div ref={commentsStartRef} />
         {comments &&
           comments.length > 1 &&
-          comments.map((msg) => (
-            <Message
-              key={msg.comment_id}
-              msg={msg}
-              editMsg={handleEditComment}
-              deleteMsg={() =>
-                handleDeleteComment(msg.comment_id, msg.type, msg.content)
-              }
-            />
-          ))}
+          comments.map((msg) =>
+            msg.comment_id !== currEditMsgId ? (
+              <Message
+                key={msg.comment_id}
+                msg={msg}
+                editMsg={() => setCurrEditMsgId(msg.comment_id)}
+                deleteMsg={() =>
+                  handleDeleteComment(msg.comment_id, msg.type, msg.content)
+                }
+              />
+            ) : (
+              <div
+                className="flex flex-col items-end justify-end"
+                key={msg.comment_id}
+              >
+                <input
+                  defaultValue={msg.content}
+                  className="p-1 rounded focus:outline-none"
+                  onChange={(e) => setEditedMsg(e.target.value)}
+                />
+                <div className="inline-flex rounded-md shadow-sm" role="group">
+                  <button
+                    type="button"
+                    className="py-2 px-4 text-sm font-medium text-gray-900 rounded-l hover:bg-green-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-green-700 focus:text-w dark:bg-green-700 dark:border-gray-600 dark:text-white dark:hover:text-white dark:hover:bg-green-600 dark:focus:ring-blue-500 dark:focus:text-white"
+                    onClick={() =>
+                      handleEditComment(msg.comment_id, msg.content)
+                    }
+                  >
+                    Save
+                  </button>
+                  <button
+                    type="button"
+                    className="py-2 px-4 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-green-700 focus:text-blue-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-blue-500 dark:focus:text-white"
+                    onClick={() => setCurrEditMsgId("")}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            )
+          )}
       </div>
     </div>
   );

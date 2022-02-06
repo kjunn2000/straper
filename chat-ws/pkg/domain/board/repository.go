@@ -34,6 +34,7 @@ type Repository interface {
 
 	CreateCardComment(ctx context.Context, comment *CardComment) error
 	GetCardComments(ctx context.Context, cardId string, limit, offset uint64) ([]CardComment, error)
+	EditCardComment(ctx context.Context, params CardEditCommentParams) error
 	DeleteCardComment(ctx context.Context, commentId string) error
 
 	GetBoardUserInfoByUserId(ctx context.Context, userId string) (UserDetail, error)

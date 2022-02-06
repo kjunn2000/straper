@@ -70,6 +70,11 @@ type CardDeleteChecklistItemParams struct {
 	ItemId string `json:"item_id" db:"item_id"`
 }
 
+type CardEditCommentParams struct {
+	CommentId string `json:"comment_id"`
+	Content   string `json:"content" db:"content"`
+}
+
 type CardDeleteCommentParams struct {
 	CommentId string `json:"comment_id"`
 	Type      string `json:"type"`

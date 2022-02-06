@@ -27,6 +27,20 @@ const useCommentStore = create((set) => ({
       };
     });
   },
+  updateComment: ({ comment_id, content }) => {
+    set((state) => {
+      const newComments = state.comments.map((comment) => {
+        if (comment.comment_id === comment_id) {
+          comment.content = content;
+        }
+        return comment;
+      });
+      setLocalStorage("comments", newComments);
+      return {
+        comments: newComments,
+      };
+    });
+  },
   deleteComment: ({ comment_id }) => {
     set((state) => {
       const newComments = state.comments.filter(

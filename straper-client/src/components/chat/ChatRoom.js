@@ -11,6 +11,8 @@ import { sendChatMsg } from "../../service/websocket";
 const ChatRoom = () => {
   const [offset, setOffset] = useState(0);
   const [isTop, setIsTop] = useState(false);
+  const [currEditMsgId, setCurrEditMsgId] = useState("");
+  const [editedMsg, setEditedMsg] = useState("");
 
   const currChannel = useWorkspaceStore((state) => state.currChannel);
   const msgs = useMessageStore((state) => state.messages);
@@ -78,8 +80,17 @@ const ChatRoom = () => {
     </div>
   );
 
-  const handleEditMessage = () => {
-    console.log("editing message...");
+  const handleEditMessage = (msgId, oriContent) => {
+    if (oriContent === editedMsg) {
+      return;
+    }
+    const payload = {
+      message_id: msgId,
+      content: editedMsg,
+    };
+    sendChatMsg("CHAT_EDIT_MESSAGE", currChannel.channel_id, payload);
+    setCurrEditMsgId("");
+    setEditedMsg("");
   };
 
   const handleDeleteMessage = (messageId, type, content) => {
@@ -95,16 +106,45 @@ const ChatRoom = () => {
     msgs
       .slice(0)
       .reverse()
-      .map((msg) => (
-        <Message
-          key={msg.message_id}
-          msg={msg}
-          editMsg={handleEditMessage}
-          deleteMsg={() =>
-            handleDeleteMessage(msg.message_id, msg.type, msg.content)
-          }
-        />
-      ));
+      .map((msg) =>
+        msg.message_id !== currEditMsgId ? (
+          <Message
+            key={msg.message_id}
+            msg={msg}
+            editMsg={() => setCurrEditMsgId(msg.message_id)}
+            deleteMsg={() =>
+              handleDeleteMessage(msg.message_id, msg.type, msg.content)
+            }
+          />
+        ) : (
+          <div
+            className="flex flex-col items-end justify-end"
+            key={msg.message_id}
+          >
+            <input
+              defaultValue={msg.content}
+              className="p-1 rounded focus:outline-none text-black"
+              onChange={(e) => setEditedMsg(e.target.value)}
+            />
+            <div className="inline-flex rounded-md shadow-sm" role="group">
+              <button
+                type="button"
+                className="py-2 px-4 text-sm font-medium text-gray-900 rounded-l hover:bg-green-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-green-700 focus:text-w dark:bg-green-700 dark:border-gray-600 dark:text-white dark:hover:text-white dark:hover:bg-green-600 dark:focus:ring-blue-500 dark:focus:text-white"
+                onClick={() => handleEditMessage(msg.message_id, msg.content)}
+              >
+                Save
+              </button>
+              <button
+                type="button"
+                className="py-2 px-4 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-green-700 focus:text-blue-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-blue-500 dark:focus:text-white"
+                onClick={() => setCurrEditMsgId("")}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )
+      );
 
   const scrollToBottom = () => {
     if (messagesEndRef.current) {

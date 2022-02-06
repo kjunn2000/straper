@@ -11,7 +11,7 @@ import SimpleDialog from "../dialog/SimpleDialog";
 import { copyTextToClipboard } from "../../service/navigator";
 import MenuItem from "../menu/MenuItem";
 
-export default function MessageMenu({ editMsg, deleteMsg }) {
+export default function MessageMenu({ type, editMsg, deleteMsg }) {
   const [deleteWarningDialogOpen, setDeleteWarningDialogOpen] = useState(false);
 
   return (
@@ -38,13 +38,15 @@ export default function MessageMenu({ editMsg, deleteMsg }) {
         >
           <Menu.Items className="absolute right-0 w-56 m-5 p-2 origin-top-right bg-black divide-y divide-gray-100 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
             <div className="px-1 py-1">
-              <MenuItem
-                content="Edit"
-                icon={AiFillEdit}
-                click={() => {
-                  editMsg();
-                }}
-              />
+              {type === "MESSAGE" && (
+                <MenuItem
+                  content="Edit"
+                  icon={AiFillEdit}
+                  click={() => {
+                    editMsg();
+                  }}
+                />
+              )}
               <MenuItem
                 content="Delete"
                 click={() => setDeleteWarningDialogOpen(true)}

@@ -173,6 +173,14 @@ func (s *service) handleBoardAddComment(ctx context.Context, bytePayload []byte)
 	return newMsg, nil
 }
 
+func (service *service) handleCardEditComment(ctx context.Context, bytePayload []byte) error {
+	var cardEditCommentParams CardEditCommentParams
+	if err := json.Unmarshal(bytePayload, &cardEditCommentParams); err != nil {
+		return err
+	}
+	return service.store.EditCardComment(ctx, cardEditCommentParams)
+}
+
 func (service *service) handleCardDeleteComment(ctx context.Context, bytePayload []byte) error {
 	var cardDeleteCommentParams CardDeleteCommentParams
 	if err := json.Unmarshal(bytePayload, &cardDeleteCommentParams); err != nil {

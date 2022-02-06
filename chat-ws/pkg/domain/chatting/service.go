@@ -65,6 +65,10 @@ func (s *service) HandleBroadcast(ctx context.Context, msg *ws.Message, publishP
 				return err
 			}
 		}
+	case ChatEditMessage:
+		if err := s.handleEditMessage(ctx, bytePayload); err != nil {
+			return err
+		}
 	case ChatDeleteMessage:
 		if err := s.handleDeleteMessage(ctx, bytePayload); err != nil {
 			return err
@@ -108,6 +112,14 @@ func (s *service) handleAddMessage(ctx context.Context, bytePayload []byte) ([]b
 		return []byte{}, err
 	}
 	return newMsg, nil
+}
+
+func (service *service) handleEditMessage(ctx context.Context, bytePayload []byte) error {
+	var editChatMessageParams EditChatMessageParams
+	if err := json.Unmarshal(bytePayload, &editChatMessageParams); err != nil {
+		return err
+	}
+	return service.store.EditMessage(ctx, editChatMessageParams)
 }
 
 func (service *service) handleDeleteMessage(ctx context.Context, bytePayload []byte) error {

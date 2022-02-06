@@ -75,6 +75,23 @@ func (q *Queries) GetChannelMessages(ctx context.Context, channelId string, limi
 	return msgs, nil
 }
 
+func (q *Queries) EditMessage(ctx context.Context, params chatting.EditChatMessageParams) error {
+	sql, args, err := sq.Update("message").
+		Set("content", params.Content).
+		Where(sq.Eq{"message_id": params.MessageId}).
+		ToSql()
+	if err != nil {
+		q.log.Info("Failed to create update message sql.", zap.Error(err))
+		return err
+	}
+	_, err = q.db.Exec(sql, args...)
+	if err != nil {
+		q.log.Info("Failed to update message.", zap.Error(err))
+		return err
+	}
+	return nil
+}
+
 func (q *Queries) DeleteMessage(ctx context.Context, messageId string) error {
 	sql, args, err := sq.Delete("message").
 		Where(sq.Eq{"message_id": messageId}).

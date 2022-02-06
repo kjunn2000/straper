@@ -6,7 +6,7 @@ import { sendBoardMsg } from "../../service/websocket";
 import useBoardStore from "../../store/boardStore";
 import { IoSendSharp } from "react-icons/io5";
 
-const CommentInput = ({ cardId, scrollToTop }) => {
+const CommentInput = ({ cardId }) => {
   const inputRef = useRef(null);
   const identity = useIdentityStore((state) => state.identity);
   const board = useBoardStore((state) => state.board);
@@ -47,7 +47,7 @@ const CommentInput = ({ cardId, scrollToTop }) => {
       <div className="w-full flex">
         <input
           ref={inputRef}
-          className="p-3 w-full focus:outline-none bg-gray-200 rounded"
+          className="p-3 w-full focus:outline-none focus:bg-blue-300 bg-gray-200 rounded"
           placeholder="Add a comment..."
           onKeyDown={(e) => handleKeyDown(e)}
         />

@@ -8,6 +8,10 @@ export const handleWsChatMsg = (msg) => {
       messageState.pushMessage(msg.payload);
       break;
     }
+    case "CHAT_EDIT_MESSAGE": {
+      messageState.editMessage(msg.payload);
+      break;
+    }
     case "CHAT_DELETE_MESSAGE": {
       messageState.deleteMessage(msg.payload);
       break;

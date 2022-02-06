@@ -56,7 +56,11 @@ const Message = ({ msg, editMsg, deleteMsg }) => {
           }`}
         >
           {isCreator() ? (
-            <MessageMenu editMsg={editMsg} deleteMsg={deleteMsg} />
+            <MessageMenu
+              type={msg.type}
+              editMsg={() => msg.type === "MESSAGE" && editMsg(msg.content)}
+              deleteMsg={deleteMsg}
+            />
           ) : (
             <span className={"inline-block pb-3 text-gray-400 font-semibold"}>
               {msg?.user_detail.username}

@@ -13,6 +13,7 @@ type Repository interface {
 	GetChannelMessages(ctx context.Context, channelId string, limit, offset uint64) ([]Message, error)
 	GetAllChannelMessages(ctx context.Context, channelId string) ([]Message, error)
 	GetAllChannelMessagesByWorkspaceId(ctx context.Context, workspaceId string) ([]Message, error)
+	EditMessage(ctx context.Context, params EditChatMessageParams) error
 	DeleteMessage(ctx context.Context, messageId string) error
 	UpdateChannelAccessTime(ctx context.Context, channelId string, userId string) error
 }

@@ -69,6 +69,7 @@ type Querier interface {
 	GetChannelMessages(ctx context.Context, channelId string, limit, offset uint64) ([]chatting.Message, error)
 	GetAllChannelMessages(ctx context.Context, channelId string) ([]chatting.Message, error)
 	GetAllChannelMessagesByWorkspaceId(ctx context.Context, workspaceId string) ([]chatting.Message, error)
+	EditMessage(ctx context.Context, params chatting.EditChatMessageParams) error
 	DeleteMessage(ctx context.Context, messageId string) error
 	UpdateChannelAccessTime(ctx context.Context, channelId string, userId string) error
 
@@ -107,5 +108,6 @@ type Querier interface {
 
 	CreateCardComment(ctx context.Context, comment *board.CardComment) error
 	GetCardComments(ctx context.Context, cardId string, limit, offset uint64) ([]board.CardComment, error)
+	EditCardComment(ctx context.Context, params board.CardEditCommentParams) error
 	DeleteCardComment(ctx context.Context, commentId string) error
 }

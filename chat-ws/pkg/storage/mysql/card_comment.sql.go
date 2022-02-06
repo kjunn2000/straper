@@ -43,6 +43,23 @@ func (q *Queries) GetCardComments(ctx context.Context, cardId string, limit, off
 	return cardComments, nil
 }
 
+func (q *Queries) EditCardComment(ctx context.Context, params board.CardEditCommentParams) error {
+	sql, args, err := sq.Update("card_comment").
+		Set("content", params.Content).
+		Where(sq.Eq{"comment_id": params.CommentId}).
+		ToSql()
+	if err != nil {
+		q.log.Info("Failed to create update comment sql.", zap.Error(err))
+		return err
+	}
+	_, err = q.db.Exec(sql, args...)
+	if err != nil {
+		q.log.Info("Failed to update comment.", zap.Error(err))
+		return err
+	}
+	return nil
+}
+
 func (q *Queries) DeleteCardComment(ctx context.Context, commentId string) error {
 	sql, args, err := sq.Delete("card_comment").
 		Where(sq.Eq{"comment_id": commentId}).
