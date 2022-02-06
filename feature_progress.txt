@@ -1,7 +1,6 @@
 User,
  To view other users’ status
 
- To provide comments for the tasks on the task board
  To sort tasks on the task board by the task priority or created time
 
  To raise tickets with detailed description and attachments
@@ -19,5 +18,4 @@ Bug
 2. WS Server malfunctions when one of the client conn is closed
 
 Task
-1. Edit and delete msg and comment
-2. Delete all the file in seaweedfs when delete a card/list/board
+1. Delete all the file in seaweedfs when delete a card/list/board

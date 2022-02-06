@@ -110,4 +110,7 @@ type Querier interface {
 	GetCardComments(ctx context.Context, cardId string, limit, offset uint64) ([]board.CardComment, error)
 	EditCardComment(ctx context.Context, params board.CardEditCommentParams) error
 	DeleteCardComment(ctx context.Context, commentId string) error
+	GetFileCommentsByCardId(ctx context.Context, cardId string) ([]board.CardComment, error)
+	GetFileCommentsByListId(ctx context.Context, listId string) ([]board.CardComment, error)
+	GetFileCommentsByBoardId(ctx context.Context, boardId string) ([]board.CardComment, error)
 }

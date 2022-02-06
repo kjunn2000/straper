@@ -43,6 +43,66 @@ func (q *Queries) GetCardComments(ctx context.Context, cardId string, limit, off
 	return cardComments, nil
 }
 
+func (q *Queries) GetFileCommentsByCardId(ctx context.Context, cardId string) ([]board.CardComment, error) {
+	var cardComments []board.CardComment
+	sql, arg, err := sq.Select("comment_id", "type", "card_id", "creator_id", "content", "file_name",
+		"file_type", "created_date").
+		From("card_comment").
+		Where(sq.Eq{"card_id": cardId}).
+		Where(sq.Eq{"type": "FILE"}).
+		ToSql()
+	if err != nil {
+		q.log.Warn("Failed to create select sql.")
+		return []board.CardComment{}, err
+	}
+	err = q.db.Select(&cardComments, sql, arg...)
+	if err != nil {
+		return []board.CardComment{}, err
+	}
+	return cardComments, nil
+}
+
+func (q *Queries) GetFileCommentsByListId(ctx context.Context, listId string) ([]board.CardComment, error) {
+	var cardComments []board.CardComment
+	sql, arg, err := sq.Select("comment_id", "type", "card_id", "cc.creator_id", "content", "file_name",
+		"file_type", "cc.created_date").
+		From("card_comment cc").
+		InnerJoin("card c on cc.card_id = c.card_id").
+		Where(sq.Eq{"c.list_id": listId}).
+		Where(sq.Eq{"type": "FILE"}).
+		ToSql()
+	if err != nil {
+		q.log.Warn("Failed to create select sql.")
+		return []board.CardComment{}, err
+	}
+	err = q.db.Select(&cardComments, sql, arg...)
+	if err != nil {
+		return []board.CardComment{}, err
+	}
+	return cardComments, nil
+}
+
+func (q *Queries) GetFileCommentsByBoardId(ctx context.Context, boardId string) ([]board.CardComment, error) {
+	var cardComments []board.CardComment
+	sql, arg, err := sq.Select("comment_id", "type", "card_id", "cc.creator_id", "content", "file_name",
+		"file_type", "cc.created_date").
+		From("card_comment cc").
+		InnerJoin("card c on cc.card_id = c.card_id").
+		InnerJoin("task_list tl on c.list_id = tl.list_id").
+		Where(sq.Eq{"tl.board_id": boardId}).
+		Where(sq.Eq{"type": "FILE"}).
+		ToSql()
+	if err != nil {
+		q.log.Warn("Failed to create select sql.")
+		return []board.CardComment{}, err
+	}
+	err = q.db.Select(&cardComments, sql, arg...)
+	if err != nil {
+		return []board.CardComment{}, err
+	}
+	return cardComments, nil
+}
+
 func (q *Queries) EditCardComment(ctx context.Context, params board.CardEditCommentParams) error {
 	sql, args, err := sq.Update("card_comment").
 		Set("content", params.Content).
