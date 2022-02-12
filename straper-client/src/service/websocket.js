@@ -61,4 +61,12 @@ const sendBoardMsg = (type, workspaceId, payload) => {
   console.log(dto);
   socket.send(JSON.stringify(dto));
 };
-export { connect, sendChatMsg, sendBoardMsg };
+
+const sendUnregisterMsg = () => {
+  const dto = {
+    type : "USER_LEAVE"
+  }
+  socket.send(JSON.stringify(dto))
+}
+
+export { connect, sendChatMsg, sendBoardMsg, sendUnregisterMsg };

@@ -39,6 +39,7 @@ func (user *User) readMsg(ctx context.Context, log *zap.Logger) {
 			return
 		} else if err != nil {
 			log.Warn("Receive error.", zap.Error(err))
+			user.wsServer.unregister <- user
 			return
 		}
 
