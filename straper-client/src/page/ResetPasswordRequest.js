@@ -1,9 +1,9 @@
-import axios from "../axios/api";
 import React, { useState } from "react";
 import { Link, useHistory } from "react-router-dom";
 import { useForm } from "react-hook-form";
 import SimpleDialog from "../components/dialog/SimpleDialog";
 import { ErrorMessage } from "@hookform/error-message";
+import api from "../axios/api";
 
 const ResetPassword = () => {
   const history = useHistory();
@@ -17,8 +17,8 @@ const ResetPassword = () => {
   const [dialogErrMsg, setDialogErrMsg] = useState("");
 
   const onReset = (data) => {
-    axios
-      .post("http://localhost:8080/api/v1/account/reset-password/create", data)
+    api
+      .post("/account/reset-password/create", data)
       .then((res) => {
         if (res.data.Success) {
           setShowSuccessDialog(true);

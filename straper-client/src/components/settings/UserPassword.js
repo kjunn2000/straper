@@ -2,6 +2,7 @@ import axios from "axios";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
+import api from "../../axios/api";
 import useIdentityStore from "../../store/identityStore";
 import SimpleDialog from "../dialog/SimpleDialog";
 
@@ -22,9 +23,9 @@ const UserPassword = () => {
     const payload = {
       email: identity.email,
     };
-    axios
+    api
       .post(
-        "http://localhost:8080/api/v1/account/reset-password/create",
+        "/account/reset-password/create",
         payload
       )
       .then((res) => {

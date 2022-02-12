@@ -1,6 +1,6 @@
-import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router";
+import api from "../axios/api";
 
 const EmailVerify = () => {
   const history = useHistory();
@@ -8,9 +8,9 @@ const EmailVerify = () => {
 
   useEffect(() => {
     const tokenId = history.location.pathname.split("/").pop();
-    axios
+    api
       .post(
-        `http://localhost:8080/api/v1/account/email/verify/${tokenId}`,
+        `/account/email/verify/${tokenId}`,
         tokenId
       )
       .then((res) => {

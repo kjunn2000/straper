@@ -1,9 +1,9 @@
-import axios from "../axios/api";
 import React, { useRef, useState } from "react";
 import { Link, useHistory } from "react-router-dom";
 import PasswordStrengthBar from "react-password-strength-bar";
 import { useForm } from "react-hook-form";
 import SimpleDialog from "../components/dialog/SimpleDialog";
+import api from "../axios/api";
 
 const ResetPassword = () => {
   const history = useHistory();
@@ -25,8 +25,8 @@ const ResetPassword = () => {
       "token_id" : history.location.pathname.split("/").pop(),
       "password" : data.password
     }
-    axios
-      .post("http://localhost:8080/api/v1/account/password/update", requestData)
+    api
+      .post("/account/password/update", requestData)
       .then((res) => {
         if (res.data.Success) {
           setShowSuccessDialog(true);

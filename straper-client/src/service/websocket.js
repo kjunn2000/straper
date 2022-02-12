@@ -8,7 +8,7 @@ var socket;
 const connect = () => {
   var identity = getLocalStorage("identity");
   socket = new WebSocket(
-    `ws://localhost:8080/api/v1/protected/ws/${identity.user_id}`
+    `ws://localhost:9090/api/v1/protected/ws/${identity.user_id}`
   );
   console.log("Connecting");
 

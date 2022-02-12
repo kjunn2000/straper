@@ -43,7 +43,9 @@ func (s *seaweedfsClient) SaveSeaweedfsFile(ctx context.Context, fileBytes []byt
 	if err != nil {
 		return "", err
 	}
-	url := "http://" + weedMasterResponse.Url + "/" + weedMasterResponse.Fid
+	// url := "http://" + weedMasterResponse.Url + "/" + weedMasterResponse.Fid
+	// Local
+	url := "http://" + "localhost:8080" + "/" + weedMasterResponse.Fid
 	if err := s.sendMultiPartRequest(fileBytes, url); err != nil {
 		return "", err
 	}
@@ -80,28 +82,30 @@ func (s *seaweedfsClient) sendMultiPartRequest(fileBytes []byte, url string) err
 }
 
 func (s *seaweedfsClient) GetSeaweedfsFile(ctx context.Context, fid string) ([]byte, error) {
-	fidArr := strings.Split(fid, ",")
-	resp, err := http.Get("http://localhost:9333/dir/lookup?volumeId=" + fidArr[0])
-	if err != nil {
-		s.log.Warn("Seaweedfs look up volume failed", zap.Error(err))
-		return []byte{}, err
-	}
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		s.log.Warn("Read response body failed", zap.Error(err))
-		return []byte{}, err
-	}
-	var weedVolumeLoopUpResponse WeedVolumeLoopUpResponse
-	json.Unmarshal(body, &weedVolumeLoopUpResponse)
+	// fidArr := strings.Split(fid, ",")
+	// resp, err := http.Get("http://localhost:9333/dir/lookup?volumeId=" + fidArr[0])
+	// if err != nil {
+	// 	s.log.Warn("Seaweedfs look up volume failed", zap.Error(err))
+	// 	return []byte{}, err
+	// }
+	// defer resp.Body.Close()
+	// body, err := ioutil.ReadAll(resp.Body)
+	// if err != nil {
+	// 	s.log.Warn("Read response body failed", zap.Error(err))
+	// 	return []byte{}, err
+	// }
+	// var weedVolumeLoopUpResponse WeedVolumeLoopUpResponse
+	// json.Unmarshal(body, &weedVolumeLoopUpResponse)
 
-	resp, err = http.Get("http://" + weedVolumeLoopUpResponse.Locations[0].PublicUrl + "/" + fid)
+	// resp, err = http.Get("http://" + weedVolumeLoopUpResponse.Locations[0].PublicUrl + "/" + fid)
+	// Local
+	resp, err := http.Get("http://" + "localhost:8080" + "/" + fid)
 	if err != nil {
 		s.log.Warn("Seaweedfs get file failed", zap.Error(err))
 		return []byte{}, err
 	}
 	defer resp.Body.Close()
-	body, err = ioutil.ReadAll(resp.Body)
+	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		s.log.Warn("Read response body failed", zap.Error(err))
 		return []byte{}, err
