@@ -64,8 +64,8 @@ func (q *Queries) GetFileCommentsByCardId(ctx context.Context, cardId string) ([
 
 func (q *Queries) GetFileCommentsByListId(ctx context.Context, listId string) ([]board.CardComment, error) {
 	var cardComments []board.CardComment
-	sql, arg, err := sq.Select("comment_id", "type", "card_id", "cc.creator_id", "content", "file_name",
-		"file_type", "cc.created_date").
+	sql, arg, err := sq.Select("cc.comment_id", "cc.type", "cc.card_id", "cc.creator_id", "cc.content", "cc.file_name",
+		"cc.file_type", "cc.created_date").
 		From("card_comment cc").
 		InnerJoin("card c on cc.card_id = c.card_id").
 		Where(sq.Eq{"c.list_id": listId}).
@@ -82,25 +82,25 @@ func (q *Queries) GetFileCommentsByListId(ctx context.Context, listId string) ([
 	return cardComments, nil
 }
 
-func (q *Queries) GetFileCommentsByBoardId(ctx context.Context, boardId string) ([]board.CardComment, error) {
-	var cardComments []board.CardComment
-	sql, arg, err := sq.Select("comment_id", "type", "card_id", "cc.creator_id", "content", "file_name",
-		"file_type", "cc.created_date").
+func (q *Queries) GetFidsByWorkspaceId(ctx context.Context, workspaceId string) ([]string, error) {
+	var fids []string
+	sql, arg, err := sq.Select("cc.content").
 		From("card_comment cc").
 		InnerJoin("card c on cc.card_id = c.card_id").
 		InnerJoin("task_list tl on c.list_id = tl.list_id").
-		Where(sq.Eq{"tl.board_id": boardId}).
-		Where(sq.Eq{"type": "FILE"}).
+		InnerJoin("task_board tb on tl.board_id= tb.board_id").
+		Where(sq.Eq{"tb.workspace_id": workspaceId}).
+		Where(sq.Eq{"cc.type": "FILE"}).
 		ToSql()
 	if err != nil {
 		q.log.Warn("Failed to create select sql.")
-		return []board.CardComment{}, err
+		return []string{}, err
 	}
-	err = q.db.Select(&cardComments, sql, arg...)
+	err = q.db.Select(&fids, sql, arg...)
 	if err != nil {
-		return []board.CardComment{}, err
+		return []string{}, err
 	}
-	return cardComments, nil
+	return fids, nil
 }
 
 func (q *Queries) EditCardComment(ctx context.Context, params board.CardEditCommentParams) error {

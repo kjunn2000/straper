@@ -112,5 +112,6 @@ type Querier interface {
 	DeleteCardComment(ctx context.Context, commentId string) error
 	GetFileCommentsByCardId(ctx context.Context, cardId string) ([]board.CardComment, error)
 	GetFileCommentsByListId(ctx context.Context, listId string) ([]board.CardComment, error)
-	GetFileCommentsByBoardId(ctx context.Context, boardId string) ([]board.CardComment, error)
+
+	GetFidsByWorkspaceId(ctx context.Context, workspaceId string) ([]string, error)
 }

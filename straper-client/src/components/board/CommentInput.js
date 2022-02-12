@@ -47,7 +47,7 @@ const CommentInput = ({ cardId }) => {
       <div className="w-full flex">
         <input
           ref={inputRef}
-          className="p-3 w-full focus:outline-none focus:bg-blue-300 bg-gray-200 rounded"
+          className="p-3 w-full focus:outline-none bg-gray-200 rounded"
           placeholder="Add a comment..."
           onKeyDown={(e) => handleKeyDown(e)}
         />

@@ -4,11 +4,11 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
 	"net/http"
-	"strings"
 	"time"
 
 	"go.uber.org/zap"
@@ -114,25 +114,30 @@ func (s *seaweedfsClient) GetSeaweedfsFile(ctx context.Context, fid string) ([]b
 }
 
 func (s *seaweedfsClient) DeleteSeaweedfsFile(ctx context.Context, fid string) error {
+	fmt.Println(fid)
+	// fidArr := strings.Split(fid, ",")
+	// resp, err := http.Get("http://localhost:9333/dir/lookup?volumeId=" + fidArr[0])
+	// if err != nil {
+	// 	s.log.Warn("Seaweedfs look up volume failed", zap.Error(err))
+	// 	return err
+	// }
+	// defer resp.Body.Close()
+	// body, err := ioutil.ReadAll(resp.Body)
+	// if err != nil {
+	// 	s.log.Warn("Read response body failed", zap.Error(err))
+	// 	return err
+	// }
+	// var weedVolumeLoopUpResponse WeedVolumeLoopUpResponse
+	// json.Unmarshal(body, &weedVolumeLoopUpResponse)
 
-	fidArr := strings.Split(fid, ",")
-	resp, err := http.Get("http://localhost:9333/dir/lookup?volumeId=" + fidArr[0])
-	if err != nil {
-		s.log.Warn("Seaweedfs look up volume failed", zap.Error(err))
-		return err
-	}
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		s.log.Warn("Read response body failed", zap.Error(err))
-		return err
-	}
-	var weedVolumeLoopUpResponse WeedVolumeLoopUpResponse
-	json.Unmarshal(body, &weedVolumeLoopUpResponse)
+	// client := &http.Client{}
 
+	// req, err := http.NewRequest("DELETE", "http://"+weedVolumeLoopUpResponse.Locations[0].PublicUrl+"/"+fid, nil)
+
+	// Local
 	client := &http.Client{}
 
-	req, err := http.NewRequest("DELETE", "http://"+weedVolumeLoopUpResponse.Locations[0].PublicUrl+"/"+fid, nil)
+	req, err := http.NewRequest("DELETE", "http://localhost:8080/"+fid, nil)
 	if err != nil {
 		return err
 	}

@@ -3,6 +3,7 @@ package board
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
 	"github.com/google/uuid"
 )
@@ -32,6 +33,14 @@ func (service *service) handleUpdateList(ctx context.Context, bytePayload []byte
 func (service *service) handleDeleteList(ctx context.Context, bytePayload []byte) error {
 	var listId string
 	if err := json.Unmarshal(bytePayload, &listId); err != nil {
+		return err
+	}
+	fileComments, err := service.store.GetFileCommentsByListId(ctx, listId)
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	if err := service.deleteSeaweedfsFiles(ctx, fileComments); err != nil {
 		return err
 	}
 	return service.store.DeleteTaskList(ctx, listId)

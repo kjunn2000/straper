@@ -47,6 +47,13 @@ func (service *service) handleDeleteCard(ctx context.Context, bytePayload []byte
 	if err := json.Unmarshal(bytePayload, &deleteCardParams); err != nil {
 		return err
 	}
+	fileComments, err := service.store.GetFileCommentsByCardId(ctx, deleteCardParams.CardId)
+	if err != nil {
+		return err
+	}
+	if err := service.deleteSeaweedfsFiles(ctx, fileComments); err != nil {
+		return err
+	}
 	return service.store.DeleteCard(ctx, deleteCardParams.CardId)
 }
 

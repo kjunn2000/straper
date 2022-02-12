@@ -38,7 +38,6 @@ type Repository interface {
 	DeleteCardComment(ctx context.Context, commentId string) error
 	GetFileCommentsByCardId(ctx context.Context, cardId string) ([]CardComment, error)
 	GetFileCommentsByListId(ctx context.Context, listId string) ([]CardComment, error)
-	GetFileCommentsByBoardId(ctx context.Context, boardId string) ([]CardComment, error)
 
 	GetBoardUserInfoByUserId(ctx context.Context, userId string) (UserDetail, error)
 }

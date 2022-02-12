@@ -102,7 +102,7 @@ func (server *Server) SetServerRoute() (*mux.Router, error) {
 	boardService := board.NewService(server.log, server.store, server.seaweedfsClient)
 	listingService := listing.NewService(server.log, server.store)
 	editingService := editing.NewService(server.log, server.store)
-	deletingService := deleting.NewService(server.log, server.store)
+	deletingService := deleting.NewService(server.log, server.store, server.seaweedfsClient)
 	websocketService := websocket.NewService(server.log, server.redisClient, chattingService, boardService)
 	websocketService.SetUpWSServer(context.Background())
 

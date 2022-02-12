@@ -39,6 +39,8 @@ const CardComment = ({ cardId }) => {
   const fetchComments = async (firstTime, limit, offset) => {
     if (isBottom && !firstTime) {
       return;
+    }else if (firstTime) {
+      clearComments();
     }
     api
       .get(
@@ -46,12 +48,11 @@ const CardComment = ({ cardId }) => {
       )
       .then((res) => {
         const fetchedData = res.data.Data;
-        if (!fetchedData && !firstTime) {
+        if (!fetchedData && !firstTime ) {
           setIsBottom(true);
           return;
-        } else if (firstTime) {
-          clearComments();
         }
+        console.log(fetchedData)
         pushComments(fetchedData);
         setOffset((offset) => offset + 10);
       });
@@ -95,7 +96,6 @@ const CardComment = ({ cardId }) => {
       >
         <div ref={commentsStartRef} />
         {comments &&
-          comments.length > 1 &&
           comments.map((msg) =>
             msg.comment_id !== currEditMsgId ? (
               <Message

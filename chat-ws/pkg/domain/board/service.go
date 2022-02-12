@@ -204,3 +204,12 @@ func (s *service) GetCardComments(ctx context.Context, cardId string, limit, off
 	}
 	return msgs, nil
 }
+
+func (s *service) deleteSeaweedfsFiles(ctx context.Context, fileComment []CardComment) error {
+	for _, comment := range fileComment {
+		if err := s.sc.DeleteSeaweedfsFile(ctx, comment.Content); err != nil {
+			return err
+		}
+	}
+	return nil
+}

@@ -10,7 +10,7 @@ const FileMessage = ({ file }) => {
       style={darkGrayBg}
     >
       <FcDocument size={40} />
-      <div className="px-5">
+      <div className="px-5 text-white">
         <div>{file.file_name}</div>
         <div>{file.blob && file.blob.size / 1000} KB</div>
       </div>

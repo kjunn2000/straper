@@ -13,15 +13,21 @@ type Service interface {
 	LeaveChannel(ctx context.Context, channelId, userId string) error
 }
 
+type SeaweedfsClient interface {
+	DeleteSeaweedfsFile(ctx context.Context, fid string) error
+}
+
 type service struct {
 	log *zap.Logger
 	r   Repository
+	sc  SeaweedfsClient
 }
 
-func NewService(log *zap.Logger, r Repository) *service {
+func NewService(log *zap.Logger, r Repository, sc SeaweedfsClient) *service {
 	return &service{
 		log: log,
 		r:   r,
+		sc:  sc,
 	}
 }
 
@@ -30,8 +36,16 @@ type Channel struct {
 }
 
 func (s *service) DeleteWorkspace(ctx context.Context, workspaceId string) error {
-
-	err := s.r.DeleteWorkspace(ctx, workspaceId)
+	fids, err := s.r.GetFidsByWorkspaceId(ctx, workspaceId)
+	if err != nil {
+		return err
+	}
+	for _, fid := range fids {
+		if err := s.sc.DeleteSeaweedfsFile(ctx, fid); err != nil {
+			return err
+		}
+	}
+	err = s.r.DeleteWorkspace(ctx, workspaceId)
 	if err != nil {
 		return err
 	}
