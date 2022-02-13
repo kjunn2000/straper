@@ -1,5 +1,4 @@
 import axios from "axios";
-import { logOut } from "../service/logout";
 import useAuthStore from "../store/authStore";
 
 const api = axios.create({

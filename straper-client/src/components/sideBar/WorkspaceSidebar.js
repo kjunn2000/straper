@@ -56,7 +56,7 @@ function WorkspaceSidebar() {
   };
 
   const onDeleteChannel = (channelId, type) => {
-    if (currWorkspace.channel_list.length == 1) {
+    if (currWorkspace.channel_list.length === 1) {
       setFailDeleteDialogOpen(true);
       return;
     }
@@ -70,7 +70,7 @@ function WorkspaceSidebar() {
     if (res.data.Success) {
       deleteChannelFromWorkspace(channelId);
       setCurrWorkspace(currWorkspace.workspace_id);
-      if (selectedChannelIds.get(currWorkspace.workspace_id) == channelId) {
+      if (selectedChannelIds.get(currWorkspace.workspace_id) === channelId) {
         const nextChannelId = currWorkspace.channel_list[0].channel_id;
         setCurrChannel(nextChannelId);
         setSelectedChannelIds(currWorkspace.workspace_id, nextChannelId);
@@ -177,7 +177,7 @@ function WorkspaceSidebar() {
                         <AiOutlineLink style={iconStyle} />
                       </span>
                       {!channel.is_default &&
-                        (identity.user_id == channel.creator_id ? (
+                        (identity.user_id === channel.creator_id ? (
                           <span
                             className="opacity-0 group-hover:opacity-100 cursor-pointer pl-3"
                             onClick={() =>
@@ -244,13 +244,13 @@ function WorkspaceSidebar() {
             isOpen={deleteWarningDialogOpen}
             setIsOpen={setDeleteWarningDialogOpen}
             title={
-              deleteType == "delete"
+              deleteType === "delete"
                 ? "Delete Channel Confirmation"
                 : "Leave Channel Confirmation"
             }
             content="Please confirm that the removed channel will not able to be recovered."
             buttonText={
-              deleteType == "delete" ? "Delete Anyway" : "Leave Anyway"
+              deleteType === "delete" ? "Delete Anyway" : "Leave Anyway"
             }
             buttonStatus="fail"
             buttonAction={() => deleteOrLeaveChannel(targetDeleteChannelId)}

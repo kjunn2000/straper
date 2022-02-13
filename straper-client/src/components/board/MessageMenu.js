@@ -1,14 +1,8 @@
 import { Menu, Transition } from "@headlessui/react";
-import { Fragment, useEffect, useState } from "react";
-import { AiFillEdit, AiFillDelete, AiOutlineLink } from "react-icons/ai";
-import { FiSettings, FiMoreHorizontal } from "react-icons/fi";
-import useIdentityStore from "../../store/identityStore";
-import useWorkspaceStore from "../../store/workspaceStore";
-import api from "../../axios/api";
-import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
+import { Fragment,  useState } from "react";
+import { AiFillEdit, AiFillDelete} from "react-icons/ai";
+import { FiMoreHorizontal } from "react-icons/fi";
 import ActionDialog from "../dialog/ActionDialog";
-import SimpleDialog from "../dialog/SimpleDialog";
-import { copyTextToClipboard } from "../../service/navigator";
 import MenuItem from "../menu/MenuItem";
 
 export default function MessageMenu({ type, editMsg, deleteMsg }) {

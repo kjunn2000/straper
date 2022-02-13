@@ -8,9 +8,9 @@ const UserAuthGuard = ({ component: Component, ...rest }) => {
     <Route
       {...rest}
       render={(props) =>
-        identity?.role == "USER" ? (
+        identity?.role === "USER" ? (
           <Component {...props} />
-        ) : identity?.role == "ADMIN" ? (
+        ) : identity?.role === "ADMIN" ? (
           <Redirect to="/dashboard" />
         ) : (
           <Redirect to="/login" />

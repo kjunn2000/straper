@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import { AiOutlineClockCircle } from "react-icons/ai";
-import api from "../../axios/api";
 import CardDialog from "./CardDialog";
-import useCommentStore from "../../store/commentStore";
 
 const Card = ({ card }) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);

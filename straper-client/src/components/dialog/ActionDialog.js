@@ -72,7 +72,7 @@ export default function ActionDialog({
                     type="button"
                     className={`inline-flex justify-center px-4 py-2 text-sm font-medium 
                     ${
-                      buttonStatus == "success"
+                      buttonStatus === "success"
                         ? "text-blue-900 bg-blue-100 hover:bg-blue-200 focus-visible:ring-blue-500"
                         : "text-red-900 bg-red-100 hover:bg-red-200 focus-visible:ring-red-500"
                     } border border-transparent rounded-md  focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 `}

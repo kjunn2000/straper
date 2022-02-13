@@ -7,7 +7,6 @@ import UserPassword from "../components/settings/UserPassword";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import { logOut } from "../service/logout";
 import ActionDialog from "../components/dialog/ActionDialog";
-import { set } from "react-hook-form";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");

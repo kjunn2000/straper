@@ -1,6 +1,5 @@
 import create from "zustand";
 import { addToList, removeFromList } from "../service/board";
-import { isEmpty } from "../service/object";
 import { getLocalStorage, setLocalStorage } from "./localStorage";
 
 const useBoardStore = create((set) => ({

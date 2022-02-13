@@ -14,7 +14,7 @@ const Message = ({ msg, editMsg, deleteMsg }) => {
   const [file, setFile] = useState({});
 
   useEffect(() => {
-    if (msg.type == "FILE") {
+    if (msg.type === "FILE") {
       const blob = createBlobFile(base64ToArray(msg.file_bytes), msg.file_type);
       const src = URL.createObjectURL(blob);
       setFile({

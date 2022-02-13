@@ -24,7 +24,7 @@ const useWorkspaceStore = create((set) => ({
   deleteWorkspace: (workspaceId) => {
     set((state) => {
       const newWorkspaces = state.workspaces.filter(
-        (workspace) => workspace.workspace_id != workspaceId
+        (workspace) => workspace.workspace_id !== workspaceId
       );
       setLocalStorage("workspaces", newWorkspaces);
       return { workspaces: newWorkspaces };
@@ -33,7 +33,7 @@ const useWorkspaceStore = create((set) => ({
   setCurrWorkspace: (workspaceId) => {
     set((state) => {
       const currWorkspace = state.workspaces.find(
-        (workspace) => workspace.workspace_id == workspaceId
+        (workspace) => workspace.workspace_id === workspaceId
       );
       setLocalStorage("currWorkspace", currWorkspace);
       return { currWorkspace: currWorkspace };
@@ -50,7 +50,7 @@ const useWorkspaceStore = create((set) => ({
   addChannelToWorkspace: (workspaceId, channel) => {
     set((state) => {
       const workspaces = state.workspaces.map((workspace) => {
-        if (workspace.workspace_id == workspaceId) {
+        if (workspace.workspace_id === workspaceId) {
           workspace.channel_list.push(channel);
         }
         return workspace;
@@ -62,9 +62,9 @@ const useWorkspaceStore = create((set) => ({
   deleteChannelFromWorkspace: (channelId) => {
     set((state) => {
       const workspaces = state.workspaces.map((workspace) => {
-        if (workspace.workspace_id == state.currWorkspace.workspace_id) {
+        if (workspace.workspace_id === state.currWorkspace.workspace_id) {
           workspace.channel_list = workspace.channel_list.filter(
-            (channel) => channel.channel_id != channelId
+            (channel) => channel.channel_id !== channelId
           );
         }
         return workspace;
@@ -76,7 +76,7 @@ const useWorkspaceStore = create((set) => ({
   setCurrChannel: (channelId) => {
     set((state) => {
       const currChannel = state.currWorkspace?.channel_list.find(
-        (channel) => channel.channel_id == channelId
+        (channel) => channel.channel_id === channelId
       );
       setLocalStorage("currChannel", currChannel);
       return { currChannel: currChannel };
@@ -95,7 +95,7 @@ const useWorkspaceStore = create((set) => ({
   setDefaultSelectedChannelIds: () => {
     set((state) => {
       const newSelectedChannelIds = state.selectedChannelIds;
-      state.workspaces.map((workspace) => {
+      state.workspaces.foreach((workspace) => {
         if (workspace.channel_list.length > 0) {
           newSelectedChannelIds.set(
             workspace.workspace_id,

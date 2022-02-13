@@ -61,7 +61,7 @@ const ResetPassword = () => {
   };
 
   const isPasswordMatch = () => {
-    return getValues("password") == getValues("confirmedPassword")
+    return getValues("password") === getValues("confirmedPassword")
   }
 
   return (

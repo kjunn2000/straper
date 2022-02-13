@@ -2,7 +2,6 @@ import { Dialog, Transition } from "@headlessui/react";
 import { ErrorMessage } from "@hookform/error-message";
 import React, { useRef } from "react";
 import { useForm } from "react-hook-form";
-import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import { Fragment } from "react/cjs/react.production.min";
 
 const AddDialog = ({ isOpen, close, toggleDialog, addAction, type }) => {
@@ -16,8 +15,6 @@ const AddDialog = ({ isOpen, close, toggleDialog, addAction, type }) => {
 
   let addBtn = useRef(null);
 
-  const history = useHistory();
-
   const closeDialog = () => {
     reset();
     close();
@@ -30,11 +27,11 @@ const AddDialog = ({ isOpen, close, toggleDialog, addAction, type }) => {
 
   const executeAddAction = async (data) => {
     const errMsg = await addAction(data);
-    if (!errMsg || errMsg == "") {
+    if (!errMsg || errMsg === "") {
       closeDialog();
       return;
     }
-    setError(type == "workspace" ? "workspace_name" : "channel_name", {
+    setError(type === "workspace" ? "workspace_name" : "channel_name", {
       type: "bad_request",
       message: errMsg,
     });
@@ -82,18 +79,18 @@ const AddDialog = ({ isOpen, close, toggleDialog, addAction, type }) => {
                 as="h3"
                 className="text-lg font-medium leading-6 text-gray-900"
               >
-                {type == "workspace"
+                {type === "workspace"
                   ? "Create Your Own Workspace"
                   : "Create Your Own Channel"}
               </Dialog.Title>
               <form className="mt-2" onSubmit={handleSubmit(executeAddAction)}>
                 <div className="self-center space-y-5">
                   <div>
-                    {type == "workspace"
+                    {type === "workspace"
                       ? "New Workspace Name"
                       : "New Channel Name"}
                   </div>
-                  {type == "workspace" ? (
+                  {type === "workspace" ? (
                     <div>
                       <input
                         className="bg-gray-200 p-2 w-full"
@@ -119,7 +116,7 @@ const AddDialog = ({ isOpen, close, toggleDialog, addAction, type }) => {
                     </div>
                   )}
                 </div>
-                {type == "workspace" ? (
+                {type === "workspace" ? (
                   <ErrorMessage errors={errors} name="workspace_name" as="p" />
                 ) : (
                   <ErrorMessage errors={errors} name="channel_name" as="p" />
@@ -128,7 +125,7 @@ const AddDialog = ({ isOpen, close, toggleDialog, addAction, type }) => {
                   className="text-indigo-500 self-center cursor-pointer hover:text-indigo-300"
                   onClick={toggle}
                 >
-                  {type == "workspace"
+                  {type === "workspace"
                     ? "Join a workspace?"
                     : "Join a channel?"}
                 </div>

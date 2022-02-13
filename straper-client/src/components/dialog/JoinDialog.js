@@ -27,11 +27,11 @@ const JoinDialog = ({ isOpen, close, toggleDialog, joinAction, type }) => {
 
   const executeJoinActoin = async (data) => {
     const errMsg = await joinAction(data);
-    if (!errMsg || errMsg == "") {
+    if (!errMsg || errMsg === "") {
       closeDialog();
       return;
     }
-    setError(type == "workspace" ? "workspace_id" : "channel_id", {
+    setError(type === "workspace" ? "workspace_id" : "channel_id", {
       type: "bad_request",
       message: errMsg,
     });
@@ -79,14 +79,14 @@ const JoinDialog = ({ isOpen, close, toggleDialog, joinAction, type }) => {
                 as="h3"
                 className="text-lg font-medium leading-6 text-gray-900"
               >
-                {type == "workspace" ? "Join a Workspace" : "Join a Channel"}
+                {type === "workspace" ? "Join a Workspace" : "Join a Channel"}
               </Dialog.Title>
               <form className="mt-2" onSubmit={handleSubmit(executeJoinActoin)}>
                 <div className="self-center space-y-5">
                   <div>
-                    {type == "workspace" ? "Workspace ID" : "Channel ID"}
+                    {type === "workspace" ? "Workspace ID" : "Channel ID"}
                   </div>
-                  {type == "workspace" ? (
+                  {type === "workspace" ? (
                     <input
                       className="bg-gray-200 p-2 w-full"
                       {...register("workspace_id", {
@@ -108,7 +108,7 @@ const JoinDialog = ({ isOpen, close, toggleDialog, joinAction, type }) => {
                     />
                   )}
                 </div>
-                {type == "workspace" ? (
+                {type === "workspace" ? (
                   <ErrorMessage errors={errors} name="workspace_id" as="p" />
                 ) : (
                   <ErrorMessage errors={errors} name="channel_id" as="p" />
@@ -117,7 +117,7 @@ const JoinDialog = ({ isOpen, close, toggleDialog, joinAction, type }) => {
                   className="text-indigo-500 self-center cursor-pointer hover:text-indigo-300"
                   onClick={toggle}
                 >
-                  {type == "workspace"
+                  {type === "workspace"
                     ? "Create new workspace?"
                     : "Create new channel?"}
                 </div>
