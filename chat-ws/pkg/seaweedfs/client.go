@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
@@ -114,7 +113,6 @@ func (s *seaweedfsClient) GetSeaweedfsFile(ctx context.Context, fid string) ([]b
 }
 
 func (s *seaweedfsClient) DeleteSeaweedfsFile(ctx context.Context, fid string) error {
-	fmt.Println(fid)
 	// fidArr := strings.Split(fid, ",")
 	// resp, err := http.Get("http://localhost:9333/dir/lookup?volumeId=" + fidArr[0])
 	// if err != nil {

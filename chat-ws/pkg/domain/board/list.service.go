@@ -3,7 +3,6 @@ package board
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 
 	"github.com/google/uuid"
 )
@@ -37,7 +36,6 @@ func (service *service) handleDeleteList(ctx context.Context, bytePayload []byte
 	}
 	fileComments, err := service.store.GetFileCommentsByListId(ctx, listId)
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
 	if err := service.deleteSeaweedfsFiles(ctx, fileComments); err != nil {

@@ -10,6 +10,6 @@ export const logOut = (timeout) => {
   useAuthStore.getState()?.clearAccessToken();
   useIdentityStore.getState()?.clearIdentity();
   useWorkspaceStore.getState()?.clearWorkspaceState();
-  history.push("/login" + timeout && "/timeout");
-  window.location.reload();
+  const url = "/login" + (timeout ? "/timeout" : "");
+  history.push(url);
 };

@@ -1,4 +1,5 @@
 import axios from "axios";
+import { logOut } from "../service/logout";
 import useAuthStore from "../store/authStore";
 
 const api = axios.create({
@@ -27,26 +28,29 @@ api.interceptors.response.use(
   },
   async (err) => {
     const originalConfig = err.config;
-    if (originalConfig.url !== "/auth/login" && err.response) {
-      console.log(err.response);
-      console.log(originalConfig);
-      if (err.response.status === 403 && !originalConfig._retry) {
-        originalConfig._retry = true;
+    if (
+      originalConfig.url !== "/auth/login" &&
+      err.response &&
+      err.response.data.ErrorMessage === "invalid.access.token" &&
+      err.response.status === 403 &&
+      !originalConfig._retry
+    ) {
+      originalConfig._retry = true;
+      try {
+        const res = await api.get("/auth/refresh-token", {
+          withCredentials: true,
+        });
 
-        try {
-          const res = await api.post("/auth/refresh-token");
-
-          if (res.data.Success) {
-            console.log("success refresh token");
-            const accessToken = res.data.Data;
-            useAuthStore.getState().setAccessToken(accessToken);
-            return api(originalConfig);
-          }
-          // logOut(true);
-        } catch (_error) {
-          console.log(_error);
-          return Promise.reject(_error);
+        if (res.data.Success) {
+          console.log("success refresh token");
+          const accessToken = res.data.Data;
+          useAuthStore.getState().setAccessToken(accessToken);
+          return api(originalConfig);
         }
+        logOut(true);
+      } catch (_error) {
+        console.log(_error);
+        return Promise.reject(_error);
       }
     }
 

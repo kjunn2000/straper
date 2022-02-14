@@ -5,6 +5,10 @@ import { handleWsChatMsg } from "./chat";
 
 var socket;
 
+const isSocketOpen = () => {
+  return socket !== undefined;
+};
+
 const connect = () => {
   var identity = getLocalStorage("identity");
   socket = new WebSocket(
@@ -64,9 +68,9 @@ const sendBoardMsg = (type, workspaceId, payload) => {
 
 const sendUnregisterMsg = () => {
   const dto = {
-    type : "USER_LEAVE"
-  }
-  socket.send(JSON.stringify(dto))
-}
+    type: "USER_LEAVE",
+  };
+  socket.send(JSON.stringify(dto));
+};
 
-export { connect, sendChatMsg, sendBoardMsg, sendUnregisterMsg };
+export { isSocketOpen, connect, sendChatMsg, sendBoardMsg, sendUnregisterMsg };

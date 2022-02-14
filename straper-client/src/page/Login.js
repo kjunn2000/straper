@@ -8,7 +8,7 @@ import "./login.scss";
 import api from "../axios/api";
 import SimpleDialog from "../components/dialog/SimpleDialog";
 
-const Login = ({ location }) => {
+const Login = () => {
   const {
     register,
     handleSubmit,
@@ -24,9 +24,7 @@ const Login = ({ location }) => {
   const [showTimeoutDialog, setShowTimeoutDialog] = useState(false);
 
   useEffect(() => {
-    const url = location.pathname.split("/");
-    const timeOut = url[url.length - 1];
-    if (timeOut === "timeout") {
+    if (window.location.href.endsWith("/timeout")) {
       setShowTimeoutDialog(true);
     }
   }, []);
@@ -118,7 +116,7 @@ const Login = ({ location }) => {
         isOpen={showTimeoutDialog}
         setIsOpen={setShowTimeoutDialog}
         title="Time Out"
-        content="Session is timeout. Please login one more time."
+        content="Session is timeout. Please login again."
         buttonText="Close"
         buttonStatus="fail"
       />

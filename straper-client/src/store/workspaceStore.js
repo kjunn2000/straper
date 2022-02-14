@@ -95,7 +95,7 @@ const useWorkspaceStore = create((set) => ({
   setDefaultSelectedChannelIds: () => {
     set((state) => {
       const newSelectedChannelIds = state.selectedChannelIds;
-      state.workspaces.foreach((workspace) => {
+      state.workspaces.forEach((workspace) => {
         if (workspace.channel_list.length > 0) {
           newSelectedChannelIds.set(
             workspace.workspace_id,

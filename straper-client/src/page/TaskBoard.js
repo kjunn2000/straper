@@ -7,7 +7,7 @@ import useWorkspaceStore from "../store/workspaceStore";
 import useBoardStore from "../store/boardStore";
 import { isEmpty } from "../service/object";
 import DragList from "../components/board/DragList";
-import { connect } from "../service/websocket";
+import { connect, isSocketOpen } from "../service/websocket";
 
 function TaskBoard() {
   const history = useHistory();
@@ -23,7 +23,9 @@ function TaskBoard() {
   useEffect(() => {
     getBoardData();
     getWorkspaceUsersInfo();
-    connect();
+    if (!isSocketOpen()) {
+      connect();
+    }
   }, []);
 
   const getBoardData = () => {
