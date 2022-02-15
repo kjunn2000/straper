@@ -13,9 +13,33 @@ Straper allows Administrator,
  To view and manage all the users
  To view and manage all the workspaces
 
-Bug
-1. Refresh token cookies not attaced to the request
-2. WS Server malfunctions when one of the client conn is closed
-
-Task
-1. Delete all the file in seaweedfs when delete a card/list/board
+Issue
+Issue Type
+1. Story
+2. Bug
+3. Epic
+Backlog Priority
+Summary
+Description
+Attachments
+Acceptance criteria
+Epic Link
+Sprint
+Story Points
+Steps to recreate/replicate
+Environment
+1. DEV (Local)
+2. TEST
+3. INTEGRATION
+4. ACCEPTANCE
+5. PRODUCTION
+Workaround
+Serverity
+1. Blocking
+2. Critical
+3. Major
+4. Normal
+5. Minor
+Labels
+Estimate Time
+Assignee

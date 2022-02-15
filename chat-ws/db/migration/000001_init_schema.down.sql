@@ -1,4 +1,6 @@
-DROP TABLE IF EXISTS ticket;
+DROP TABLE IF EXISTS issue_attachment;
+
+DROP TABLE IF EXISTS issue;
 
 DROP TABLE IF EXISTS card_comment;
 

@@ -123,18 +123,33 @@ CREATE TABLE `card_comment` (
   `created_date` DATETIME NOT NULL DEFAULT (now())
 );
 
-CREATE TABLE `ticket` (
-  `ticket_id` CHAR(36) PRIMARY KEY,
-  `title` VARCHAR(255) NOT NULL,
-  `type` VARCHAR(36) NOT NULL,
-  `status` VARCHAR(255) NOT NULL,
-  `priority` VARCHAR(5) NOT NULL,
-  `description` LONGTEXT NOT NULL,
-  `card_id` CHAR(36) NOT NULL,
-  `creator_id` VARCHAR(255) NOT NULL,
+CREATE TABLE `issue` (
+  `issue_id` CHAR(36) PRIMARY KEY,
+  `type` VARCHAR(5) NOT NULL,
+  `backlog_priority` VARCHAR(20),
+  `summary` VARCHAR(255) NOT NULL,
+  `description` LONGTEXT,
+  `acceptance_criteria` LONGTEXT,
+  `epic_link` CHAR(36),
+  `story_point` int,
+  `replicate_step` LONGTEXT,
+  `environment` VARCHAR(20),
+  `workaround` LONGTEXT,
+  `serverity` VARCHAR(8),
+  `label` VARCHAR(50),
+  `assignee` CHAR(36)
+  `estimate_time` DATETIME,
+  `workspace_id` CHAR(36) NOT NULL,
+  `creator_id` CHAR(36) NOT NULL,
   `created_date` DATETIME NOT NULL DEFAULT (now()),
-  `due_date` DATETIME NOT NULL
 );
+
+CREATE TABLE `issue_attachment`(
+  `fid` VARCHAR(255) PRIMARY KEY,
+  `file_name` VARCHAR(255) NOT NULL,
+  `file_type` VARCHAR(255) NOT NULL,
+  `issue_id` CHAR(36) NOT NULL
+)
 
 ALTER TABLE `user_credential` ADD FOREIGN KEY (`user_id`) REFERENCES `user_detail` (`user_id`) ON DELETE CASCADE;
 
@@ -183,6 +198,16 @@ ALTER TABLE `card_comment` ADD FOREIGN KEY (`creator_id`) REFERENCES `user_detai
 ALTER TABLE `ticket` ADD FOREIGN KEY (`card_id`) REFERENCES `card` (`card_id`) ON DELETE CASCADE;
 
 ALTER TABLE `ticket` ADD FOREIGN KEY (`creator_id`) REFERENCES `user_detail` (`user_id`) ON DELETE CASCADE;
+
+ALTER TABLE `issue` ADD FOREIGN KEY (`epic_link`) REFERENCES `issue` (`issue_id`) ON DELETE CASCADE;
+
+ALTER TABLE `issue` ADD FOREIGN KEY (`assignee`) REFERENCES `user_detail` (`user_id`) ON DELETE CASCADE;
+
+ALTER TABLE `issue` ADD FOREIGN KEY (`workspace_id`) REFERENCES `workspace` (`workspace_id`) ON DELETE CASCADE;
+
+ALTER TABLE `issue` ADD FOREIGN KEY (`creator_id`) REFERENCES `user_detail` (`user_id`) ON DELETE CASCADE;
+
+ALTER TABLE `issue_attachment` ADD FOREIGN KEY (`issue_id`) REFERENCES `issue` (`issue_id`) ON DELETE CASCADE;
 
 CREATE TRIGGER trigger_user_detail
 BEFORE INSERT

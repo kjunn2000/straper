@@ -6,6 +6,7 @@ import (
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/account"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/auth"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/board"
+	"github.com/kjunn2000/straper/chat-ws/pkg/domain/bug"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/chatting"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/websocket"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/adding"
@@ -114,4 +115,12 @@ type Querier interface {
 	GetFileCommentsByListId(ctx context.Context, listId string) ([]board.CardComment, error)
 
 	GetFidsByWorkspaceId(ctx context.Context, workspaceId string) ([]string, error)
+
+	CreateIssue(ctx context.Context, issue bug.Issue) error
+	GetIssuesByWorkspaceId(ctx context.Context, workspaceId string, limit, offset uint64) ([]bug.Issue, error)
+	UpdateIssue(ctx context.Context, issue bug.Issue) error
+	DeleteIssue(ctx context.Context, issueId string) error
+	CreateIssueAttachment(ctx context.Context, a bug.Attachment) error
+	GetIssueAttachments(ctx context.Context, fid string) ([]bug.Attachment, error)
+	DeleteIssueAttachment(ctx context.Context, fid string) error
 }

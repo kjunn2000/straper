@@ -31,7 +31,8 @@ func (q *Queries) GetCardComments(ctx context.Context, cardId string, limit, off
 	var cardComments []board.CardComment
 	sql, arg, err := sq.Select("comment_id", "type", "card_id", "creator_id", "content", "file_name",
 		"file_type", "created_date").
-		From("card_comment").Where(sq.Eq{"card_id": cardId}).OrderBy("created_date desc").Limit(limit).Offset(offset).ToSql()
+		From("card_comment").Where(sq.Eq{"card_id": cardId}).
+		OrderBy("created_date desc").Limit(limit).Offset(offset).ToSql()
 	if err != nil {
 		q.log.Warn("Failed to create select sql.")
 		return []board.CardComment{}, err
