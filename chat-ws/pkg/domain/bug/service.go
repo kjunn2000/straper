@@ -9,9 +9,9 @@ import (
 )
 
 type Service interface {
-	CreateIssue(ctx context.Context, issue Issue) error
-	GetIssuesByWorkspaceId(ctx context.Context, workspaceId string) ([]Issue, error)
-	UpdateIssue(ctx context.Context, issue Issue) error
+	CreateIssue(ctx context.Context, issue Issue) (Issue, error)
+	GetIssuesByWorkspaceId(ctx context.Context, workspaceId string, limit, offset uint64) ([]Issue, error)
+	UpdateIssue(ctx context.Context, param UpdateIssueParam) (Issue, error)
 	DeleteIssue(ctx context.Context, issueId string) error
 }
 
@@ -35,20 +35,21 @@ func NewService(log *zap.Logger, store Repository, sc SeaweedfsClient) *service 
 	}
 }
 
-func (s *service) CreateIssue(ctx context.Context, issue Issue) error {
+func (s *service) CreateIssue(ctx context.Context, issue Issue) (Issue, error) {
 	issueId, _ := uuid.NewRandom()
 	issue.IssueId = issueId.String()
 	issue.CreatedDate = time.Now()
-	for _, a := range issue.Attachments {
+	for i, a := range issue.Attachments {
 		fid, err := s.sc.SaveSeaweedfsFile(ctx, a.FileBytes)
 		if err != nil {
-			return err
+			return Issue{}, err
 		}
 		a.Fid = fid
 		a.IssueId = issueId.String()
 		s.store.CreateIssueAttachment(ctx, a)
+		issue.Attachments[i] = a
 	}
-	return s.store.CreateIssue(ctx, issue)
+	return issue, s.store.CreateIssue(ctx, issue)
 }
 
 func (s *service) GetIssuesByWorkspaceId(ctx context.Context, workspaceId string, limit, offset uint64) ([]Issue, error) {
@@ -75,24 +76,33 @@ func (s *service) GetIssuesByWorkspaceId(ctx context.Context, workspaceId string
 	return issues, nil
 }
 
-func (s *service) UpdateIssue(ctx context.Context, params UpdateIssueParam) error {
-	for _, a := range params.NewAttachments {
+func (s *service) UpdateIssue(ctx context.Context, params UpdateIssueParam) (Issue, error) {
+	for i, a := range params.NewAttachments {
 		fid, err := s.sc.SaveSeaweedfsFile(ctx, a.FileBytes)
 		if err != nil {
-			return err
+			return Issue{}, err
 		}
 		a.Fid = fid
-		s.store.CreateIssueAttachment(ctx, a)
+		a.IssueId = params.UpdatedIssue.IssueId
+		if err := s.store.CreateIssueAttachment(ctx, a); err != nil {
+			return Issue{}, err
+		}
+		params.NewAttachments[i] = a
 	}
 	for _, fid := range params.DeleteAttachments {
 		if err := s.sc.DeleteSeaweedfsFile(ctx, fid); err != nil {
-			return err
+			return Issue{}, err
 		}
 		if err := s.store.DeleteIssueAttachment(ctx, fid); err != nil {
-			return err
+			return Issue{}, err
 		}
 	}
-	return s.store.UpdateIssue(ctx, params.UpdatedIssue)
+	if err := s.store.UpdateIssue(ctx, params.UpdatedIssue); err != nil {
+		return Issue{}, err
+	}
+	params.UpdatedIssue.Attachments = append(params.UpdatedIssue.Attachments,
+		params.NewAttachments...)
+	return params.UpdatedIssue, nil
 }
 
 func (s *service) DeleteIssue(ctx context.Context, issueId string) error {

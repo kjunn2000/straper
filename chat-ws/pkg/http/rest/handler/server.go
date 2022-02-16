@@ -14,6 +14,7 @@ import (
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/account"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/auth"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/board"
+	"github.com/kjunn2000/straper/chat-ws/pkg/domain/bug"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/chatting"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/websocket"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/adding"
@@ -103,6 +104,7 @@ func (server *Server) SetServerRoute() (*mux.Router, error) {
 	listingService := listing.NewService(server.log, server.store)
 	editingService := editing.NewService(server.log, server.store)
 	deletingService := deleting.NewService(server.log, server.store, server.seaweedfsClient)
+	bugService := bug.NewService(server.log, server.store, server.seaweedfsClient)
 	websocketService := websocket.NewService(server.log, server.redisClient, chattingService, boardService)
 	websocketService.SetUpWSServer(context.Background())
 
@@ -111,6 +113,7 @@ func (server *Server) SetServerRoute() (*mux.Router, error) {
 	server.SetUpWorkspaceRouter(mr, addingService, listingService, editingService, deletingService, chattingService)
 	server.SetUpChannelRouter(mr, addingService, listingService, editingService, deletingService, chattingService)
 	server.SetUpBoardRouter(mr, boardService)
+	server.SetUpBugRouter(mr, bugService)
 	server.SetUpWebsocketRouter(mr, websocketService, chattingService, boardService)
 
 	server.httpServer.Handler = getCORSHandler()(mr)
