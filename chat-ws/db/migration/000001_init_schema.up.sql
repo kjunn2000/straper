@@ -137,11 +137,11 @@ CREATE TABLE `issue` (
   `workaround` LONGTEXT,
   `serverity` VARCHAR(8),
   `label` VARCHAR(50),
-  `assignee` CHAR(36)
+  `assignee` CHAR(36),
   `estimate_time` DATETIME,
   `workspace_id` CHAR(36) NOT NULL,
   `creator_id` CHAR(36) NOT NULL,
-  `created_date` DATETIME NOT NULL DEFAULT (now()),
+  `created_date` DATETIME NOT NULL DEFAULT (now())
 );
 
 CREATE TABLE `issue_attachment`(
@@ -149,7 +149,7 @@ CREATE TABLE `issue_attachment`(
   `file_name` VARCHAR(255) NOT NULL,
   `file_type` VARCHAR(255) NOT NULL,
   `issue_id` CHAR(36) NOT NULL
-)
+);
 
 ALTER TABLE `user_credential` ADD FOREIGN KEY (`user_id`) REFERENCES `user_detail` (`user_id`) ON DELETE CASCADE;
 
@@ -194,10 +194,6 @@ ALTER TABLE `checklist_item` ADD FOREIGN KEY (`card_id`) REFERENCES `card` (`car
 ALTER TABLE `card_comment` ADD FOREIGN KEY (`card_id`) REFERENCES `card` (`card_id`) ON DELETE CASCADE;
 
 ALTER TABLE `card_comment` ADD FOREIGN KEY (`creator_id`) REFERENCES `user_detail` (`user_id`) ON DELETE CASCADE;
-
-ALTER TABLE `ticket` ADD FOREIGN KEY (`card_id`) REFERENCES `card` (`card_id`) ON DELETE CASCADE;
-
-ALTER TABLE `ticket` ADD FOREIGN KEY (`creator_id`) REFERENCES `user_detail` (`user_id`) ON DELETE CASCADE;
 
 ALTER TABLE `issue` ADD FOREIGN KEY (`epic_link`) REFERENCES `issue` (`issue_id`) ON DELETE CASCADE;
 
