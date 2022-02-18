@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import useWorkspaceStore from "../../store/workspaceStore";
 import { useHistory } from "react-router";
-import AddDialog from "../dialog/AddDialog";
+import AddDialog from "./AddDialog";
+import JoinDialog from "./JoinDialog";
 import api from "../../axios/api";
-import JoinDialog from "../dialog/JoinDialog";
 import SidebarIcon from "./SidebarIcon";
 
 function WorkspaceNavigator() {

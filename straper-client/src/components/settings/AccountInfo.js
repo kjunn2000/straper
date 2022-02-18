@@ -2,8 +2,8 @@ import { ErrorMessage } from "@hookform/error-message";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import api from "../../axios/api";
+import SimpleDialog from "../../shared/dialog/SimpleDialog";
 import useIdentityStore from "../../store/identityStore";
-import SimpleDialog from "../dialog/SimpleDialog";
 
 const AccountInfo = () => {
   const {

@@ -17,8 +17,9 @@ type Issue struct {
 	Serverity          string       `json:"serverity" db:"serverity"`
 	Label              string       `json:"label" db:"label"`
 	Assignee           string       `json:"assignee" db:"assignee"`
-	EstimateTime       time.Time    `json:"estimate_time" db:"estimate_time"`
-	CreatorId          string       `json:"creator_id" db:"creator_id"`
+	Reporter           string       `json:"reporter" db:"reporter"`
+	DueTime            time.Time    `json:"due_time" db:"due_time"`
+	Status             string       `json:"status" db:"status"`
 	CreatedDate        time.Time    `json:"created_date" db:"created_date"`
 	Attachments        []Attachment `json:"attachment"`
 }

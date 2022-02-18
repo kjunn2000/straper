@@ -6,7 +6,7 @@ import AccountInfo from "../components/settings/AccountInfo";
 import UserPassword from "../components/settings/UserPassword";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import { logOut } from "../service/logout";
-import ActionDialog from "../components/dialog/ActionDialog";
+import ActionDialog from "../shared/dialog/ActionDialog";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");

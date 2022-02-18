@@ -1,10 +1,10 @@
 import React, { useRef } from "react";
-import UploadButton from "../button/UploadButton";
 import useIdentityStore from "../../store/identityStore";
 import { getAsByteArray } from "../../service/file";
 import { sendBoardMsg } from "../../service/websocket";
 import useBoardStore from "../../store/boardStore";
 import { IoSendSharp } from "react-icons/io5";
+import UploadButton from "../../shared/button/UploadButton";
 
 const CommentInput = ({ cardId }) => {
   const inputRef = useRef(null);

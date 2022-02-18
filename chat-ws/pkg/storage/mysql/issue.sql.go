@@ -12,10 +12,10 @@ func (q *Queries) CreateIssue(ctx context.Context, issue bug.Issue) error {
 	sql, arg, err := sq.Insert("issue").
 		Columns("issue_id", "type", "backlog_priority", "summary", "description", "acceptance_criteria",
 			"epic_link", "story_point", "replicate_step", "environment", "workaround", "serverity",
-			"label", "assignee", "estimate_time", "creator_id", "created_date").
+			"label", "assignee", "reporter", "due_time", "status", "created_date").
 		Values(issue.IssueId, issue.Type, issue.BacklogPriority, issue.Summary, issue.Description, issue.AcceptanceCriteria,
 			issue.EpicLink, issue.StoryPoint, issue.ReplicateStep, issue.Environment, issue.Workaround, issue.Serverity,
-			issue.Label, issue.Assignee, issue.EstimateTime, issue.CreatorId, issue.CreatedDate).
+			issue.Label, issue.Assignee, issue.Reporter, issue.DueTime, issue.Status, issue.CreatedDate).
 		ToSql()
 	if err != nil {
 		q.log.Warn("Failed to create issue query.")
@@ -33,7 +33,7 @@ func (q *Queries) GetIssuesByWorkspaceId(ctx context.Context, workspaceId string
 	var issues []bug.Issue
 	sql, arg, err := sq.Select("issue_id", "type", "backlog_priority", "summary", "description", "acceptance_criteria",
 		"epic_link", "story_point", "replicate_step", "environment", "workaround", "serverity",
-		"label", "assignee", "estimate_time", "creator_id", "created_date").
+		"label", "assignee", "reporter", "due_time", "status", "created_date").
 		From("issue").
 		Where(sq.Eq{"workspace_id": workspaceId}).
 		OrderBy("created_date desc").Limit(limit).Offset(offset).ToSql()
@@ -63,7 +63,8 @@ func (q *Queries) UpdateIssue(ctx context.Context, issue bug.Issue) error {
 		Set("serverity", issue.Serverity).
 		Set("label", issue.Label).
 		Set("assignee", issue.Assignee).
-		Set("estimate_time", issue.EstimateTime).
+		Set("due_time", issue.DueTime).
+		Set("status", issue.Status).
 		Where(sq.Eq{"issue_id": issue.IssueId}).
 		ToSql()
 	if err != nil {

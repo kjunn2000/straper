@@ -2,12 +2,10 @@ import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import api from "../../axios/api";
 import useIdentityStore from "../../store/identityStore";
-import SimpleDialog from "../dialog/SimpleDialog";
+import SimpleDialog from "../../shared/dialog/SimpleDialog";
 
 const UserPassword = () => {
-  const {
-    handleSubmit,
-  } = useForm();
+  const { handleSubmit } = useForm();
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [showFailDialog, setShowFailDialog] = useState(false);
   const [dialogErrMsg, setDialogErrMsg] = useState("");
@@ -18,10 +16,7 @@ const UserPassword = () => {
       email: identity.email,
     };
     api
-      .post(
-        "/account/reset-password/create",
-        payload
-      )
+      .post("/account/reset-password/create", payload)
       .then((res) => {
         if (res.data.Success) {
           setShowSuccessDialog(true);

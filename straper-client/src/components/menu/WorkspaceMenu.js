@@ -7,9 +7,9 @@ import useWorkspaceStore from "../../store/workspaceStore";
 import api from "../../axios/api";
 import MenuItem from "./MenuItem";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
-import ActionDialog from "../dialog/ActionDialog";
-import SimpleDialog from "../dialog/SimpleDialog";
 import { copyTextToClipboard } from "../../service/navigator";
+import ActionDialog from "../../shared/dialog/ActionDialog";
+import SimpleDialog from "../../shared/dialog/SimpleDialog";
 
 export default function WorkspaceMenu() {
   const [isCreator, setIsCreator] = useState(false);

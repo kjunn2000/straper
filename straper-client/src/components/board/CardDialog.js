@@ -12,7 +12,7 @@ import { useForm } from "react-hook-form";
 import { BsCardChecklist, BsFillChatDotsFill } from "react-icons/bs";
 import { AiFillDelete, AiOutlineClose } from "react-icons/ai";
 import CardComment from "./CardComment";
-import ActionDialog from "../dialog/ActionDialog";
+import ActionDialog from "../../shared/dialog/ActionDialog";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import AddMember from "./AddMember";

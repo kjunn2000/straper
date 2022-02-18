@@ -1,8 +1,8 @@
 import { Menu, Transition } from "@headlessui/react";
-import { Fragment,  useState } from "react";
-import { AiFillEdit, AiFillDelete} from "react-icons/ai";
+import { Fragment, useState } from "react";
+import { AiFillEdit, AiFillDelete } from "react-icons/ai";
 import { FiMoreHorizontal } from "react-icons/fi";
-import ActionDialog from "../dialog/ActionDialog";
+import ActionDialog from "../../shared/dialog/ActionDialog";
 import MenuItem from "../menu/MenuItem";
 
 export default function MessageMenu({ type, editMsg, deleteMsg }) {

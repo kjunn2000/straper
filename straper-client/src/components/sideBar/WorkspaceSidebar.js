@@ -8,10 +8,10 @@ import useIdentityStore from "../../store/identityStore";
 import useWorkspaceStore from "../../store/workspaceStore";
 import { darkGrayBg } from "../../utils/style/color";
 import { iconStyle } from "../../utils/style/icon";
-import ActionDialog from "../dialog/ActionDialog";
-import AddDialog from "../dialog/AddDialog";
-import JoinDialog from "../dialog/JoinDialog";
-import SimpleDialog from "../dialog/SimpleDialog";
+import ActionDialog from "../../shared/dialog/ActionDialog";
+import AddDialog from "./AddDialog";
+import JoinDialog from "./JoinDialog";
+import SimpleDialog from "../../shared/dialog/SimpleDialog";
 import WorkspaceMenu from "../menu/WorkspaceMenu";
 import AccountStatus from "./AccountStatus";
 
@@ -155,8 +155,20 @@ function WorkspaceSidebar() {
       {currWorkspace.workspace_id ? (
         <div className="flex flex-col w-64">
           <WorkspaceMenu />
+          <div
+            className="p-3 text-sm text-gray-400 cursor-pointer hover:text-white"
+            onClick={() => history.push("/board")}
+          >
+            <span>TASK BOARD</span>
+          </div>
+          <div
+            className="p-3 text-sm text-gray-400 cursor-pointer hover:text-white"
+            onClick={() => history.push("/bug")}
+          >
+            <span>BUG DASHBOARD</span>
+          </div>
           <div>
-            <div className="p-5 text-sm text-gray-400 flex justify-between hover:text-white">
+            <div className="p-3 text-sm text-gray-400 flex justify-between hover:text-white">
               <span>CHANNELS</span>
               <AiOutlinePlus onClick={() => setAddChannelDialogOpen(true)} />
             </div>
@@ -201,15 +213,6 @@ function WorkspaceSidebar() {
                 ))}
             </div>
           </div>
-          <div>
-            <div
-              className="p-5 text-sm text-gray-400 cursor-pointer hover:text-white"
-              onClick={() => history.push("/board")}
-            >
-              <span>TASK BOARD</span>
-            </div>
-          </div>
-
           <AddDialog
             isOpen={isAddChannelDialogOpen}
             close={() => setAddChannelDialogOpen(false)}

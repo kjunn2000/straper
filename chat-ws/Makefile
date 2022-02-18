@@ -27,3 +27,9 @@ mock:
 
 build:
 		docker build -t straper:latest .
+
+docker-up:
+		docker start chat-ws-mysql-1 straper-redis
+
+docker-down:
+		docker stop $(docker ps -q)

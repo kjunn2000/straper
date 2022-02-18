@@ -2,10 +2,10 @@ import React, { useRef } from "react";
 import { sendChatMsg } from "../../service/websocket";
 import useIdentityStore from "../../store/identityStore";
 import useWorkspaceStore from "../../store/workspaceStore";
-import UploadButton from "../button/UploadButton";
 import { IoSendSharp } from "react-icons/io5";
 import { isEmpty } from "../../service/object";
 import { getAsByteArray } from "../../service/file";
+import UploadButton from "../../shared/button/UploadButton";
 
 const ChatInput = () => {
   const currChannel = useWorkspaceStore((state) => state.currChannel);

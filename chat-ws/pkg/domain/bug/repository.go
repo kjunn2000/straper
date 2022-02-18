@@ -9,4 +9,5 @@ type Repository interface {
 	CreateIssueAttachment(ctx context.Context, a Attachment) error
 	GetIssueAttachments(ctx context.Context, fid string) ([]Attachment, error)
 	DeleteIssueAttachment(ctx context.Context, fid string) error
+	DeleteIssueAndAttachments(ctx context.Context, issueId string, attachments []Attachment) error
 }

@@ -6,7 +6,7 @@ import { useForm } from "react-hook-form";
 import { ErrorMessage } from "@hookform/error-message";
 import "./login.scss";
 import api from "../axios/api";
-import SimpleDialog from "../components/dialog/SimpleDialog";
+import SimpleDialog from "../shared/dialog/SimpleDialog";
 
 const Login = () => {
   const {

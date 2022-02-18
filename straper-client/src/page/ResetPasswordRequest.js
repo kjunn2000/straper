@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { Link, useHistory } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import SimpleDialog from "../components/dialog/SimpleDialog";
 import { ErrorMessage } from "@hookform/error-message";
 import api from "../axios/api";
+import SimpleDialog from "../shared/dialog/SimpleDialog";
 
 const ResetPassword = () => {
   const history = useHistory();

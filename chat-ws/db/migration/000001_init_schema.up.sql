@@ -138,9 +138,10 @@ CREATE TABLE `issue` (
   `serverity` VARCHAR(8),
   `label` VARCHAR(50),
   `assignee` CHAR(36),
-  `estimate_time` DATETIME,
+  `reporter` CHAR(36) NOT NULL,
+  `due_time` DATETIME,
+  `status` VARCHAR(20) NOT NULL,
   `workspace_id` CHAR(36) NOT NULL,
-  `creator_id` CHAR(36) NOT NULL,
   `created_date` DATETIME NOT NULL DEFAULT (now())
 );
 

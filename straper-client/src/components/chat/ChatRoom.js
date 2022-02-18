@@ -76,7 +76,7 @@ const ChatRoom = () => {
       <span className="pb-5 text-white font-semibold">
         START THE CONVERSATION
       </span>
-      <Text />
+      <Text className="w-auto h-80 max-w-full max-h-full" />
     </div>
   );
 
