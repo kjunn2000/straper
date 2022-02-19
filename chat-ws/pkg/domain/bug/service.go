@@ -13,6 +13,8 @@ type Service interface {
 	GetIssuesByWorkspaceId(ctx context.Context, workspaceId string, limit, offset uint64) ([]Issue, error)
 	UpdateIssue(ctx context.Context, param UpdateIssueParam) (Issue, error)
 	DeleteIssue(ctx context.Context, issueId string) error
+	GetEpicLinkOptions(ctx context.Context, workspaceId string) ([]EpicLinkOption, error)
+	GetAssigneeOptions(ctx context.Context, workspaceId string) ([]Assignee, error)
 }
 
 type service struct {
@@ -116,4 +118,12 @@ func (s *service) DeleteIssue(ctx context.Context, issueId string) error {
 		}
 	}
 	return s.store.DeleteIssueAndAttachments(ctx, issueId, attachments)
+}
+
+func (s *service) GetEpicLinkOptions(ctx context.Context, workspaceId string) ([]EpicLinkOption, error) {
+	return s.store.GetEpicListByWorkspaceId(ctx, workspaceId)
+}
+
+func (s *service) GetAssigneeOptions(ctx context.Context, workspaceId string) ([]Assignee, error) {
+	return s.store.GetAssigneeListByWorkspaceId(ctx, workspaceId)
 }

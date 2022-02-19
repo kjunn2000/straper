@@ -8,6 +8,7 @@ import (
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/account"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/auth"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/board"
+	"github.com/kjunn2000/straper/chat-ws/pkg/domain/bug"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/chatting"
 	"go.uber.org/zap"
 )
@@ -150,6 +151,25 @@ func (q *Queries) GetUserInfoListByWorkspaceId(ctx context.Context, workspaceId 
 	if err != nil {
 		q.log.Warn("Failed to get user info list.", zap.Error(err))
 		return []account.UserInfo{}, err
+	}
+	return userList, nil
+}
+
+func (q *Queries) GetAssigneeListByWorkspaceId(ctx context.Context, workspaceId string) ([]bug.Assignee, error) {
+	var userList []bug.Assignee
+	sta, arg, err := sq.Select("wu.user_id", "username").
+		From("user_detail").
+		InnerJoin("workspace_user wu on user_detail.user_id = wu.user_id").
+		Where(sq.Eq{"workspace_id": workspaceId}).
+		ToSql()
+	if err != nil {
+		q.log.Warn("Failed to create select sql.")
+		return []bug.Assignee{}, err
+	}
+	err = q.db.Select(&userList, sta, arg...)
+	if err != nil {
+		q.log.Warn("Failed to get user info list.", zap.Error(err))
+		return []bug.Assignee{}, err
 	}
 	return userList, nil
 }

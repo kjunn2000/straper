@@ -202,9 +202,9 @@ ALTER TABLE `issue` ADD FOREIGN KEY (`assignee`) REFERENCES `user_detail` (`user
 
 ALTER TABLE `issue` ADD FOREIGN KEY (`workspace_id`) REFERENCES `workspace` (`workspace_id`) ON DELETE CASCADE;
 
-ALTER TABLE `issue` ADD FOREIGN KEY (`creator_id`) REFERENCES `user_detail` (`user_id`) ON DELETE CASCADE;
+ALTER TABLE `issue` ADD FOREIGN KEY (`reporter`) REFERENCES `user_detail` (`user_id`) ON DELETE CASCADE;
 
-ALTER TABLE `issue_attachment` ADD FOREIGN KEY (`issue_id`) REFERENCES `issue` (`issue_id`) ON DELETE CASCADE;
+ALTER TABLE `issue_attacehment` ADD FOREIGN KEY (`issue_id`) REFERENCES `issue` (`issue_id`) ON DELETE CASCADE;
 
 CREATE TRIGGER trigger_user_detail
 BEFORE INSERT

@@ -1,6 +1,8 @@
 package bug
 
-import "context"
+import (
+	"context"
+)
 
 type Repository interface {
 	CreateIssue(ctx context.Context, issue Issue) error
@@ -10,4 +12,6 @@ type Repository interface {
 	GetIssueAttachments(ctx context.Context, fid string) ([]Attachment, error)
 	DeleteIssueAttachment(ctx context.Context, fid string) error
 	DeleteIssueAndAttachments(ctx context.Context, issueId string, attachments []Attachment) error
+	GetEpicListByWorkspaceId(ctx context.Context, workspaceId string) ([]EpicLinkOption, error)
+	GetAssigneeListByWorkspaceId(ctx context.Context, workspaceId string) ([]Assignee, error)
 }

@@ -1,13 +1,47 @@
 import { Dialog, Transition } from "@headlessui/react";
-import { Fragment, useRef, useState } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { ErrorMessage } from "@hookform/error-message";
 import DatePicker from "react-datepicker";
+import useWorkpaceStore from "../../store/workspaceStore";
+import api from "../../axios/api";
+import useIdentityStore from "../../store/identityStore";
 
 export default function CreateIssueDialog({ isOpen, closeDialog }) {
   const cancelButtonRef = useRef();
   const [errMsg, setErrMsg] = useState("");
-  const [dueDate, setDueDate] = useState();
+  const [dueDate, setDueDate] = useState(new Date());
+  const [epicLinkOptions, setEpicLinkOptions] = useState([]);
+  const [assigneeOptions, setAssigneeOptions] = useState([]);
+
+  const currWorkspace = useWorkpaceStore((state) => state.currWorkspace);
+  const identity = useIdentityStore((state) => state.identity);
+
+  useEffect(() => {
+    fetchEpicLinkOptions();
+    fetchAssigneeOptions();
+  }, []);
+
+  const fetchEpicLinkOptions = async () => {
+    const res = await api.get(
+      `/protected/issue/epic-link/option/${currWorkspace.workspace_id}`
+    );
+    if (res.data.Success) {
+      setEpicLinkOptions(res.data.Data);
+    }
+  };
+
+  const fetchAssigneeOptions = async () => {
+    const res = await api.get(
+      `/protected/issue/assignee/option/${currWorkspace.workspace_id}`
+    );
+    if (res.data.Success) {
+      const data = res.data.Data.filter(
+        (user) => user.user_id !== identity.user_id
+      );
+      setAssigneeOptions(data);
+    }
+  };
 
   const {
     register,
@@ -21,6 +55,17 @@ export default function CreateIssueDialog({ isOpen, closeDialog }) {
     resetField();
     clearErrors();
     closeDialog();
+  };
+
+  const createIssue = async (data) => {
+    dueDate.setHours(0, 0, 0, 0);
+    data.due_time = dueDate.toJSON();
+    data.workspace_id = currWorkspace.workspace_id;
+    data.story_point = parseInt(data.story_point);
+    const res = await api.post("/protected/issue/create", data);
+    if (res.data.Success) {
+      console.log(res.data.Data);
+    }
   };
 
   const Title = ({ text, required }) => (
@@ -74,7 +119,9 @@ export default function CreateIssueDialog({ isOpen, closeDialog }) {
                 Create Issue
               </Dialog.Title>
               <form
-                onSubmit={handleSubmit(() => {})}
+                onSubmit={handleSubmit((data) => {
+                  createIssue(data);
+                })}
                 className="rounded-lg flex-col space-y-5 w-96 h-auto self-center py-5"
               >
                 <div>
@@ -128,7 +175,14 @@ export default function CreateIssueDialog({ isOpen, closeDialog }) {
                   <select
                     {...register("epic_link")}
                     className="w-2/3 p-2 rounded bg-gray-200 hover:cursor-pointer focus:outline-none"
-                  ></select>
+                  >
+                    {epicLinkOptions &&
+                      epicLinkOptions.map((option) => (
+                        <option value={option.issue_id}>
+                          {option.Summary}
+                        </option>
+                      ))}
+                  </select>
                   <ErrorMessage errors={errors} name="epic_link" as="p" />
                 </div>
                 <div>
@@ -157,11 +211,41 @@ export default function CreateIssueDialog({ isOpen, closeDialog }) {
                   <ErrorMessage errors={errors} name="environment" as="p" />
                 </div>
                 <div>
+                  <Title text="Workaround" required={false} />
+                  <textarea
+                    className="w-full p-1 rounded-lg bg-gray-200"
+                    {...register("workaround")}
+                  />
+                  <ErrorMessage errors={errors} name="workaround" as="p" />
+                </div>
+                <div>
+                  <Title text="Priority" required={false} />
+                  <select
+                    {...register("backlog_priority")}
+                    className="w-2/3 p-2 rounded bg-gray-200 hover:cursor-pointer focus:outline-none"
+                  >
+                    {Array.from({ length: 5 }, (v, k) => k + 1).map((val) => (
+                      <option value={val}>{val}</option>
+                    ))}
+                  </select>
+                  <ErrorMessage
+                    errors={errors}
+                    name="backlog_priority"
+                    as="p"
+                  />
+                </div>
+                <div>
                   <Title text="Serverity" required={false} />
                   <select
                     {...register("serverity")}
                     className="w-2/3 p-2 rounded bg-gray-200 hover:cursor-pointer focus:outline-none"
-                  ></select>
+                  >
+                    <option value="blocker">Blocker</option>
+                    <option value="critical">Critical</option>
+                    <option value="major">Major</option>
+                    <option value="minor">Minor</option>
+                    <option value="low">Low</option>
+                  </select>
                   <ErrorMessage errors={errors} name="serverity" as="p" />
                 </div>
                 <div>
@@ -177,7 +261,14 @@ export default function CreateIssueDialog({ isOpen, closeDialog }) {
                   <select
                     {...register("assignee")}
                     className="w-2/3 p-2 rounded bg-gray-200 hover:cursor-pointer focus:outline-none"
-                  ></select>
+                  >
+                    {assigneeOptions &&
+                      assigneeOptions.map((option) => (
+                        <option value={option.user_id}>
+                          {option.username}
+                        </option>
+                      ))}
+                  </select>
                   <ErrorMessage errors={errors} name="assignee" as="p" />
                 </div>
                 <div>

@@ -116,6 +116,7 @@ type Querier interface {
 
 	GetFidsByWorkspaceId(ctx context.Context, workspaceId string) ([]string, error)
 
+	// bug
 	CreateIssue(ctx context.Context, issue bug.Issue) error
 	GetIssuesByWorkspaceId(ctx context.Context, workspaceId string, limit, offset uint64) ([]bug.Issue, error)
 	UpdateIssue(ctx context.Context, issue bug.Issue) error
@@ -123,4 +124,6 @@ type Querier interface {
 	CreateIssueAttachment(ctx context.Context, a bug.Attachment) error
 	GetIssueAttachments(ctx context.Context, fid string) ([]bug.Attachment, error)
 	DeleteIssueAttachment(ctx context.Context, fid string) error
+	GetEpicListByWorkspaceId(ctx context.Context, workspaceId string) ([]bug.EpicLinkOption, error)
+	GetAssigneeListByWorkspaceId(ctx context.Context, workspaceId string) ([]bug.Assignee, error)
 }

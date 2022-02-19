@@ -17,15 +17,22 @@ func (server *Server) SetUpBugRouter(mr *mux.Router, bs bug.Service) {
 	br.HandleFunc("/list/read/{workspace_id}", server.GetIssues(bs)).Methods("GET")
 	br.HandleFunc("/update", server.UpdateIssue(bs)).Methods("POST")
 	br.HandleFunc("/delete/{issue_id}", server.DeleteIssue(bs)).Methods("POST")
+	br.HandleFunc("/epic-link/option/{workspace_id}", server.GetEpicLinkOptions(bs)).Methods("GET")
+	br.HandleFunc("/assignee/option/{workspace_id}", server.GetAssigneeOptions(bs)).Methods("GET")
 	br.Use(middleware.TokenVerifier(server.tokenMaker))
 }
 
 func (server *Server) CreateIssue(bs bug.Service) func(http.ResponseWriter, *http.Request) {
 	return func(rw http.ResponseWriter, r *http.Request) {
+		userId, err := server.getUserIdFromToken(r)
+		if err != nil {
+			rest.AddResponseToResponseWritter(rw, nil, err.Error())
+			return
+		}
 		var issue bug.Issue
 		json.NewDecoder(r.Body).Decode(&issue)
-
-		issue, err := bs.CreateIssue(r.Context(), issue)
+		issue.Reporter = userId
+		issue, err = bs.CreateIssue(r.Context(), issue)
 		if err != nil {
 			rest.AddResponseToResponseWritter(rw, nil, err.Error())
 			return
@@ -89,5 +96,39 @@ func (server *Server) DeleteIssue(bs bug.Service) func(w http.ResponseWriter, r 
 			return
 		}
 		rest.AddResponseToResponseWritter(w, nil, "")
+	}
+}
+
+func (server *Server) GetEpicLinkOptions(bs bug.Service) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		workspaceId, ok := vars["workspace_id"]
+		if !ok {
+			rest.AddResponseToResponseWritter(w, nil, "workspace.id.not.found")
+			return
+		}
+		options, err := bs.GetEpicLinkOptions(r.Context(), workspaceId)
+		if err != nil {
+			rest.AddResponseToResponseWritter(w, nil, err.Error())
+			return
+		}
+		rest.AddResponseToResponseWritter(w, options, "")
+	}
+}
+
+func (server *Server) GetAssigneeOptions(bs bug.Service) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		workspaceId, ok := vars["workspace_id"]
+		if !ok {
+			rest.AddResponseToResponseWritter(w, nil, "workspace.id.not.found")
+			return
+		}
+		options, err := bs.GetAssigneeOptions(r.Context(), workspaceId)
+		if err != nil {
+			rest.AddResponseToResponseWritter(w, nil, err.Error())
+			return
+		}
+		rest.AddResponseToResponseWritter(w, options, "")
 	}
 }

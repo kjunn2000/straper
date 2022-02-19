@@ -9,13 +9,27 @@ import (
 )
 
 func (q *Queries) CreateIssue(ctx context.Context, issue bug.Issue) error {
+	column := []string{
+		"issue_id", "type", "backlog_priority", "summary", "description", "acceptance_criteria",
+		"story_point", "replicate_step", "environment", "workaround", "serverity", "label",
+		"reporter", "due_time", "status", "workspace_id", "created_date",
+	}
+	values := []interface{}{
+		issue.IssueId, issue.Type, issue.BacklogPriority, issue.Summary, issue.Description, issue.AcceptanceCriteria,
+		issue.StoryPoint, issue.ReplicateStep, issue.Environment, issue.Workaround, issue.Serverity, issue.Label,
+		issue.Reporter, issue.DueTime, issue.Status, issue.WorkspaceId, issue.CreatedDate,
+	}
+	if issue.EpicLink != "" {
+		column = append(column, "epic_link")
+		values = append(values, issue.EpicLink)
+	}
+	if issue.Assignee != "" {
+		column = append(column, "assignee")
+		values = append(values, issue.Assignee)
+	}
 	sql, arg, err := sq.Insert("issue").
-		Columns("issue_id", "type", "backlog_priority", "summary", "description", "acceptance_criteria",
-			"epic_link", "story_point", "replicate_step", "environment", "workaround", "serverity",
-			"label", "assignee", "reporter", "due_time", "status", "created_date").
-		Values(issue.IssueId, issue.Type, issue.BacklogPriority, issue.Summary, issue.Description, issue.AcceptanceCriteria,
-			issue.EpicLink, issue.StoryPoint, issue.ReplicateStep, issue.Environment, issue.Workaround, issue.Serverity,
-			issue.Label, issue.Assignee, issue.Reporter, issue.DueTime, issue.Status, issue.CreatedDate).
+		Columns(column...).
+		Values(values...).
 		ToSql()
 	if err != nil {
 		q.log.Warn("Failed to create issue query.")
@@ -33,7 +47,7 @@ func (q *Queries) GetIssuesByWorkspaceId(ctx context.Context, workspaceId string
 	var issues []bug.Issue
 	sql, arg, err := sq.Select("issue_id", "type", "backlog_priority", "summary", "description", "acceptance_criteria",
 		"epic_link", "story_point", "replicate_step", "environment", "workaround", "serverity",
-		"label", "assignee", "reporter", "due_time", "status", "created_date").
+		"label", "assignee", "reporter", "due_time", "status", "workspace_id", "created_date").
 		From("issue").
 		Where(sq.Eq{"workspace_id": workspaceId}).
 		OrderBy("created_date desc").Limit(limit).Offset(offset).ToSql()
@@ -49,22 +63,27 @@ func (q *Queries) GetIssuesByWorkspaceId(ctx context.Context, workspaceId string
 }
 
 func (q *Queries) UpdateIssue(ctx context.Context, issue bug.Issue) error {
-	sql, args, err := sq.Update("issue").
+	updateBuilder := sq.Update("issue").
 		Set("type", issue.Type).
 		Set("backlog_priority", issue.BacklogPriority).
 		Set("summary", issue.Summary).
 		Set("description", issue.Description).
 		Set("acceptance_criteria", issue.AcceptanceCriteria).
-		Set("epic_link", issue.EpicLink).
 		Set("story_point", issue.StoryPoint).
 		Set("replicate_step", issue.ReplicateStep).
 		Set("environment", issue.Environment).
 		Set("workaround", issue.Workaround).
 		Set("serverity", issue.Serverity).
 		Set("label", issue.Label).
-		Set("assignee", issue.Assignee).
 		Set("due_time", issue.DueTime).
-		Set("status", issue.Status).
+		Set("status", issue.Status)
+	if issue.EpicLink != "" {
+		updateBuilder.Set("epic_link", issue.EpicLink)
+	}
+	if issue.Assignee != "" {
+		updateBuilder.Set("assignee", issue.Assignee)
+	}
+	sql, args, err := updateBuilder.
 		Where(sq.Eq{"issue_id": issue.IssueId}).
 		ToSql()
 	if err != nil {
@@ -162,4 +181,23 @@ func (q *Queries) DeleteIssueAttachment(ctx context.Context, fid string) error {
 		return err
 	}
 	return nil
+}
+
+func (q *Queries) GetEpicListByWorkspaceId(ctx context.Context, workspaceId string) ([]bug.EpicLinkOption, error) {
+	var issues []bug.EpicLinkOption
+	sql, arg, err := sq.Select("issue_id", "summary").
+		From("issue").
+		Where(sq.Eq{"workspace_id": workspaceId}).
+		Where(sq.Eq{"type": "epic"}).
+		OrderBy("created_date desc").
+		ToSql()
+	if err != nil {
+		q.log.Warn("Failed to create select sql.")
+		return []bug.EpicLinkOption{}, err
+	}
+	err = q.db.Select(&issues, sql, arg...)
+	if err != nil {
+		return []bug.EpicLinkOption{}, err
+	}
+	return issues, nil
 }
