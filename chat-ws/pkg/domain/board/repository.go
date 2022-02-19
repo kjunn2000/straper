@@ -19,8 +19,25 @@ type Repository interface {
 
 	CreateCard(ctx context.Context, card Card) error
 	UpdateCard(ctx context.Context, params UpdateCardParams) error
+	UpdateCardDueDate(ctx context.Context, params UpdateCardDueDateParams) error
 	UpdateCardOrder(ctx context.Context, cardId string, orderIndex int, listId string, updateListId bool) error
 	DeleteCard(ctx context.Context, cardId string) error
-	AddUserToCard(ctx context.Context, cardId, userId string) error
+
+	GetUserFromCard(ctx context.Context, cardId string) ([]string, error)
+	AddUserListToCard(ctx context.Context, cardId string, userIdList []string) error
 	DeleteUserFromCard(ctx context.Context, cardId, userId string) error
+
+	GetChecklistItemsByCardId(ctx context.Context, cardId string) ([]CardChecklistItem, error)
+	CreateChecklistItem(ctx context.Context, checklistItem CardChecklistItemDto) error
+	UpdateChecklistItem(ctx context.Context, checklistItem CardChecklistItemDto) error
+	DeleteChecklistItem(ctx context.Context, itemId string) error
+
+	CreateCardComment(ctx context.Context, comment *CardComment) error
+	GetCardComments(ctx context.Context, cardId string, limit, offset uint64) ([]CardComment, error)
+	EditCardComment(ctx context.Context, params CardEditCommentParams) error
+	DeleteCardComment(ctx context.Context, commentId string) error
+	GetFileCommentsByCardId(ctx context.Context, cardId string) ([]CardComment, error)
+	GetFileCommentsByListId(ctx context.Context, listId string) ([]CardComment, error)
+
+	GetBoardUserInfoByUserId(ctx context.Context, userId string) (UserDetail, error)
 }

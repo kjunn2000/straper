@@ -7,6 +7,7 @@ type Repository interface {
 	GetUserDetailByUserId(ctx context.Context, userId string) (UserDetail, error)
 	GetUserDetailByUsername(ctx context.Context, username string) (UserDetail, error)
 	GetUserDetailByEmail(ctx context.Context, email string) (UserDetail, error)
+	GetUserInfoListByWorkspaceId(ctx context.Context, workspaceId string) ([]UserInfo, error)
 	UpdateUser(ctx context.Context, user UpdateUserParam) error
 	UpdateAccountPassword(ctx context.Context, userId, password string) error
 	UpdateAccountStatus(ctx context.Context, userId, status string) error

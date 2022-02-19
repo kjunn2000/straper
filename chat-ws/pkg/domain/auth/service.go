@@ -97,7 +97,6 @@ func (as *service) RefreshToken(ctx context.Context, refreshToken string) (strin
 	if err != nil {
 		return "", err
 	}
-
 	return accessToken, nil
 }
 

@@ -1,12 +1,13 @@
 import React, { useRef } from "react";
-import { sendMsg } from "../../service/websocket";
+import { sendChatMsg } from "../../service/websocket";
 import useIdentityStore from "../../store/identityStore";
 import useWorkspaceStore from "../../store/workspaceStore";
-import UploadButton from "../button/UploadButton";
 import { IoSendSharp } from "react-icons/io5";
 import { isEmpty } from "../../service/object";
+import { getAsByteArray } from "../../service/file";
+import UploadButton from "../../shared/button/UploadButton";
 
-const ChatInput = ({ scrollToBottom }) => {
+const ChatInput = () => {
   const currChannel = useWorkspaceStore((state) => state.currChannel);
   const identity = useIdentityStore((state) => state.identity);
 
@@ -21,16 +22,28 @@ const ChatInput = ({ scrollToBottom }) => {
     sendMessage("MESSAGE", inputRef.current.value);
   };
 
-  const sendMessage = (type, msg) => {
+  const sendMessage = async (type, content) => {
     if (type === "MESSAGE") {
-      msg = msg.trim();
+      content = content.trim();
     }
-    if (!msg || msg === "" || isEmpty(msg)) {
+    if (!content || content === "" || isEmpty(content)) {
       return;
     }
-    sendMsg(type, currChannel.channel_id, identity.user_id, msg);
+    const payload = {
+      type,
+      channel_id: currChannel.channel_id,
+      creator_id: identity.user_id,
+    };
+    if (type === "MESSAGE") {
+      payload.content = content;
+    } else if (type === "FILE") {
+      const result = await getAsByteArray(content);
+      payload.file_name = content.name;
+      payload.file_type = content.type;
+      payload.file_bytes = Array.from(result);
+    }
+    sendChatMsg("CHAT_ADD_MESSAGE", currChannel.channel_id, payload);
     inputRef.current.value = "";
-    scrollToBottom();
   };
 
   return (

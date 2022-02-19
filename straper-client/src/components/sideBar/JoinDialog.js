@@ -2,10 +2,9 @@ import { Dialog, Transition } from "@headlessui/react";
 import { ErrorMessage } from "@hookform/error-message";
 import React, { useRef } from "react";
 import { useForm } from "react-hook-form";
-import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import { Fragment } from "react/cjs/react.production.min";
 
-const AddDialog = ({ isOpen, close, toggleDialog, addAction, type }) => {
+const JoinDialog = ({ isOpen, close, toggleDialog, joinAction, type }) => {
   const {
     register,
     handleSubmit,
@@ -14,9 +13,7 @@ const AddDialog = ({ isOpen, close, toggleDialog, addAction, type }) => {
     formState: { errors },
   } = useForm();
 
-  let addBtn = useRef(null);
-
-  const history = useHistory();
+  const joinBtn = useRef(null);
 
   const closeDialog = () => {
     reset();
@@ -28,13 +25,13 @@ const AddDialog = ({ isOpen, close, toggleDialog, addAction, type }) => {
     toggleDialog();
   };
 
-  const executeAddAction = async (data) => {
-    const errMsg = await addAction(data);
-    if (!errMsg || errMsg == "") {
+  const executeJoinActoin = async (data) => {
+    const errMsg = await joinAction(data);
+    if (!errMsg || errMsg === "") {
       closeDialog();
       return;
     }
-    setError(type == "workspace" ? "workspace_name" : "channel_name", {
+    setError(type === "workspace" ? "workspace_id" : "channel_id", {
       type: "bad_request",
       message: errMsg,
     });
@@ -46,7 +43,7 @@ const AddDialog = ({ isOpen, close, toggleDialog, addAction, type }) => {
         as="div"
         className="fixed inset-0 z-10 overflow-y-auto"
         onClose={closeDialog}
-        initialFocus={addBtn}
+        initialFocus={joinBtn}
       >
         <div className="min-h-screen px-4 text-center">
           <Transition.Child
@@ -82,64 +79,56 @@ const AddDialog = ({ isOpen, close, toggleDialog, addAction, type }) => {
                 as="h3"
                 className="text-lg font-medium leading-6 text-gray-900"
               >
-                {type == "workspace"
-                  ? "Create Your Own Workspace"
-                  : "Create Your Own Channel"}
+                {type === "workspace" ? "Join a Workspace" : "Join a Channel"}
               </Dialog.Title>
-              <form className="mt-2" onSubmit={handleSubmit(executeAddAction)}>
+              <form className="mt-2" onSubmit={handleSubmit(executeJoinActoin)}>
                 <div className="self-center space-y-5">
                   <div>
-                    {type == "workspace"
-                      ? "New Workspace Name"
-                      : "New Channel Name"}
+                    {type === "workspace" ? "Workspace ID" : "Channel ID"}
                   </div>
-                  {type == "workspace" ? (
-                    <div>
-                      <input
-                        className="bg-gray-200 p-2 w-full"
-                        {...register("workspace_name", {
-                          required: {
-                            value: true,
-                            message: "Workspace name cannot be empty.",
-                          },
-                        })}
-                      />
-                    </div>
+                  {type === "workspace" ? (
+                    <input
+                      className="bg-gray-200 p-2 w-full"
+                      {...register("workspace_id", {
+                        required: {
+                          value: true,
+                          message: "Workspace ID cannot be empty.",
+                        },
+                      })}
+                    />
                   ) : (
-                    <div>
-                      <input
-                        className="bg-gray-200 p-2 w-full"
-                        {...register("channel_name", {
-                          required: {
-                            value: true,
-                            message: "Channel name cannot be empty.",
-                          },
-                        })}
-                      />
-                    </div>
+                    <input
+                      className="bg-gray-200 p-2 w-full"
+                      {...register("channel_id", {
+                        required: {
+                          value: true,
+                          message: "Channel ID cannot be empty.",
+                        },
+                      })}
+                    />
                   )}
                 </div>
-                {type == "workspace" ? (
-                  <ErrorMessage errors={errors} name="workspace_name" as="p" />
+                {type === "workspace" ? (
+                  <ErrorMessage errors={errors} name="workspace_id" as="p" />
                 ) : (
-                  <ErrorMessage errors={errors} name="channel_name" as="p" />
+                  <ErrorMessage errors={errors} name="channel_id" as="p" />
                 )}
                 <div
                   className="text-indigo-500 self-center cursor-pointer hover:text-indigo-300"
                   onClick={toggle}
                 >
-                  {type == "workspace"
-                    ? "Join a workspace?"
-                    : "Join a channel?"}
+                  {type === "workspace"
+                    ? "Create new workspace?"
+                    : "Create new channel?"}
                 </div>
 
                 <div className="mt-4 flex justify-end">
                   <button
                     type="submit"
                     className="inline-flex justify-center px-4 py-2 text-sm font-medium text-white bg-indigo-500 border border-transparent rounded-md hover:bg-purple-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-purple-500"
-                    ref={addBtn}
+                    ref={joinBtn}
                   >
-                    Add
+                    Join
                   </button>
                 </div>
               </form>
@@ -160,4 +149,4 @@ const AddDialog = ({ isOpen, close, toggleDialog, addAction, type }) => {
   );
 };
 
-export default AddDialog;
+export default JoinDialog;

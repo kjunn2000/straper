@@ -28,11 +28,8 @@ mock:
 build:
 		docker build -t straper:latest .
 
-weed_master_up:
-		weed master &
+docker-up:
+		docker start chat-ws-mysql-1 straper-redis
 
-weed_volumn_up_1:
-		weed volume -dir="/tmp/data1" -max=5  -mserver="localhost:9333" -port=8080 &
-
-weed_volumn_up_2:
-		weed volume -dir="/tmp/data2" -max=5  -mserver="localhost:9333" -port=8081 &
+docker-down:
+		docker stop $(docker ps -q)

@@ -5,13 +5,6 @@ import (
 	"time"
 )
 
-const (
-	UserJoin  = "USER_JOIN"
-	UserLeave = "USER_LEAVE"
-	Messaging = "MESSAGE"
-	File      = "FILE"
-)
-
 type Message struct {
 	MessageId   string     `json:"message_id" db:"message_id"`
 	Type        string     `json:"type" db:"type"`

@@ -1,23 +1,31 @@
-import { darkGrayBg } from "../utils/style/color";
-import { FaWindowClose } from "react-icons/fa";
-import { useHistory } from "react-router-dom";
 import { useEffect } from "react";
 import api from "../axios/api";
 import useWorkspaceStore from "../store/workspaceStore";
 import useBoardStore from "../store/boardStore";
 import { isEmpty } from "../service/object";
 import DragList from "../components/board/DragList";
-import { connect } from "../service/websocket";
+import { connect, isSocketOpen } from "../service/websocket";
+import SubPage from "../components/border/SubPage";
 
 function TaskBoard() {
-  const history = useHistory();
   const currWorkspace = useWorkspaceStore((state) => state.currWorkspace);
   const board = useBoardStore((state) => state.board);
   const setBoard = useBoardStore((state) => state.setBoard);
   const setTaskLists = useBoardStore((state) => state.setTaskLists);
   const setTaskListsOrder = useBoardStore((state) => state.setTaskListsOrder);
+  const setCurrAccountList = useWorkspaceStore(
+    (state) => state.setCurrAccountList
+  );
 
   useEffect(() => {
+    getBoardData();
+    getWorkspaceUsersInfo();
+    if (!isSocketOpen()) {
+      connect();
+    }
+  }, []);
+
+  const getBoardData = () => {
     api.get(`/protected/board/${currWorkspace.workspace_id}`).then((res) => {
       if (res.data.Success) {
         const data = res.data.Data;
@@ -44,28 +52,32 @@ function TaskBoard() {
         }
       }
     });
-    connect();
-  }, []);
+  };
+
+  const getWorkspaceUsersInfo = () => {
+    api
+      .get(`/protected/account/list/${currWorkspace.workspace_id}`)
+      .then((res) => {
+        if (res.data.Success) {
+          const data = res.data.Data;
+          if (!isEmpty(data)) {
+            const userListMap = data.reduce((map, obj) => {
+              map[obj.user_id] = obj;
+              return map;
+            }, {});
+            setCurrAccountList(userListMap);
+          }
+        }
+      });
+  };
 
   return (
-    <div className="w-full h-screen grid grid-cols-10" style={darkGrayBg}>
-      <div className="p-3">
-        <FaWindowClose
-          size="40"
-          className="text-indigo-500 cursor-pointer"
-          onClick={() => history.push("/channel")}
-        />
-      </div>
-      <div
-        className="col-span-9 flex flex-col overflow-x-auto p-5"
-        style={{ background: "rgb(54,57,63)" }}
-      >
-        <span className="text-white font-bold text-center">
-          {board.board_name}
-        </span>
-        <DragList />
-      </div>
-    </div>
+    <SubPage>
+      <span className="text-white font-bold text-center">
+        {board.board_name}
+      </span>
+      <DragList />
+    </SubPage>
   );
 }
 

@@ -20,15 +20,17 @@ type TaskList struct {
 }
 
 type Card struct {
-	CardId      string    `json:"card_id" db:"card_id"`
-	Title       string    `json:"title" db:"title"`
-	Priority    string    `json:"priority" db:"priority"`
-	ListId      string    `json:"list_id" db:"list_id"`
-	Description string    `json:"description" db:"description"`
-	CreatorId   string    `json:"creator_id" db:"creator_id"`
-	CreatedDate time.Time `json:"created_date" db:"created_date"`
-	DueDate     time.Time `json:"due_date" db:"due_date"`
-	OrderIndex  int       `json:"order_index" db:"order_index"`
+	CardId      string              `json:"card_id" db:"card_id"`
+	Title       string              `json:"title" db:"title"`
+	Priority    string              `json:"priority" db:"priority"`
+	ListId      string              `json:"list_id" db:"list_id"`
+	Description string              `json:"description" db:"description"`
+	CreatorId   string              `json:"creator_id" db:"creator_id"`
+	CreatedDate time.Time           `json:"created_date" db:"created_date"`
+	DueDate     time.Time           `json:"due_date" db:"due_date"`
+	OrderIndex  int                 `json:"order_index" db:"order_index"`
+	MemberList  []string            `json:"member_list"`
+	Checklist   []CardChecklistItem `json:"checklist"`
 }
 
 func (card *Card) Encode() ([]byte, error) {
@@ -37,6 +39,20 @@ func (card *Card) Encode() ([]byte, error) {
 		return nil, err
 	}
 	return json, nil
+}
+
+type CardChecklistItem struct {
+	ItemId    string `json:"item_id" db:"item_id"`
+	Content   string `json:"content" db:"content"`
+	IsChecked bool   `json:"is_checked" db:"is_checked"`
+	CardId    string `json:"card_id" db:"card_id"`
+}
+
+type UserDetail struct {
+	UserId   string `json:"user_id" db:"user_id"`
+	Username string `json:"username" db:"username"`
+	Email    string `json:"email" db:"email" validate:"email"`
+	PhoneNo  string `json:"phone_no" db:"phone_no"`
 }
 
 type CardComment struct {
@@ -50,11 +66,4 @@ type CardComment struct {
 	FileType    string     `json:"file_type" db:"file_type"`
 	FileBytes   []byte     `json:"file_bytes"`
 	CreatedDate time.Time  `json:"created_date" db:"created_date"`
-}
-
-type UserDetail struct {
-	UserId   string `json:"user_id" db:"user_id"`
-	Username string `json:"username" db:"username"`
-	Email    string `json:"email" db:"email" validate:"email"`
-	PhoneNo  string `json:"phone_no" db:"phone_no"`
 }

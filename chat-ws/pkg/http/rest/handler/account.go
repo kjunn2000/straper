@@ -25,6 +25,7 @@ func (server *Server) SetUpAccountRouter(mr *mux.Router, as account.Service) {
 	pr := mr.PathPrefix("/protected/account").Subrouter()
 	ar.HandleFunc("/create", server.Register(as, validate)).Methods("POST")
 	pr.HandleFunc("/read/{user_id}", server.GetAccount(as)).Methods("GET")
+	pr.HandleFunc("/list/{workspace_id}", server.GetAccountListByWorkspaceId(as)).Methods("GET")
 	pr.HandleFunc("/update", server.UpdateAccount(as)).Methods("POST")
 	pr.HandleFunc("/delete/{user_id}", server.DeleteAccount(as)).Methods("POST")
 	ar.HandleFunc("/email/verify/{token_id}", server.ValidateVerifyEmailToken(as)).Methods("POST")
@@ -75,6 +76,23 @@ func (server *Server) GetAccount(as account.Service) func(http.ResponseWriter, *
 			return
 		}
 		rest.AddResponseToResponseWritter(w, user, "")
+	}
+}
+
+func (server *Server) GetAccountListByWorkspaceId(as account.Service) func(http.ResponseWriter, *http.Request) {
+	return func(rw http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		workspaceId, ok := vars["workspace_id"]
+		if !ok {
+			rest.AddResponseToResponseWritter(rw, nil, "Workspace ID not found.")
+			return
+		}
+		accountList, err := as.GetAccountListByWorkspaceId(r.Context(), workspaceId)
+		if err != nil {
+			rest.AddResponseToResponseWritter(rw, nil, err.Error())
+			return
+		}
+		rest.AddResponseToResponseWritter(rw, accountList, "")
 	}
 }
 

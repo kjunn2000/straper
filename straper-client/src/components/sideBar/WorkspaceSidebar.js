@@ -8,10 +8,10 @@ import useIdentityStore from "../../store/identityStore";
 import useWorkspaceStore from "../../store/workspaceStore";
 import { darkGrayBg } from "../../utils/style/color";
 import { iconStyle } from "../../utils/style/icon";
-import ActionDialog from "../dialog/ActionDialog";
-import AddDialog from "../dialog/AddDialog";
-import JoinDialog from "../dialog/JoinDialog";
-import SimpleDialog from "../dialog/SimpleDialog";
+import ActionDialog from "../../shared/dialog/ActionDialog";
+import AddDialog from "./AddDialog";
+import JoinDialog from "./JoinDialog";
+import SimpleDialog from "../../shared/dialog/SimpleDialog";
 import WorkspaceMenu from "../menu/WorkspaceMenu";
 import AccountStatus from "./AccountStatus";
 
@@ -56,7 +56,7 @@ function WorkspaceSidebar() {
   };
 
   const onDeleteChannel = (channelId, type) => {
-    if (currWorkspace.channel_list.length == 1) {
+    if (currWorkspace.channel_list.length === 1) {
       setFailDeleteDialogOpen(true);
       return;
     }
@@ -70,7 +70,7 @@ function WorkspaceSidebar() {
     if (res.data.Success) {
       deleteChannelFromWorkspace(channelId);
       setCurrWorkspace(currWorkspace.workspace_id);
-      if (selectedChannelIds.get(currWorkspace.workspace_id) == channelId) {
+      if (selectedChannelIds.get(currWorkspace.workspace_id) === channelId) {
         const nextChannelId = currWorkspace.channel_list[0].channel_id;
         setCurrChannel(nextChannelId);
         setSelectedChannelIds(currWorkspace.workspace_id, nextChannelId);
@@ -155,8 +155,20 @@ function WorkspaceSidebar() {
       {currWorkspace.workspace_id ? (
         <div className="flex flex-col w-64">
           <WorkspaceMenu />
+          <div
+            className="p-3 text-sm text-gray-400 cursor-pointer hover:text-white"
+            onClick={() => history.push("/board")}
+          >
+            <span>TASK BOARD</span>
+          </div>
+          <div
+            className="p-3 text-sm text-gray-400 cursor-pointer hover:text-white"
+            onClick={() => history.push("/bug")}
+          >
+            <span>BUG DASHBOARD</span>
+          </div>
           <div>
-            <div className="p-5 text-sm text-gray-400 flex justify-between hover:text-white">
+            <div className="p-3 text-sm text-gray-400 flex justify-between hover:text-white">
               <span>CHANNELS</span>
               <AiOutlinePlus onClick={() => setAddChannelDialogOpen(true)} />
             </div>
@@ -177,7 +189,7 @@ function WorkspaceSidebar() {
                         <AiOutlineLink style={iconStyle} />
                       </span>
                       {!channel.is_default &&
-                        (identity.user_id == channel.creator_id ? (
+                        (identity.user_id === channel.creator_id ? (
                           <span
                             className="opacity-0 group-hover:opacity-100 cursor-pointer pl-3"
                             onClick={() =>
@@ -201,15 +213,6 @@ function WorkspaceSidebar() {
                 ))}
             </div>
           </div>
-          <div>
-            <div
-              className="p-5 text-sm text-gray-400 cursor-pointer hover:text-white"
-              onClick={() => history.push("/board")}
-            >
-              <span>TASK BOARD</span>
-            </div>
-          </div>
-
           <AddDialog
             isOpen={isAddChannelDialogOpen}
             close={() => setAddChannelDialogOpen(false)}
@@ -244,13 +247,13 @@ function WorkspaceSidebar() {
             isOpen={deleteWarningDialogOpen}
             setIsOpen={setDeleteWarningDialogOpen}
             title={
-              deleteType == "delete"
+              deleteType === "delete"
                 ? "Delete Channel Confirmation"
                 : "Leave Channel Confirmation"
             }
             content="Please confirm that the removed channel will not able to be recovered."
             buttonText={
-              deleteType == "delete" ? "Delete Anyway" : "Leave Anyway"
+              deleteType === "delete" ? "Delete Anyway" : "Leave Anyway"
             }
             buttonStatus="fail"
             buttonAction={() => deleteOrLeaveChannel(targetDeleteChannelId)}

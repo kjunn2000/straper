@@ -7,13 +7,14 @@ import {
 } from "../../service/file";
 import useIdentityStore from "../../store/identityStore";
 import FileMessage from "./FileMessage";
+import MessageMenu from "../board/MessageMenu";
 
-const Message = ({ msg }) => {
+const Message = ({ msg, editMsg, deleteMsg }) => {
   const identity = useIdentityStore((state) => state.identity);
   const [file, setFile] = useState({});
 
   useEffect(() => {
-    if (msg.type == "FILE") {
+    if (msg.type === "FILE") {
       const blob = createBlobFile(base64ToArray(msg.file_bytes), msg.file_type);
       const src = URL.createObjectURL(blob);
       setFile({
@@ -54,16 +55,24 @@ const Message = ({ msg }) => {
             isCreator() ? "items-end" : "items-start"
           }`}
         >
-          <span className="inline-block text-gray-300 pb-3">
-            {msg?.user_detail.username}
-          </span>
+          {isCreator() ? (
+            <MessageMenu
+              type={msg.type}
+              editMsg={() => msg.type === "MESSAGE" && editMsg(msg.content)}
+              deleteMsg={deleteMsg}
+            />
+          ) : (
+            <span className={"inline-block pb-3 text-gray-400 font-semibold"}>
+              {msg?.user_detail.username}
+            </span>
+          )}
 
           {msg.type === "MESSAGE" ? (
             <p
               className={`px-3 py-2 rounded-lg inline-block text-white max-w-sm break-words ${
                 isCreator()
                   ? "rounded-br-none bg-indigo-500"
-                  : "rounded-bl-none bg-gray-500"
+                  : "rounded-bl-none bg-gray-500 text-white"
               }`}
             >
               {msg.content}
@@ -77,9 +86,9 @@ const Message = ({ msg }) => {
               )}
             </button>
           )}
-          <span className="invisible text-gray-400 group-hover:visible transition duration-150">
-            {convertToDateString(msg.created_date)}
-          </span>
+          <div className="flex flex-col invisible text-gray-400 group-hover:visible transition duration-150">
+            <div>{convertToDateString(msg.created_date)}</div>
+          </div>
         </div>
       </div>
     </div>

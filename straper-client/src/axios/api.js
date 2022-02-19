@@ -3,7 +3,7 @@ import { logOut } from "../service/logout";
 import useAuthStore from "../store/authStore";
 
 const api = axios.create({
-  baseURL: "http://localhost:8080/api/v1",
+  baseURL: "http://localhost:9090/api/v1",
   headers: {
     "Content-Type": "application/json",
   },
@@ -28,22 +28,29 @@ api.interceptors.response.use(
   },
   async (err) => {
     const originalConfig = err.config;
-    if (originalConfig.url !== "/auth/login" && err.response) {
-      if (err.response.status === 403 && !originalConfig._retry) {
-        originalConfig._retry = true;
+    if (
+      originalConfig.url !== "/auth/login" &&
+      err.response &&
+      err.response.data.ErrorMessage === "invalid.access.token" &&
+      err.response.status === 403 &&
+      !originalConfig._retry
+    ) {
+      originalConfig._retry = true;
+      try {
+        const res = await api.get("/auth/refresh-token", {
+          withCredentials: true,
+        });
 
-        try {
-          const res = await api.post("/auth/refresh-token");
-
-          if (res.data.Success) {
-            const accessToken = res.data.Data;
-            useAuthStore.getState().setAccessToken(accessToken);
-            return api(originalConfig);
-          }
-          logOut(true);
-        } catch (_error) {
-          return Promise.reject(_error);
+        if (res.data.Success) {
+          console.log("success refresh token");
+          const accessToken = res.data.Data;
+          useAuthStore.getState().setAccessToken(accessToken);
+          return api(originalConfig);
         }
+        logOut(true);
+      } catch (_error) {
+        console.log(_error);
+        return Promise.reject(_error);
       }
     }
 

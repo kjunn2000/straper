@@ -75,7 +75,11 @@ const DraggableElement = ({ element, index }) => {
               </div>
               <Droppable droppableId={element.list_id}>
                 {(provided) => (
-                  <div {...provided.droppableProps} ref={provided.innerRef}>
+                  <div
+                    {...provided.droppableProps}
+                    ref={provided.innerRef}
+                    className="px-2"
+                  >
                     {element.card_list &&
                       element.card_list_order.map((id, i) => (
                         <ListItem

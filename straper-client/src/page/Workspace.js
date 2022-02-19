@@ -1,16 +1,14 @@
-import { useParams } from "react-router";
 import ChatRoom from "../components/chat/ChatRoom";
 import Sidebar from "../components/sideBar/Sidebar";
 import useWorkspaceStore from "../store/workspaceStore";
 import { ReactComponent as Welcome } from "../asset/img/welcome.svg";
-import { ReactComponent as NotFound } from "../asset/img/notfound.svg";
 import { useEffect } from "react";
 import {
   fetchWorkspaceData,
   redirectToLatestWorkspace,
 } from "../service/workspace";
 import { isEmpty } from "../service/object";
-import { connect } from "../service/websocket";
+import { connect, isSocketOpen } from "../service/websocket";
 
 function Workspace() {
   const currWorkspace = useWorkspaceStore((state) => state.currWorkspace);
@@ -18,7 +16,9 @@ function Workspace() {
 
   useEffect(() => {
     fetchWorkspaceData().then((data) => redirectToLatestWorkspace(data));
-    connect();
+    if (!isSocketOpen()) {
+      connect();
+    }
   }, []);
 
   const emptyComponent = (Image, text) => (

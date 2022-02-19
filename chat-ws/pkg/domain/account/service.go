@@ -14,6 +14,7 @@ import (
 type Service interface {
 	Register(ctx context.Context, params CreateUserParam) error
 	GetUserByUserId(ctx context.Context, userId string) (UserDetail, error)
+	GetAccountListByWorkspaceId(ctx context.Context, workspaceId string) ([]UserInfo, error)
 	UpdateUser(ctx context.Context, param UpdateUserParam) error
 
 	ResetAccountPassword(ctx context.Context, email string) error
@@ -44,25 +45,30 @@ func (us *service) Register(ctx context.Context, params CreateUserParam) error {
 	}
 	params.Password = hashedPassword
 	params.Role = RoleUser
-	params.Status = StatusVerifying
+	// params.Status = StatusVerifying
+	params.Status = StatusActive
 	params.CreatedDate = time.Now()
 	err = us.ur.CreateUser(ctx, params)
 	if err != nil {
 		return us.verigyUserFieldError(err)
 	}
-	user, err := us.ur.GetUserDetailByUsername(ctx, params.Username)
-	if err != nil {
-		return err
-	}
-	err = us.CreateAndSendVerifyEmailToken(ctx, user)
-	if err != nil {
-		return err
-	}
+	// user, err := us.ur.GetUserDetailByUsername(ctx, params.Username)
+	// if err != nil {
+	// 	return err
+	// }
+	// err = us.CreateAndSendVerifyEmailToken(ctx, user)
+	// if err != nil {
+	// 	return err
+	// }
 	return nil
 }
 
 func (us *service) GetUserByUserId(ctx context.Context, userId string) (UserDetail, error) {
 	return us.ur.GetUserDetailByUserId(ctx, userId)
+}
+
+func (us *service) GetAccountListByWorkspaceId(ctx context.Context, workspaceId string) ([]UserInfo, error) {
+	return us.ur.GetUserInfoListByWorkspaceId(ctx, workspaceId)
 }
 
 func (us *service) UpdateUser(ctx context.Context, params UpdateUserParam) error {

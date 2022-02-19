@@ -13,6 +13,13 @@ type UserDetail struct {
 	UpdatedDate time.Time `json:"updated_date" db:"updated_date"`
 }
 
+type UserInfo struct {
+	UserId   string `json:"user_id" db:"user_id"`
+	Username string `json:"username" db:"username"`
+	Email    string `json:"email" db:"email" validate:"email"`
+	PhoneNo  string `json:"phone_no" db:"phone_no"`
+}
+
 type UserCredential struct {
 	CredentialId string    `json:"credential_id" db:"credential_id"`
 	UserId       string    `json:"user_id" db:"user_id"`

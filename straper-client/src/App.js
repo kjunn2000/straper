@@ -15,6 +15,8 @@ import ResetPassword from "./page/ResetPassword";
 import Workspace from "./page/Workspace";
 import Setting from "./page/Setting";
 import TaskBoard from "./page/TaskBoard";
+import LogOutNotice from "./page/LogOutNotice";
+import Bug from "./page/Bug";
 
 function App() {
   return (
@@ -28,6 +30,9 @@ function App() {
           <UserAuthGuard path="/channel" component={Workspace} />
           <UserAuthGuard path="/setting" component={Setting} />
           <UserAuthGuard path="/board" component={TaskBoard} />
+          <UserAuthGuard path="/bug" component={Bug} />
+          <UserAuthGuard path="/logout-notice" component={LogOutNotice} />
+          <NoAuthGuard path="/login/timeout" component={Login} />
           <NoAuthGuard path="/login" component={Login} />
           <NoAuthGuard path="/register" component={Register} />
           <NoAuthGuard

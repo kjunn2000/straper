@@ -1,22 +1,14 @@
-import axios from "../axios/api";
 import React, { useEffect, useState } from "react";
 import { Link, useHistory } from "react-router-dom";
 import useAuthStore from "../store/authStore";
 import useIdentityStore from "../store/identityStore";
-import useWorkspaceStore from "../store/workspaceStore";
 import { useForm } from "react-hook-form";
 import { ErrorMessage } from "@hookform/error-message";
 import "./login.scss";
 import api from "../axios/api";
-import SimpleDialog from "../components/dialog/SimpleDialog";
-import {
-  fetchWorkspaceData,
-  redirectToLatestWorkspace,
-} from "../service/workspace";
-import { connect } from "../service/websocket";
-import useMessageStore from "../store/messageStore";
+import SimpleDialog from "../shared/dialog/SimpleDialog";
 
-const Login = ({ location }) => {
+const Login = () => {
   const {
     register,
     handleSubmit,
@@ -32,9 +24,7 @@ const Login = ({ location }) => {
   const [showTimeoutDialog, setShowTimeoutDialog] = useState(false);
 
   useEffect(() => {
-    const url = location.pathname.split("/");
-    const timeOut = url[url.length - 1];
-    if (timeOut === "timeout") {
+    if (window.location.href.endsWith("/timeout")) {
       setShowTimeoutDialog(true);
     }
   }, []);
@@ -47,11 +37,11 @@ const Login = ({ location }) => {
         res.data?.Data.user
       );
       history.push("/channel");
-    } else if (res.data?.ErrorMessage == "invalid.credential") {
+    } else if (res.data?.ErrorMessage === "invalid.credential") {
       updateErrMsg("Invalid credenital.");
-    } else if (res.data?.ErrorMessage == "user.not.found") {
+    } else if (res.data?.ErrorMessage === "user.not.found") {
       updateErrMsg("User not found.");
-    } else if (res.data?.ErrorMessage == "invalid.account.status") {
+    } else if (res.data?.ErrorMessage === "invalid.account.status") {
       updateErrMsg("Invalid account status.");
     }
   };
@@ -103,7 +93,7 @@ const Login = ({ location }) => {
           <ErrorMessage errors={errors} name="password" as="p" />
         </div>
 
-        {errMsg != "" && (
+        {errMsg !== "" && (
           <div className="text-red-600 self-center">{errMsg}</div>
         )}
         <button type="submit" className="bg-indigo-400 self-center w-48 p-1">
@@ -126,7 +116,7 @@ const Login = ({ location }) => {
         isOpen={showTimeoutDialog}
         setIsOpen={setShowTimeoutDialog}
         title="Time Out"
-        content="Session is timeout. Please login one more time."
+        content="Session is timeout. Please login again."
         buttonText="Close"
         buttonStatus="fail"
       />

@@ -1,16 +1,10 @@
 package chatting
 
 import (
-	"bytes"
 	"context"
 	"database/sql"
 	"encoding/json"
 	"errors"
-	"io"
-	"io/ioutil"
-	"mime/multipart"
-	"net/http"
-	"strings"
 	"time"
 
 	"github.com/go-redis/redis/v8"
@@ -25,9 +19,9 @@ var (
 )
 
 type Service interface {
-	HandleBroadcast(ctx context.Context, msg *ws.Message, publishPubSub func(context.Context, *ws.Message) error) error
 	GetChannelMessages(ctx context.Context, channelId string, userId string, limit, offset uint64) ([]Message, error)
-	GetBoarcastUserListByMessageType(ctx context.Context, msg *ws.Message) ([]ws.UserData, error)
+	HandleBroadcast(ctx context.Context, msg *ws.Message, publishPubSub func(context.Context, *ws.Message) error) error
+	GetBroadcastUserListByMessageType(ctx context.Context, msg *ws.Message) ([]ws.UserData, error)
 	DeleteSeaweedfsMessagesByChannelId(ctx context.Context, channelId string) error
 	DeleteSeaweedfsMessagesByWorkspaceId(ctx context.Context, workspaceId string) error
 }
@@ -37,165 +31,112 @@ type PubSub interface {
 	PublishToChannel(ctx context.Context, channelName string, payload []byte) error
 }
 
-type WeedMasterResponse struct {
-	Count     int    `json:"count"`
-	Fid       string `json:"fid"`
-	Url       string `json:"url"`
-	PublicUrl string `json:"publicUrl"`
-}
-
-type WeedVolumeResponse struct {
-	Name string `json:"name"`
-	Size int    `json:"size"`
-	ETag string `json:"eTag"`
-}
-
-type WeedVolumeLoopUpResponse struct {
-	VolumeOrFileId string     `json:"volumeOrFileId"`
-	Locations      []Location `json:"locations"`
-}
-
-type WeedUploadFileResponse struct {
-	Name string `json:"name"`
-	Size int    `json:"size"`
-	Etag string `json:"eTag"`
-}
-
-type Location struct {
-	Url       string `json:"url"`
-	PublicUrl string `json:"publicUrl"`
+type SeaweedfsClient interface {
+	SaveSeaweedfsFile(ctx context.Context, fileBytes []byte) (string, error)
+	GetSeaweedfsFile(ctx context.Context, fid string) ([]byte, error)
+	DeleteSeaweedfsFile(ctx context.Context, fid string) error
 }
 
 type service struct {
 	log   *zap.Logger
 	store Repository
+	sc    SeaweedfsClient
 }
 
-func NewService(log *zap.Logger, store Repository) *service {
+func NewService(log *zap.Logger, store Repository, sc SeaweedfsClient) *service {
 	return &service{
 		log:   log,
 		store: store,
+		sc:    sc,
 	}
 }
 
 func (s *service) HandleBroadcast(ctx context.Context, msg *ws.Message, publishPubSub func(context.Context, *ws.Message) error) error {
-	newMsg, err := s.saveAndUpdateMessage(ctx, msg)
+	bytePayload, err := msg.Payload.MarshalJSON()
 	if err != nil {
-		s.log.Warn("Fail to save message.", zap.Error(err))
 		return err
 	}
-	if err := publishPubSub(ctx, newMsg); err != nil {
-		s.log.Warn("Fail to publish message.", zap.Error(err))
+	switch msg.MessageType {
+	case ChatAddMessage:
+		if newPayload, err := s.handleAddMessage(ctx, bytePayload); err != nil {
+			return err
+		} else {
+			if err := msg.Payload.UnmarshalJSON(newPayload); err != nil {
+				return err
+			}
+		}
+	case ChatEditMessage:
+		if err := s.handleEditMessage(ctx, bytePayload); err != nil {
+			return err
+		}
+	case ChatDeleteMessage:
+		if err := s.handleDeleteMessage(ctx, bytePayload); err != nil {
+			return err
+		}
+	}
+	if err := publishPubSub(ctx, msg); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (s *service) saveAndUpdateMessage(ctx context.Context, msg *ws.Message) (*ws.Message, error) {
-	messageId, err := uuid.NewRandom()
-	if err != nil {
-		return &ws.Message{}, err
+func (s *service) handleAddMessage(ctx context.Context, bytePayload []byte) ([]byte, error) {
+	var message Message
+	if err := json.Unmarshal(bytePayload, &message); err != nil {
+		return []byte{}, err
 	}
-	message, err := s.convertByteArrayToMessage(ctx, msg)
+	newId, err := uuid.NewRandom()
 	if err != nil {
-		return &ws.Message{}, err
+		return []byte{}, err
 	}
-
-	message.MessageId = messageId.String()
+	message.MessageId = newId.String()
 	message.CreatedDate = time.Now()
-	if message.Type == File {
-		fid, err := s.saveFile(ctx, message.FileBytes)
+	if message.Type == TypeFile {
+		fid, err := s.sc.SaveSeaweedfsFile(ctx, message.FileBytes)
 		if err != nil {
-			return &ws.Message{}, err
+			return []byte{}, err
 		}
 		message.Content = fid
 	}
 	if err := s.store.CreateMessage(ctx, &message); err != nil {
-		return &ws.Message{}, err
+		return []byte{}, err
 	}
-	userDetail, err := s.store.GetUserInfoByUserId(ctx, message.CreatorId)
+	userDetail, err := s.store.GetChatUserInfoByUserId(ctx, message.CreatorId)
 	if err != nil {
 		s.log.Warn("Fail to fetch user data.", zap.Error(err))
-		return &ws.Message{}, err
+		return []byte{}, err
 	}
 	message.UserDetail = userDetail
 	newMsg, err := json.Marshal(message)
 	if err != nil {
-		return &ws.Message{}, err
+		return []byte{}, err
 	}
-	msg.Payload.UnmarshalJSON(newMsg)
-	return msg, nil
+	return newMsg, nil
 }
 
-func (s *service) GetBoarcastUserListByMessageType(ctx context.Context, msg *ws.Message) ([]ws.UserData, error) {
-	message, err := s.convertByteArrayToMessage(ctx, msg)
-	if err != nil {
-		return []ws.UserData{}, err
+func (service *service) handleEditMessage(ctx context.Context, bytePayload []byte) error {
+	var editChatMessageParams EditChatMessageParams
+	if err := json.Unmarshal(bytePayload, &editChatMessageParams); err != nil {
+		return err
 	}
-	return s.store.GetUserListByChannelId(ctx, message.ChannelId)
+	return service.store.EditMessage(ctx, editChatMessageParams)
 }
 
-func (s *service) convertByteArrayToMessage(ctx context.Context, msg *ws.Message) (Message, error) {
-	bytePayload, err := msg.Payload.MarshalJSON()
-	if err != nil {
-		return Message{}, err
+func (service *service) handleDeleteMessage(ctx context.Context, bytePayload []byte) error {
+	var deleteChatMessageParams DeleteChatMessageParams
+	if err := json.Unmarshal(bytePayload, &deleteChatMessageParams); err != nil {
+		return err
 	}
-	var message Message
-	if err := json.Unmarshal(bytePayload, &message); err != nil {
-		return Message{}, err
+	if deleteChatMessageParams.Type == TypeFile {
+		if err := service.sc.DeleteSeaweedfsFile(ctx, deleteChatMessageParams.Fid); err != nil {
+			return err
+		}
 	}
-	return message, nil
+	return service.store.DeleteMessage(ctx, deleteChatMessageParams.MessageId)
 }
 
-func (s *service) saveFile(ctx context.Context, fileBytes []byte) (string, error) {
-	resp, err := http.Get("http://localhost:9333/dir/assign")
-	if err != nil {
-		return "", err
-	}
-	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return "", err
-	}
-	var weedMasterResponse WeedMasterResponse
-	json.Unmarshal(body, &weedMasterResponse)
-	if err != nil {
-		return "", err
-	}
-	url := "http://" + weedMasterResponse.Url + "/" + weedMasterResponse.Fid
-	if err := s.SendMultiPartRequest(fileBytes, url); err != nil {
-		return "", err
-	}
-	return weedMasterResponse.Fid, nil
-}
-
-func (s *service) SendMultiPartRequest(fileBytes []byte, url string) error {
-	client := &http.Client{
-		Timeout: time.Second * 10,
-	}
-
-	body := &bytes.Buffer{}
-	writer := multipart.NewWriter(body)
-	fw, err := writer.CreateFormField("file")
-	if err != nil {
-		return err
-	}
-	_, err = io.Copy(fw, bytes.NewReader(fileBytes))
-	if err != nil {
-		return err
-	}
-	writer.Close()
-	req, err := http.NewRequest("POST", url, bytes.NewReader(body.Bytes()))
-	if err != nil {
-		return err
-	}
-	req.Header.Set("Content-Type", writer.FormDataContentType())
-	_, err = client.Do(req)
-	if err != nil {
-		s.log.Warn("Multipart post request to seaweedfs server failed", zap.Error(err))
-		return err
-	}
-	return nil
+func (s *service) GetBroadcastUserListByMessageType(ctx context.Context, msg *ws.Message) ([]ws.UserData, error) {
+	return s.store.GetUserListByChannelId(ctx, msg.ChannelId)
 }
 
 func (s *service) GetChannelMessages(ctx context.Context, channelId string, userId string, limit, offset uint64) ([]Message, error) {
@@ -207,36 +148,14 @@ func (s *service) GetChannelMessages(ctx context.Context, channelId string, user
 	}
 	for i, msg := range msgs {
 		if msg.Type == "FILE" {
-			fid := strings.Split(msg.Content, ",")
-			resp, err := http.Get("http://localhost:9333/dir/lookup?volumeId=" + fid[0])
+			bytesData, err := s.sc.GetSeaweedfsFile(ctx, msg.Content)
 			if err != nil {
-				s.log.Warn("Seaweedfs look up volume failed", zap.Error(err))
 				return []Message{}, err
 			}
-			defer resp.Body.Close()
-			body, err := ioutil.ReadAll(resp.Body)
-			if err != nil {
-				s.log.Warn("Read response body failed", zap.Error(err))
-				return []Message{}, err
-			}
-			var weedVolumeLoopUpResponse WeedVolumeLoopUpResponse
-			json.Unmarshal(body, &weedVolumeLoopUpResponse)
-
-			resp, err = http.Get("http://" + weedVolumeLoopUpResponse.Locations[0].PublicUrl + "/" + msg.Content)
-			if err != nil {
-				s.log.Warn("Seaweedfs get file failed", zap.Error(err))
-				return []Message{}, err
-			}
-			defer resp.Body.Close()
-			body, err = ioutil.ReadAll(resp.Body)
-			if err != nil {
-				s.log.Warn("Read response body failed", zap.Error(err))
-				return []Message{}, err
-			}
-			msg.FileBytes = body
+			msg.FileBytes = bytesData
 			msgs[i] = msg
 		}
-		userDetail, err := s.store.GetUserInfoByUserId(ctx, msg.CreatorId)
+		userDetail, err := s.store.GetChatUserInfoByUserId(ctx, msg.CreatorId)
 		if err != nil {
 			return []Message{}, err
 		} else {
@@ -250,7 +169,6 @@ func (s *service) GetChannelMessages(ctx context.Context, channelId string, user
 }
 
 func (s *service) DeleteSeaweedfsMessagesByChannelId(ctx context.Context, channelId string) error {
-
 	msgs, err := s.store.GetAllChannelMessages(ctx, channelId)
 	if err != nil {
 		return err
@@ -259,7 +177,6 @@ func (s *service) DeleteSeaweedfsMessagesByChannelId(ctx context.Context, channe
 }
 
 func (s *service) DeleteSeaweedfsMessagesByWorkspaceId(ctx context.Context, workspaceId string) error {
-
 	msgs, err := s.store.GetAllChannelMessagesByWorkspaceId(ctx, workspaceId)
 	if err != nil {
 		return err
@@ -268,32 +185,9 @@ func (s *service) DeleteSeaweedfsMessagesByWorkspaceId(ctx context.Context, work
 }
 
 func (s *service) deleteSeaweedfsMessages(ctx context.Context, msgs []Message) error {
-
 	for _, msg := range msgs {
-		if msg.Type == "FILE" {
-			fid := strings.Split(msg.Content, ",")
-			resp, err := http.Get("http://localhost:9333/dir/lookup?volumeId=" + fid[0])
-			if err != nil {
-				s.log.Warn("Seaweedfs look up volume failed", zap.Error(err))
-				return err
-			}
-			defer resp.Body.Close()
-			body, err := ioutil.ReadAll(resp.Body)
-			if err != nil {
-				s.log.Warn("Read response body failed", zap.Error(err))
-				return err
-			}
-			var weedVolumeLoopUpResponse WeedVolumeLoopUpResponse
-			json.Unmarshal(body, &weedVolumeLoopUpResponse)
-
-			client := &http.Client{}
-
-			req, err := http.NewRequest("DELETE", "http://"+weedVolumeLoopUpResponse.Locations[0].PublicUrl+"/"+msg.Content, nil)
-			if err != nil {
-				return err
-			}
-
-			if _, err = client.Do(req); err != nil {
+		if msg.Type == TypeFile {
+			if err := s.sc.DeleteSeaweedfsFile(ctx, msg.Content); err != nil {
 				return err
 			}
 		}

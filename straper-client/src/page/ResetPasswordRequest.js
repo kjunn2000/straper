@@ -1,16 +1,15 @@
-import axios from "../axios/api";
 import React, { useState } from "react";
 import { Link, useHistory } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import SimpleDialog from "../components/dialog/SimpleDialog";
 import { ErrorMessage } from "@hookform/error-message";
+import api from "../axios/api";
+import SimpleDialog from "../shared/dialog/SimpleDialog";
 
-const ResetPassword= () => {
+const ResetPassword = () => {
   const history = useHistory();
   const {
     handleSubmit,
     register,
-    watch,
     formState: { errors },
   } = useForm();
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
@@ -18,8 +17,8 @@ const ResetPassword= () => {
   const [dialogErrMsg, setDialogErrMsg] = useState("");
 
   const onReset = (data) => {
-    axios
-      .post("http://localhost:8080/api/v1/account/reset-password/create", data)
+    api
+      .post("/account/reset-password/create", data)
       .then((res) => {
         if (res.data.Success) {
           setShowSuccessDialog(true);
@@ -34,7 +33,9 @@ const ResetPassword= () => {
               break;
             }
             case "password_reset_attempt_in_past_15_min": {
-              setDialogErrMsg("Password reset request has been sent to your email inbox in the past 15 minutes. Please check it out.")
+              setDialogErrMsg(
+                "Password reset request has been sent to your email inbox in the past 15 minutes. Please check it out."
+              );
               break;
             }
             default: {

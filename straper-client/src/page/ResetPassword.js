@@ -1,9 +1,9 @@
-import axios from "../axios/api";
 import React, { useRef, useState } from "react";
 import { Link, useHistory } from "react-router-dom";
 import PasswordStrengthBar from "react-password-strength-bar";
 import { useForm } from "react-hook-form";
-import SimpleDialog from "../components/dialog/SimpleDialog";
+import api from "../axios/api";
+import SimpleDialog from "../shared/dialog/SimpleDialog";
 
 const ResetPassword = () => {
   const history = useHistory();
@@ -22,22 +22,26 @@ const ResetPassword = () => {
 
   const onReset = (data) => {
     var requestData = {
-      "token_id" : history.location.pathname.split("/").pop(),
-      "password" : data.password
-    }
-    axios
-      .post("http://localhost:8080/api/v1/account/password/update", requestData)
+      token_id: history.location.pathname.split("/").pop(),
+      password: data.password,
+    };
+    api
+      .post("/account/password/update", requestData)
       .then((res) => {
         if (res.data.Success) {
           setShowSuccessDialog(true);
         } else {
           switch (res.data.ErrorMessage) {
             case "reset.password.token.not.found": {
-              setDialogErrMsg("Invalid reset password token. Please try again.");
+              setDialogErrMsg(
+                "Invalid reset password token. Please try again."
+              );
               break;
             }
             case "reset.password.token.expired": {
-              setDialogErrMsg("Reset password token expired. Please send the request again.");
+              setDialogErrMsg(
+                "Reset password token expired. Please send the request again."
+              );
               break;
             }
             case "password.too.weak": {
@@ -61,8 +65,8 @@ const ResetPassword = () => {
   };
 
   const isPasswordMatch = () => {
-    return getValues("password") == getValues("confirmedPassword")
-  }
+    return getValues("password") === getValues("confirmedPassword");
+  };
 
   return (
     <div className="bg-gradient-to-r from-purple-600 to-gray-900 w-full h-screen flex justify-center content-center">
@@ -97,7 +101,7 @@ const ResetPassword = () => {
             className="bg-gray-800 p-2 rounded-lg"
             {...register("confirmedPassword", {
               required: true,
-              validate: () => isPasswordMatch()
+              validate: () => isPasswordMatch(),
             })}
           />
           {errors?.confirmedPassword && (

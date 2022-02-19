@@ -1,18 +1,11 @@
-import axios from "axios";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
+import api from "../../axios/api";
 import useIdentityStore from "../../store/identityStore";
-import SimpleDialog from "../dialog/SimpleDialog";
+import SimpleDialog from "../../shared/dialog/SimpleDialog";
 
 const UserPassword = () => {
-  const history = useHistory();
-  const {
-    handleSubmit,
-    register,
-    watch,
-    formState: { errors },
-  } = useForm();
+  const { handleSubmit } = useForm();
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [showFailDialog, setShowFailDialog] = useState(false);
   const [dialogErrMsg, setDialogErrMsg] = useState("");
@@ -22,11 +15,8 @@ const UserPassword = () => {
     const payload = {
       email: identity.email,
     };
-    axios
-      .post(
-        "http://localhost:8080/api/v1/account/reset-password/create",
-        payload
-      )
+    api
+      .post("/account/reset-password/create", payload)
       .then((res) => {
         if (res.data.Success) {
           setShowSuccessDialog(true);

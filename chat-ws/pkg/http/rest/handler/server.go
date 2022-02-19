@@ -14,6 +14,7 @@ import (
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/account"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/auth"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/board"
+	"github.com/kjunn2000/straper/chat-ws/pkg/domain/bug"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/chatting"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/websocket"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/adding"
@@ -21,6 +22,7 @@ import (
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/editing"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/listing"
 	"github.com/kjunn2000/straper/chat-ws/pkg/http/rest/middleware"
+	"github.com/kjunn2000/straper/chat-ws/pkg/seaweedfs"
 	"go.uber.org/zap"
 
 	rdb "github.com/kjunn2000/straper/chat-ws/pkg/redis"
@@ -28,12 +30,13 @@ import (
 )
 
 type Server struct {
-	log         *zap.Logger
-	config      configs.Config
-	store       mysql.Store
-	httpServer  *http.Server
-	tokenMaker  auth.Maker
-	redisClient rdb.RedisClient
+	log             *zap.Logger
+	config          configs.Config
+	store           mysql.Store
+	httpServer      *http.Server
+	tokenMaker      auth.Maker
+	redisClient     rdb.RedisClient
+	seaweedfsClient chatting.SeaweedfsClient
 }
 
 func NewServer(log *zap.Logger, config configs.Config, store mysql.Store) (*Server, error) {
@@ -56,6 +59,8 @@ func NewServer(log *zap.Logger, config configs.Config, store mysql.Store) (*Serv
 
 	redisClient := rdb.NewRedisClient(rc)
 
+	seaweedClient := seaweedfs.NewSeaweedfsClient(log)
+
 	srv := &http.Server{
 		Addr:         config.ServerAddress,
 		WriteTimeout: 15 * time.Second,
@@ -63,12 +68,13 @@ func NewServer(log *zap.Logger, config configs.Config, store mysql.Store) (*Serv
 	}
 
 	server := &Server{
-		log:         log,
-		httpServer:  srv,
-		config:      config,
-		store:       store,
-		tokenMaker:  tokenMaker,
-		redisClient: &redisClient,
+		log:             log,
+		httpServer:      srv,
+		config:          config,
+		store:           store,
+		tokenMaker:      tokenMaker,
+		redisClient:     &redisClient,
+		seaweedfsClient: &seaweedClient,
 	}
 
 	server.SetServerRoute()
@@ -93,11 +99,12 @@ func (server *Server) SetServerRoute() (*mux.Router, error) {
 	accountService := account.NewService(server.log, server.store, server.config)
 	authService := auth.NewService(server.log, server.store, server.tokenMaker, server.config)
 	addingService := adding.NewService(server.log, server.store)
-	chattingService := chatting.NewService(server.log, server.store)
-	boardService := board.NewService(server.log, server.store)
+	chattingService := chatting.NewService(server.log, server.store, server.seaweedfsClient)
+	boardService := board.NewService(server.log, server.store, server.seaweedfsClient)
 	listingService := listing.NewService(server.log, server.store)
 	editingService := editing.NewService(server.log, server.store)
-	deletingService := deleting.NewService(server.log, server.store)
+	deletingService := deleting.NewService(server.log, server.store, server.seaweedfsClient)
+	bugService := bug.NewService(server.log, server.store, server.seaweedfsClient)
 	websocketService := websocket.NewService(server.log, server.redisClient, chattingService, boardService)
 	websocketService.SetUpWSServer(context.Background())
 
@@ -106,6 +113,7 @@ func (server *Server) SetServerRoute() (*mux.Router, error) {
 	server.SetUpWorkspaceRouter(mr, addingService, listingService, editingService, deletingService, chattingService)
 	server.SetUpChannelRouter(mr, addingService, listingService, editingService, deletingService, chattingService)
 	server.SetUpBoardRouter(mr, boardService)
+	server.SetUpBugRouter(mr, bugService)
 	server.SetUpWebsocketRouter(mr, websocketService, chattingService, boardService)
 
 	server.httpServer.Handler = getCORSHandler()(mr)

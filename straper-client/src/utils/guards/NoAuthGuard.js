@@ -1,6 +1,5 @@
 import React from "react";
 import { Route, Redirect } from "react-router-dom";
-import useAuthStore from "../../store/authStore";
 import useIdentityStore from "../../store/identityStore";
 
 const NoAuthGuard = ({ component: Component, ...rest }) => {
@@ -10,9 +9,9 @@ const NoAuthGuard = ({ component: Component, ...rest }) => {
     <Route
       {...rest}
       render={(props) =>
-        identity?.role == "USER" ? (
+        identity?.role === "USER" ? (
           <Redirect to="/channel" />
-        ) : identity?.role == "ADMIN" ? (
+        ) : identity?.role === "ADMIN" ? (
           <Redirect to="/dashboard" />
         ) : (
           <Component {...props} />

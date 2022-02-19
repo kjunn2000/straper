@@ -4,7 +4,7 @@ import React, { useRef } from "react";
 import { useForm } from "react-hook-form";
 import { Fragment } from "react/cjs/react.production.min";
 
-const JoinDialog = ({ isOpen, close, toggleDialog, joinAction, type }) => {
+const AddDialog = ({ isOpen, close, toggleDialog, addAction, type }) => {
   const {
     register,
     handleSubmit,
@@ -13,7 +13,7 @@ const JoinDialog = ({ isOpen, close, toggleDialog, joinAction, type }) => {
     formState: { errors },
   } = useForm();
 
-  const joinBtn = useRef(null);
+  let addBtn = useRef(null);
 
   const closeDialog = () => {
     reset();
@@ -25,13 +25,13 @@ const JoinDialog = ({ isOpen, close, toggleDialog, joinAction, type }) => {
     toggleDialog();
   };
 
-  const executeJoinActoin = async (data) => {
-    const errMsg = await joinAction(data);
-    if (!errMsg || errMsg == "") {
+  const executeAddAction = async (data) => {
+    const errMsg = await addAction(data);
+    if (!errMsg || errMsg === "") {
       closeDialog();
       return;
     }
-    setError(type == "workspace" ? "workspace_id" : "channel_id", {
+    setError(type === "workspace" ? "workspace_name" : "channel_name", {
       type: "bad_request",
       message: errMsg,
     });
@@ -43,7 +43,7 @@ const JoinDialog = ({ isOpen, close, toggleDialog, joinAction, type }) => {
         as="div"
         className="fixed inset-0 z-10 overflow-y-auto"
         onClose={closeDialog}
-        initialFocus={joinBtn}
+        initialFocus={addBtn}
       >
         <div className="min-h-screen px-4 text-center">
           <Transition.Child
@@ -79,56 +79,64 @@ const JoinDialog = ({ isOpen, close, toggleDialog, joinAction, type }) => {
                 as="h3"
                 className="text-lg font-medium leading-6 text-gray-900"
               >
-                {type == "workspace" ? "Join a Workspace" : "Join a Channel"}
+                {type === "workspace"
+                  ? "Create Your Own Workspace"
+                  : "Create Your Own Channel"}
               </Dialog.Title>
-              <form className="mt-2" onSubmit={handleSubmit(executeJoinActoin)}>
+              <form className="mt-2" onSubmit={handleSubmit(executeAddAction)}>
                 <div className="self-center space-y-5">
                   <div>
-                    {type == "workspace" ? "Workspace ID" : "Channel ID"}
+                    {type === "workspace"
+                      ? "New Workspace Name"
+                      : "New Channel Name"}
                   </div>
-                  {type == "workspace" ? (
-                    <input
-                      className="bg-gray-200 p-2 w-full"
-                      {...register("workspace_id", {
-                        required: {
-                          value: true,
-                          message: "Workspace ID cannot be empty.",
-                        },
-                      })}
-                    />
+                  {type === "workspace" ? (
+                    <div>
+                      <input
+                        className="bg-gray-200 p-2 w-full"
+                        {...register("workspace_name", {
+                          required: {
+                            value: true,
+                            message: "Workspace name cannot be empty.",
+                          },
+                        })}
+                      />
+                    </div>
                   ) : (
-                    <input
-                      className="bg-gray-200 p-2 w-full"
-                      {...register("channel_id", {
-                        required: {
-                          value: true,
-                          message: "Channel ID cannot be empty.",
-                        },
-                      })}
-                    />
+                    <div>
+                      <input
+                        className="bg-gray-200 p-2 w-full"
+                        {...register("channel_name", {
+                          required: {
+                            value: true,
+                            message: "Channel name cannot be empty.",
+                          },
+                        })}
+                      />
+                    </div>
                   )}
                 </div>
-                {type == "workspace" ? (
-                  <ErrorMessage errors={errors} name="workspace_id" as="p" />
+                {type === "workspace" ? (
+                  <ErrorMessage errors={errors} name="workspace_name" as="p" />
                 ) : (
-                  <ErrorMessage errors={errors} name="channel_id" as="p" />
+                  <ErrorMessage errors={errors} name="channel_name" as="p" />
                 )}
                 <div
                   className="text-indigo-500 self-center cursor-pointer hover:text-indigo-300"
                   onClick={toggle}
                 >
-                  {type == "workspace"
-                    ? "Create new workspace?"
-                    : "Create new channel?"}
+                  {type === "workspace"
+                    ? "Join a workspace?"
+                    : "Join a channel?"}
                 </div>
 
                 <div className="mt-4 flex justify-end">
                   <button
                     type="submit"
                     className="inline-flex justify-center px-4 py-2 text-sm font-medium text-white bg-indigo-500 border border-transparent rounded-md hover:bg-purple-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-purple-500"
-                    ref={joinBtn}
+                    ref={addBtn}
                   >
-                    Join
+                    Add
                   </button>
                 </div>
               </form>
@@ -149,4 +157,4 @@ const JoinDialog = ({ isOpen, close, toggleDialog, joinAction, type }) => {
   );
 };
 
-export default JoinDialog;
+export default AddDialog;
