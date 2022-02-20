@@ -3,8 +3,10 @@ import SubPage from "../components/border/SubPage";
 import CreateIssueDialog from "../components/bug/CreateIssueDialog";
 import Table, {
   AvatarCell,
+  DateCell,
   SelectColumnFilter,
   StatusPill,
+  TypeCell,
 } from "../components/bug/Table";
 import api from "../axios/api";
 import useWorkspaceStore from "../store/workspaceStore";
@@ -23,6 +25,7 @@ const Bug = () => {
       {
         Header: "T",
         accessor: "type",
+        Cell: TypeCell,
         Filter: SelectColumnFilter, // new
         filter: "includes",
       },
@@ -40,7 +43,7 @@ const Bug = () => {
       },
       {
         Header: "P",
-        accessor: "priority",
+        accessor: "backlog_priority",
       },
       {
         Header: "Status",
@@ -50,10 +53,7 @@ const Bug = () => {
       {
         Header: "Due",
         accessor: "due_time",
-      },
-      {
-        Header: "Created",
-        accessor: "created_date",
+        Cell: DateCell,
       },
       // {
       //   Header: "Role",

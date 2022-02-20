@@ -16,6 +16,14 @@ import {
 import { classNames } from "../../shared/Utils";
 import { SortIcon, SortUpIcon, SortDownIcon } from "../../shared/Icons";
 import { Button, PageButton } from "../../shared/button/Button";
+import { AiFillBug } from "react-icons/ai";
+import { BiTask } from "react-icons/bi";
+import {
+  BsSubtract,
+  BsFillBookmarkFill,
+  BsFillLightningFill,
+} from "react-icons/bs";
+import { convertToDateString } from "../../service/object";
 
 // Define a default UI for filtering
 function GlobalFilter({
@@ -34,7 +42,7 @@ function GlobalFilter({
       <span className="text-gray-700">Search: </span>
       <input
         type="text"
-        className="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+        className="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 p-1"
         value={value || ""}
         onChange={(e) => {
           setValue(e.target.value);
@@ -66,7 +74,7 @@ export function SelectColumnFilter({
     <label className="flex gap-x-2 items-baseline">
       <span className="text-gray-700">{render("Header")}: </span>
       <select
-        className="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+        className="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 p-1"
         name={id}
         id={id}
         value={filterValue}
@@ -86,15 +94,15 @@ export function SelectColumnFilter({
 }
 
 export function StatusPill({ value }) {
-  const status = value ? value.toLowerCase() : "unknown";
+  const status = value ? value.toUpperCase() : "UNKNOWN";
 
   return (
     <span
       className={classNames(
         "px-3 py-1 uppercase leading-wide font-bold text-xs rounded-full shadow-sm",
-        status.startsWith("active") ? "bg-green-100 text-green-800" : null,
-        status.startsWith("inactive") ? "bg-yellow-100 text-yellow-800" : null,
-        status.startsWith("offline") ? "bg-red-100 text-red-800" : null
+        status === "ACTIVE" ? "bg-green-100 text-green-800" : null,
+        status === "REVIEWING" ? "bg-yellow-100 text-yellow-800" : null,
+        status === "CLOSED" ? "bg-red-100 text-red-800" : null
       )}
     >
       {status}
@@ -120,6 +128,43 @@ export function AvatarCell({ value, column, row }) {
       </div>
     </div>
   );
+}
+
+export function TypeCell({ value }) {
+  switch (value) {
+    case "bug": {
+      return <AiFillBug className="bg-red-500 text-white rounded" size={20} />;
+    }
+    case "task": {
+      return <BiTask className="bg-sky-500 text-white rounded" size={20} />;
+    }
+    case "subtask": {
+      return <BsSubtract className="bg-sky-500 text-white rounded" size={20} />;
+    }
+    case "story": {
+      return (
+        <BsFillBookmarkFill
+          className="bg-lime-400 text-white rounded"
+          size={20}
+        />
+      );
+    }
+    case "epic": {
+      return (
+        <BsFillLightningFill
+          className="bg-purple-500 text-white rounded"
+          size={20}
+        />
+      );
+    }
+    default: {
+      return <div>{value}</div>;
+    }
+  }
+}
+
+export function DateCell({ value }) {
+  return <div>{convertToDateString(value)}</div>;
 }
 
 function Table({ columns, data }) {

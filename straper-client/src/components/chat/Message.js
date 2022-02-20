@@ -8,6 +8,7 @@ import {
 import useIdentityStore from "../../store/identityStore";
 import FileMessage from "./FileMessage";
 import MessageMenu from "../board/MessageMenu";
+import { convertToDateString } from "../../service/object";
 
 const Message = ({ msg, editMsg, deleteMsg }) => {
   const identity = useIdentityStore((state) => state.identity);
@@ -27,20 +28,6 @@ const Message = ({ msg, editMsg, deleteMsg }) => {
 
   const isCreator = () => {
     return identity.user_id === msg.creator_id;
-  };
-
-  const zeroPad = (num, places) => String(num).padStart(places, "0");
-
-  const convertToDateString = (timestamp) => {
-    var date = new Date(timestamp);
-    var dd = date.getDate();
-    var mm = date.getMonth() + 1;
-    var yy = date.getFullYear();
-    var hour = date.getHours();
-    var min = date.getMinutes();
-    return (
-      dd + "/" + mm + "/" + yy + " " + zeroPad(hour, 2) + ":" + zeroPad(min, 2)
-    );
   };
 
   return (

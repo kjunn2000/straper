@@ -32,6 +32,7 @@ func (server *Server) CreateIssue(bs bug.Service) func(http.ResponseWriter, *htt
 		var issue bug.Issue
 		json.NewDecoder(r.Body).Decode(&issue)
 		issue.Reporter = userId
+		issue.Status = "ACTIVE"
 		issue, err = bs.CreateIssue(r.Context(), issue)
 		if err != nil {
 			rest.AddResponseToResponseWritter(rw, nil, err.Error())
