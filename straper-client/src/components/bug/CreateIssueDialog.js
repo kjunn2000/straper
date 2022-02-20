@@ -6,6 +6,8 @@ import DatePicker from "react-datepicker";
 import useWorkpaceStore from "../../store/workspaceStore";
 import api from "../../axios/api";
 import useIdentityStore from "../../store/identityStore";
+import useIssueStore from "../../store/issueStore";
+import { removeEmptyFields } from "../../service/object";
 
 export default function CreateIssueDialog({ isOpen, closeDialog }) {
   const cancelButtonRef = useRef();
@@ -16,6 +18,7 @@ export default function CreateIssueDialog({ isOpen, closeDialog }) {
 
   const currWorkspace = useWorkpaceStore((state) => state.currWorkspace);
   const identity = useIdentityStore((state) => state.identity);
+  const addIssue = useIssueStore((state) => state.addIssue);
 
   useEffect(() => {
     fetchEpicLinkOptions();
@@ -62,9 +65,11 @@ export default function CreateIssueDialog({ isOpen, closeDialog }) {
     data.due_time = dueDate.toJSON();
     data.workspace_id = currWorkspace.workspace_id;
     data.story_point = parseInt(data.story_point);
+    removeEmptyFields(data);
     const res = await api.post("/protected/issue/create", data);
     if (res.data.Success) {
-      console.log(res.data.Data);
+      addIssue(res.data.Data);
+      onClose();
     }
   };
 

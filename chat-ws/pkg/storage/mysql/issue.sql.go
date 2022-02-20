@@ -9,27 +9,29 @@ import (
 )
 
 func (q *Queries) CreateIssue(ctx context.Context, issue bug.Issue) error {
-	column := []string{
-		"issue_id", "type", "backlog_priority", "summary", "description", "acceptance_criteria",
-		"story_point", "replicate_step", "environment", "workaround", "serverity", "label",
-		"reporter", "due_time", "status", "workspace_id", "created_date",
-	}
-	values := []interface{}{
-		issue.IssueId, issue.Type, issue.BacklogPriority, issue.Summary, issue.Description, issue.AcceptanceCriteria,
-		issue.StoryPoint, issue.ReplicateStep, issue.Environment, issue.Workaround, issue.Serverity, issue.Label,
-		issue.Reporter, issue.DueTime, issue.Status, issue.WorkspaceId, issue.CreatedDate,
-	}
-	if issue.EpicLink != "" {
-		column = append(column, "epic_link")
-		values = append(values, issue.EpicLink)
-	}
-	if issue.Assignee != "" {
-		column = append(column, "assignee")
-		values = append(values, issue.Assignee)
-	}
 	sql, arg, err := sq.Insert("issue").
-		Columns(column...).
-		Values(values...).
+		Columns("issue_id", "type", "backlog_priority", "summary", "description", "acceptance_criteria",
+			"epic_link", "story_point", "replicate_step", "environment", "workaround", "serverity", "label",
+			"assignee", "reporter", "due_time", "status", "workspace_id", "created_date").
+		Values(issue.IssueId,
+			issue.Type,
+			issue.BacklogPriority,
+			issue.Summary,
+			issue.Description,
+			issue.AcceptanceCriteria,
+			issue.EpicLink,
+			issue.StoryPoint,
+			issue.ReplicateStep,
+			issue.Environment,
+			issue.Workaround,
+			issue.Serverity,
+			issue.Label,
+			issue.Assignee,
+			issue.Reporter,
+			issue.DueTime,
+			issue.Status,
+			issue.WorkspaceId,
+			issue.CreatedDate).
 		ToSql()
 	if err != nil {
 		q.log.Warn("Failed to create issue query.")
@@ -63,7 +65,7 @@ func (q *Queries) GetIssuesByWorkspaceId(ctx context.Context, workspaceId string
 }
 
 func (q *Queries) UpdateIssue(ctx context.Context, issue bug.Issue) error {
-	updateBuilder := sq.Update("issue").
+	sql, args, err := sq.Update("issue").
 		Set("type", issue.Type).
 		Set("backlog_priority", issue.BacklogPriority).
 		Set("summary", issue.Summary).
@@ -76,14 +78,9 @@ func (q *Queries) UpdateIssue(ctx context.Context, issue bug.Issue) error {
 		Set("serverity", issue.Serverity).
 		Set("label", issue.Label).
 		Set("due_time", issue.DueTime).
-		Set("status", issue.Status)
-	if issue.EpicLink != "" {
-		updateBuilder.Set("epic_link", issue.EpicLink)
-	}
-	if issue.Assignee != "" {
-		updateBuilder.Set("assignee", issue.Assignee)
-	}
-	sql, args, err := updateBuilder.
+		Set("status", issue.Status).
+		Set("epic_link", issue.EpicLink).
+		Set("assignee", issue.Assignee).
 		Where(sq.Eq{"issue_id": issue.IssueId}).
 		ToSql()
 	if err != nil {

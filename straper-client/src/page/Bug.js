@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import SubPage from "../components/border/SubPage";
 import CreateIssueDialog from "../components/bug/CreateIssueDialog";
 import Table, {
@@ -6,32 +6,9 @@ import Table, {
   SelectColumnFilter,
   StatusPill,
 } from "../components/bug/Table";
-
-const getData = () => {
-  const data = [
-    {
-      type: "bug",
-      summary: "fix the ui position",
-      assignee: "Tam Kai Jun",
-      reporter: "Chai Juo Ann",
-      priority: "High",
-      status: "Active",
-      due_time: "22/02/22",
-      created_date: "22/02/22",
-    },
-    {
-      type: "epic",
-      summary: "fix the ui position",
-      assignee: "King Kong",
-      reporter: "Chai Juo Ann",
-      priority: "High",
-      status: "Low",
-      due_time: "22/02/22",
-      created_date: "22/02/22",
-    },
-  ];
-  return [...data, ...data, ...data];
-};
+import api from "../axios/api";
+import useWorkspaceStore from "../store/workspaceStore";
+import useIssueStore from "../store/issueStore";
 
 const Bug = () => {
   const columns = useMemo(
@@ -88,7 +65,23 @@ const Bug = () => {
     []
   );
 
-  const data = useMemo(() => getData(), []);
+  const currWorkspace = useWorkspaceStore((state) => state.currWorkspace);
+  const setIssues = useIssueStore((state) => state.setIssues);
+  const issues = useIssueStore((state) => state.issues);
+
+  useEffect(() => {
+    getData();
+  }, []);
+
+  const getData = async () => {
+    const res = await api.get(
+      `/protected/issue/list/${currWorkspace.workspace_id}?limit=100&offset=0`
+    );
+    if (res.data.Success && res.data.Data) {
+      setIssues(res.data.Data);
+    }
+  };
+
   const [createIssueDialogOpen, setCreateIssueDialogOpen] = useState(false);
 
   return (
@@ -106,7 +99,7 @@ const Bug = () => {
           </button>
         </div>
         <div className="mt-4">
-          <Table columns={columns} data={data} />
+          <Table columns={columns} data={issues} />
         </div>
       </div>
       <CreateIssueDialog

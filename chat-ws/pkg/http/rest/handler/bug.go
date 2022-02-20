@@ -14,7 +14,7 @@ import (
 func (server *Server) SetUpBugRouter(mr *mux.Router, bs bug.Service) {
 	br := mr.PathPrefix("/protected/issue").Subrouter()
 	br.HandleFunc("/create", server.CreateIssue(bs)).Methods("POST")
-	br.HandleFunc("/list/read/{workspace_id}", server.GetIssues(bs)).Methods("GET")
+	br.HandleFunc("/list/{workspace_id}", server.GetIssues(bs)).Methods("GET")
 	br.HandleFunc("/update", server.UpdateIssue(bs)).Methods("POST")
 	br.HandleFunc("/delete/{issue_id}", server.DeleteIssue(bs)).Methods("POST")
 	br.HandleFunc("/epic-link/option/{workspace_id}", server.GetEpicLinkOptions(bs)).Methods("GET")
