@@ -12,7 +12,7 @@ import { removeEmptyFields } from "../../service/object";
 export default function CreateIssueDialog({ isOpen, closeDialog }) {
   const cancelButtonRef = useRef();
   const [errMsg, setErrMsg] = useState("");
-  const [dueDate, setDueDate] = useState(new Date());
+  const [dueDate, setDueDate] = useState();
   const [epicLinkOptions, setEpicLinkOptions] = useState([]);
   const [assigneeOptions, setAssigneeOptions] = useState([]);
 
@@ -49,19 +49,19 @@ export default function CreateIssueDialog({ isOpen, closeDialog }) {
   const {
     register,
     handleSubmit,
-    resetField,
+    reset,
     clearErrors,
     formState: { errors },
   } = useForm();
 
   const onClose = () => {
-    resetField();
+    reset();
+    setDueDate();
     clearErrors();
     closeDialog();
   };
 
   const createIssue = async (data) => {
-    dueDate.setHours(0, 0, 0, 0);
     data.due_time = dueDate.toJSON();
     data.workspace_id = currWorkspace.workspace_id;
     data.story_point = parseInt(data.story_point);
@@ -282,6 +282,9 @@ export default function CreateIssueDialog({ isOpen, closeDialog }) {
                     selected={dueDate}
                     onChange={(date) => setDueDate(date)}
                     className="p-1 rounded-lg bg-gray-200"
+                    showTimeSelect
+                    timeIntervals={15}
+                    dateFormat="Pp"
                   />
                 </div>
 
