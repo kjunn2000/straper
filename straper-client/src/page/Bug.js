@@ -6,6 +6,7 @@ import Table, {
   DateCell,
   SelectColumnFilter,
   StatusPill,
+  SummaryCell,
   TypeCell,
 } from "../components/bug/Table";
 import api from "../axios/api";
@@ -32,6 +33,8 @@ const Bug = () => {
       {
         Header: "Summary",
         accessor: "summary",
+        Cell: SummaryCell,
+        idAccessor: "issue_id",
       },
       {
         Header: "Assignee",

@@ -14,16 +14,15 @@ import {
   HiChevronDoubleRight,
 } from "react-icons/hi";
 import { classNames } from "../../shared/Utils";
-import { SortIcon, SortUpIcon, SortDownIcon } from "../../shared/Icons";
-import { Button, PageButton } from "../../shared/button/Button";
-import { AiFillBug } from "react-icons/ai";
-import { BiTask } from "react-icons/bi";
 import {
-  BsSubtract,
-  BsFillBookmarkFill,
-  BsFillLightningFill,
-} from "react-icons/bs";
+  SortIcon,
+  SortUpIcon,
+  SortDownIcon,
+  IssueIcon,
+} from "../../shared/Icons";
+import { Button, PageButton } from "../../shared/button/Button";
 import { convertToDateString } from "../../service/object";
+import { Link } from "react-router-dom";
 
 // Define a default UI for filtering
 function GlobalFilter({
@@ -130,37 +129,19 @@ export function AvatarCell({ value, column, row }) {
   );
 }
 
+export function SummaryCell({ value, column, row }) {
+  return (
+    <Link
+      to={"/issue/" + row.original[column.idAccessor]}
+      className="text-indigo-500 self-center cursor-pointer hover:text-indigo-300 hover:underline transition duration-150"
+    >
+      {value}
+    </Link>
+  );
+}
+
 export function TypeCell({ value }) {
-  switch (value) {
-    case "bug": {
-      return <AiFillBug className="bg-red-500 text-white rounded" size={20} />;
-    }
-    case "task": {
-      return <BiTask className="bg-sky-500 text-white rounded" size={20} />;
-    }
-    case "subtask": {
-      return <BsSubtract className="bg-sky-500 text-white rounded" size={20} />;
-    }
-    case "story": {
-      return (
-        <BsFillBookmarkFill
-          className="bg-lime-400 text-white rounded"
-          size={20}
-        />
-      );
-    }
-    case "epic": {
-      return (
-        <BsFillLightningFill
-          className="bg-purple-500 text-white rounded"
-          size={20}
-        />
-      );
-    }
-    default: {
-      return <div>{value}</div>;
-    }
-  }
+  return <IssueIcon value={value} size={20} />;
 }
 
 export function DateCell({ value }) {

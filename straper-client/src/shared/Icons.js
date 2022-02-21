@@ -1,3 +1,11 @@
+import { AiFillBug } from "react-icons/ai";
+import { BiTask } from "react-icons/bi";
+import {
+  BsSubtract,
+  BsFillBookmarkFill,
+  BsFillLightningFill,
+} from "react-icons/bs";
+
 export function SortIcon({ className }) {
   return (
     <svg
@@ -47,4 +55,41 @@ export function SortDownIcon({ className }) {
       <path d="M41 288h238c21.4 0 32.1 25.9 17 41L177 448c-9.4 9.4-24.6 9.4-33.9 0L24 329c-15.1-15.1-4.4-41 17-41z"></path>
     </svg>
   );
+}
+
+export function IssueIcon({ value, size }) {
+  switch (value) {
+    case "bug": {
+      return (
+        <AiFillBug className="bg-red-500 text-white rounded" size={size} />
+      );
+    }
+    case "task": {
+      return <BiTask className="bg-sky-500 text-white rounded" size={size} />;
+    }
+    case "subtask": {
+      return (
+        <BsSubtract className="bg-sky-500 text-white rounded" size={size} />
+      );
+    }
+    case "story": {
+      return (
+        <BsFillBookmarkFill
+          className="bg-lime-400 text-white rounded"
+          size={size}
+        />
+      );
+    }
+    case "epic": {
+      return (
+        <BsFillLightningFill
+          className="bg-purple-500 text-white rounded"
+          size={size}
+        />
+      );
+    }
+    default: {
+      return <div>{value}</div>;
+    }
+  }
 }
