@@ -47,6 +47,7 @@ api.interceptors.response.use(
           useAuthStore.getState().setAccessToken(accessToken);
           return api(originalConfig);
         }
+        console.log("log out...");
         logOut(true);
       } catch (_error) {
         console.log(_error);

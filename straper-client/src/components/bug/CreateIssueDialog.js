@@ -17,7 +17,6 @@ export default function CreateIssueDialog({ isOpen, closeDialog }) {
   const [assigneeOptions, setAssigneeOptions] = useState([]);
 
   const currWorkspace = useWorkpaceStore((state) => state.currWorkspace);
-  const identity = useIdentityStore((state) => state.identity);
   const addIssue = useIssueStore((state) => state.addIssue);
 
   useEffect(() => {
@@ -39,10 +38,7 @@ export default function CreateIssueDialog({ isOpen, closeDialog }) {
       `/protected/issue/assignee/option/${currWorkspace.workspace_id}`
     );
     if (res.data.Success) {
-      const data = res.data.Data.filter(
-        (user) => user.user_id !== identity.user_id
-      );
-      setAssigneeOptions(data);
+      setAssigneeOptions(res.data.Data);
     }
   };
 
@@ -62,7 +58,9 @@ export default function CreateIssueDialog({ isOpen, closeDialog }) {
   };
 
   const createIssue = async (data) => {
-    data.due_time = dueDate.toJSON();
+    if (data.due_time) {
+      data.due_time = dueDate.toJSON();
+    }
     data.workspace_id = currWorkspace.workspace_id;
     data.story_point = parseInt(data.story_point);
     removeEmptyFields(data);
@@ -180,11 +178,12 @@ export default function CreateIssueDialog({ isOpen, closeDialog }) {
                   <select
                     {...register("epic_link")}
                     className="w-2/3 p-2 rounded bg-gray-200 hover:cursor-pointer focus:outline-none"
+                    defaultValue={null}
                   >
                     {epicLinkOptions &&
                       epicLinkOptions.map((option) => (
                         <option value={option.issue_id}>
-                          {option.Summary}
+                          {option.summary}
                         </option>
                       ))}
                   </select>

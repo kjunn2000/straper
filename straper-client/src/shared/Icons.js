@@ -68,9 +68,7 @@ export function IssueIcon({ value, size }) {
       return <BiTask className="bg-sky-500 text-white rounded" size={size} />;
     }
     case "subtask": {
-      return (
-        <BsSubtract className="bg-sky-500 text-white rounded" size={size} />
-      );
+      return <BsSubtract className="text-blue-500 rounded" size={size} />;
     }
     case "story": {
       return (
