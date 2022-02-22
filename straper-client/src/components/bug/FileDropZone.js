@@ -1,5 +1,14 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useDropzone } from "react-dropzone";
+import {
+  base64ToArray,
+  createBlobFile,
+  downloadBlobFile,
+  getAsByteArray,
+} from "../../service/file";
+import FileMessage from "../chat/FileMessage";
+import api from "../../axios/api";
+import useIssueStore from "../../store/issueStore";
 
 const baseStyle = {
   display: "flex",
@@ -27,13 +36,49 @@ const rejectStyle = {
   borderColor: "#ff1744",
 };
 
-function FileDropZone() {
+function FileDropZone({ issueId, attachments }) {
   const [files, setFiles] = useState([]);
 
-  const onDrop = useCallback((acceptedFiles) => {
-    console.log(files);
+  const addIssueAttachments = useIssueStore(
+    (state) => state.addIssueAttachments
+  );
+
+  useEffect(() => {
+    if (!attachments) {
+      return;
+    }
+    setFiles(
+      attachments.map((attachment) => {
+        const blob = createBlobFile(
+          base64ToArray(attachment.file_bytes),
+          attachment.file_type
+        );
+        return {
+          ...attachment,
+          blob,
+        };
+      })
+    );
+  }, [attachments]);
+
+  const onDrop = useCallback(async (acceptedFiles) => {
     console.log(acceptedFiles);
-    setFiles((files) => [...files, ...acceptedFiles]);
+    const attachments = acceptedFiles.map(async (file) => {
+      const result = await getAsByteArray();
+      return {
+        file_name: file.name,
+        file_type: file.type,
+        file_bytes: Array.from(result),
+      };
+    });
+    const payload = {
+      issue_id: issueId,
+      attachments,
+    };
+    const res = await api.post("/protected/issue/attachments/upload", payload);
+    if (res.data.Success) {
+      addIssueAttachments();
+    }
   }, []);
 
   const {
@@ -57,8 +102,8 @@ function FileDropZone() {
   );
 
   const thumbs = files.map((file) => (
-    <div key={file.name}>
-      <div>{file.name}</div>
+    <div onClick={() => downloadBlobFile(file.blob, file.file_name)}>
+      <FileMessage file={file} />
     </div>
   ));
 

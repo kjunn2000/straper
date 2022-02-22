@@ -25,6 +25,20 @@ const useIssueStore = create((set) => ({
       };
     });
   },
+  addIssueAttachments: (issueId, attachments) => {
+    set((state) => {
+      const newIssues = state.issues.map((issue) => {
+        if (issue.issue_id === issueId) {
+          issue.attachments = [...issue.attachments, ...attachments];
+        }
+        return issue;
+      });
+      setLocalStorage("issues", newIssues);
+      return {
+        issues: newIssues,
+      };
+    });
+  },
   updateIssue: (issue) => {
     set((state) => {
       const newIssues = state.issues.map((i) =>

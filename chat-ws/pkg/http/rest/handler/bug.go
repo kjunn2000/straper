@@ -14,9 +14,11 @@ import (
 func (server *Server) SetUpBugRouter(mr *mux.Router, bs bug.Service) {
 	br := mr.PathPrefix("/protected/issue").Subrouter()
 	br.HandleFunc("/create", server.CreateIssue(bs)).Methods("POST")
+	br.HandleFunc("/attachments/upload", server.AddIssueAttachments(bs)).Methods("POST")
 	br.HandleFunc("/list/{workspace_id}", server.GetIssues(bs)).Methods("GET")
 	br.HandleFunc("/update", server.UpdateIssue(bs)).Methods("POST")
 	br.HandleFunc("/delete/{issue_id}", server.DeleteIssue(bs)).Methods("POST")
+	br.HandleFunc("/attachments/delete/{fid}", server.DeleteIssueAttachment(bs)).Methods("POST")
 	br.HandleFunc("/epic-link/option/{workspace_id}", server.GetEpicLinkOptions(bs)).Methods("GET")
 	br.HandleFunc("/assignee/option/{workspace_id}", server.GetAssigneeOptions(bs)).Methods("GET")
 	br.Use(middleware.TokenVerifier(server.tokenMaker))
@@ -39,6 +41,20 @@ func (server *Server) CreateIssue(bs bug.Service) func(http.ResponseWriter, *htt
 			return
 		}
 		rest.AddResponseToResponseWritter(rw, issue, "")
+	}
+}
+
+func (server *Server) AddIssueAttachments(bs bug.Service) func(http.ResponseWriter, *http.Request) {
+	return func(rw http.ResponseWriter, r *http.Request) {
+		var param bug.AddIssueAttachmentsParam
+		json.NewDecoder(r.Body).Decode(&param)
+
+		attachments, err := bs.AddIssueAttachments(r.Context(), param)
+		if err != nil {
+			rest.AddResponseToResponseWritter(rw, nil, err.Error())
+			return
+		}
+		rest.AddResponseToResponseWritter(rw, attachments, "")
 	}
 }
 
@@ -71,10 +87,10 @@ func (server *Server) GetIssues(bs bug.Service) func(w http.ResponseWriter, r *h
 
 func (server *Server) UpdateIssue(bs bug.Service) func(http.ResponseWriter, *http.Request) {
 	return func(rw http.ResponseWriter, r *http.Request) {
-		var param bug.UpdateIssueParam
-		json.NewDecoder(r.Body).Decode(&param)
+		var issue bug.Issue
+		json.NewDecoder(r.Body).Decode(&issue)
 
-		issue, err := bs.UpdateIssue(r.Context(), param)
+		issue, err := bs.UpdateIssue(r.Context(), issue)
 		if err != nil {
 			rest.AddResponseToResponseWritter(rw, nil, err.Error())
 			return
@@ -92,6 +108,23 @@ func (server *Server) DeleteIssue(bs bug.Service) func(w http.ResponseWriter, r 
 			return
 		}
 		err := bs.DeleteIssue(r.Context(), issueId)
+		if err != nil {
+			rest.AddResponseToResponseWritter(w, nil, err.Error())
+			return
+		}
+		rest.AddResponseToResponseWritter(w, nil, "")
+	}
+}
+
+func (server *Server) DeleteIssueAttachment(bs bug.Service) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		fid, ok := vars["fid"]
+		if !ok {
+			rest.AddResponseToResponseWritter(w, nil, "fid.not.found")
+			return
+		}
+		err := bs.DeleteIssueAttachment(r.Context(), fid)
 		if err != nil {
 			rest.AddResponseToResponseWritter(w, nil, err.Error())
 			return

@@ -31,5 +31,8 @@ build:
 docker-up:
 		docker start chat-ws-mysql-1 straper-redis
 
+docker-up-2:
+		docker start chat-ws-mysql-1 straper-redis seaweedfs-master-1 seaweedfs-volume-1
+
 docker-down:
 		docker stop $(docker ps -q)

@@ -99,7 +99,10 @@ const IssueDetail = () => {
               </div>
               <div>
                 <div className="font-bold">Attachments</div>
-                <FileDropZone />
+                <FileDropZone
+                  issueId={issue.issue_id}
+                  attachments={issue.attachments}
+                />
               </div>
               <div>
                 <div className="font-bold">Acceptance Criteria</div>

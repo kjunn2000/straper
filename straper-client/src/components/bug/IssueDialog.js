@@ -113,10 +113,7 @@ export default function IssueDialog({ isOpen, closeDialog, issue, setIssue }) {
     data.story_point = parseInt(data.story_point);
     data.issue_id = issue.issue_id;
     removeEmptyFields(data);
-    const payload = {
-      issue: data,
-    };
-    const res = await api.post("/protected/issue/update", payload);
+    const res = await api.post("/protected/issue/update", data);
     if (res.data.Success) {
       updateIssue(res.data.Data);
       setIssue(res.data.Data);

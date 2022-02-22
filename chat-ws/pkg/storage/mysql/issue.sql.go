@@ -166,11 +166,11 @@ func (q *Queries) CreateIssueAttachment(ctx context.Context, a bug.Attachment) e
 	return nil
 }
 
-func (q *Queries) GetIssueAttachments(ctx context.Context, fid string) ([]bug.Attachment, error) {
+func (q *Queries) GetIssueAttachments(ctx context.Context, issueId string) ([]bug.Attachment, error) {
 	var attacments []bug.Attachment
 	sql, arg, err := sq.Select("fid", "file_name", "file_type", "issue_id").
 		From("issue_attachment").
-		Where(sq.Eq{"fid": fid}).
+		Where(sq.Eq{"issue_id": issueId}).
 		ToSql()
 	if err != nil {
 		q.log.Warn("Failed to create select sql.")

@@ -47,7 +47,7 @@ type Issue struct {
 	Status             string       `json:"status" db:"status"`
 	WorkspaceId        string       `json:"workspace_id" db:"workspace_id"`
 	CreatedDate        time.Time    `json:"created_date" db:"created_date"`
-	Attachments        []Attachment `json:"attachment"`
+	Attachments        []Attachment `json:"attachments"`
 }
 
 type Attachment struct {
@@ -58,12 +58,6 @@ type Attachment struct {
 	IssueId   string `json:"issue_id" db:"issue_id"`
 }
 
-type UpdateIssueParam struct {
-	UpdatedIssue      Issue        `json:"issue"`
-	NewAttachments    []Attachment `json:"new_attachments"`
-	DeleteAttachments []string     `json:"delete_attachments"`
-}
-
 type EpicLinkOption struct {
 	IssueId string `json:"issue_id" db:"issue_id"`
 	Summary string `json:"summary" db:"summary"`
@@ -72,4 +66,9 @@ type EpicLinkOption struct {
 type Assignee struct {
 	UserId   string `json:"user_id" db:"user_id"`
 	Username string `json:"username" db:"username"`
+}
+
+type AddIssueAttachmentsParam struct {
+	IssueId     string       `json:"issue_id" db:"issue_id"`
+	Attachments []Attachment `json:"attachments"`
 }
