@@ -102,9 +102,13 @@ func (s *service) UpdateIssue(ctx context.Context, params UpdateIssueParam) (Iss
 	if err := s.store.UpdateIssue(ctx, params.UpdatedIssue); err != nil {
 		return Issue{}, err
 	}
-	params.UpdatedIssue.Attachments = append(params.UpdatedIssue.Attachments,
+	issue, err := s.store.GetIssueByIssueId(ctx, params.UpdatedIssue.IssueId)
+	if err != nil {
+		return Issue{}, err
+	}
+	issue.Attachments = append(params.UpdatedIssue.Attachments,
 		params.NewAttachments...)
-	return params.UpdatedIssue, nil
+	return issue, nil
 }
 
 func (s *service) DeleteIssue(ctx context.Context, issueId string) error {

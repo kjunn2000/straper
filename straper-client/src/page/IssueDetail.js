@@ -10,9 +10,10 @@ import DeleteIssueBtn from "../components/bug/DeleteIssueBtn";
 
 const IssueDetail = () => {
   const { issueId } = useParams();
-  const issues = useIssueStore((state) => state.issues);
-  const [issue, setIssue] = useState();
   const history = useHistory();
+  const [issue, setIssue] = useState();
+  const issues = useIssueStore((state) => state.issues);
+  const assigneeOptions = useIssueStore((state) => state.assigneeOptions);
 
   useEffect(() => {
     getIssueData();
@@ -30,7 +31,6 @@ const IssueDetail = () => {
     "Story Point",
     "Environment",
     "Serverity",
-    "Reporter",
   ];
   const detailFields = [
     "type",
@@ -40,8 +40,14 @@ const IssueDetail = () => {
     "story_point",
     "environment",
     "serverity",
-    "reporter",
   ];
+
+  const RowField = ({ title, value }) => (
+    <div className="flex justify-between w-3/4">
+      <span className="text-gray-500 font-semibold">{title}:</span>
+      <span>{value}</span>
+    </div>
+  );
 
   return (
     <SubPage>
@@ -60,7 +66,7 @@ const IssueDetail = () => {
             </div>
           </div>
           <div className="flex space-x-5">
-            <EditIssueBtn />
+            <EditIssueBtn issue={issue} setIssue={setIssue} />
             <DeleteIssueBtn issueId={issue.issue_id} />
           </div>
           <div className="grid grid-cols-4 p-1">
@@ -115,24 +121,28 @@ const IssueDetail = () => {
             <div className="col-span-1 flex flex-col space-y-5">
               <div>
                 <div className="font-bold">People</div>
-                <div className="flex space-x-5">
-                  <div className="font-semibold text-gray-500">
-                    <div>Assignee:</div>
-                  </div>
-                  <div>{issue.assignee}</div>
+                <div className="flex flex-col">
+                  <RowField
+                    title="Assignee"
+                    value={assigneeOptions[issue.assignee]}
+                  />
+                  <RowField
+                    title="Reporter"
+                    value={assigneeOptions[issue.reporter]}
+                  />
                 </div>
               </div>
               <div>
                 <div className="font-bold">Dates</div>
-                <div className="flex space-x-5">
-                  <div className="font-semibold text-gray-500 flex flex-col">
-                    <div>Created:</div>
-                    <div>Due:</div>
-                  </div>
-                  <div className="flex flex-col">
-                    <div>{convertToDateString(issue.created_date)}</div>
-                    <div>{convertToDateString(issue.due_time)}</div>
-                  </div>
+                <div className="flex flex-col">
+                  <RowField
+                    title="Created"
+                    value={convertToDateString(issue.created_date)}
+                  />
+                  <RowField
+                    title="Due Time"
+                    value={convertToDateString(issue.due_time)}
+                  />
                 </div>
               </div>
               {issue.epic_link && issue.epic_link !== "" && (

@@ -3,6 +3,7 @@ import { getLocalStorage, setLocalStorage } from "./localStorage";
 
 const useIssueStore = create((set) => ({
   issues: getLocalStorage("issues") || [],
+  assigneeOptions: getLocalStorage("assigneeOptions") || {},
   setIssues: (issues) => {
     setLocalStorage("issues", issues);
     set(() => ({
@@ -45,6 +46,13 @@ const useIssueStore = create((set) => ({
         issues: newIssues,
       };
     });
+  },
+  setAssigneeOptions: (options) => {
+    const map = options.reduce((map, obj) => {
+      map[obj.user_id] = obj.username;
+      return map;
+    }, {});
+    set(() => ({ assigneeOptions: map }));
   },
 }));
 

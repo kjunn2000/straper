@@ -9,20 +9,59 @@ import useIdentityStore from "../../store/identityStore";
 import useIssueStore from "../../store/issueStore";
 import { removeEmptyFields } from "../../service/object";
 
-export default function CreateIssueDialog({ isOpen, closeDialog }) {
+export default function IssueDialog({ isOpen, closeDialog, issue, setIssue }) {
   const cancelButtonRef = useRef();
   const [errMsg, setErrMsg] = useState("");
   const [dueDate, setDueDate] = useState();
   const [epicLinkOptions, setEpicLinkOptions] = useState([]);
   const [assigneeOptions, setAssigneeOptions] = useState([]);
+  const [editMode, setEditMode] = useState(issue != null);
 
   const currWorkspace = useWorkpaceStore((state) => state.currWorkspace);
   const addIssue = useIssueStore((state) => state.addIssue);
+  const updateIssue = useIssueStore((state) => state.updateIssue);
+  const setStateAssigneeOptions = useIssueStore(
+    (state) => state.setAssigneeOptions
+  );
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    clearErrors,
+    setValue,
+    formState: { errors },
+  } = useForm();
 
   useEffect(() => {
     fetchEpicLinkOptions();
     fetchAssigneeOptions();
   }, []);
+
+  useEffect(() => {
+    initFields();
+  }, [issue]);
+
+  const initFields = () => {
+    if (!issue) {
+      return;
+    }
+    setValue("type", issue.type);
+    setValue("summary", issue.summary);
+    setValue("description", issue.description);
+    setValue("acceptance_criteria", issue.acceptance_criteria);
+    setValue("epic_link", issue.epic_link);
+    setValue("story_point", issue.story_point);
+    setValue("replicate_step", issue.replicate_step);
+    setValue("environment", issue.environment);
+    setValue("workaround", issue.workaround);
+    setValue("priority", issue.priority);
+    setValue("serverity", issue.serverity);
+    setValue("label", issue.label);
+    setValue("assignee", issue.assignee);
+    setDueDate(new Date(issue.due_time));
+    setValue("status", issue.status);
+  };
 
   const fetchEpicLinkOptions = async () => {
     const res = await api.get(
@@ -39,26 +78,21 @@ export default function CreateIssueDialog({ isOpen, closeDialog }) {
     );
     if (res.data.Success) {
       setAssigneeOptions(res.data.Data);
+      setStateAssigneeOptions(res.data.Data);
     }
   };
 
-  const {
-    register,
-    handleSubmit,
-    reset,
-    clearErrors,
-    formState: { errors },
-  } = useForm();
-
   const onClose = () => {
-    reset();
-    setDueDate();
-    clearErrors();
+    if (!editMode) {
+      reset();
+      setDueDate();
+      clearErrors();
+    }
     closeDialog();
   };
 
   const createIssue = async (data) => {
-    if (data.due_time) {
+    if (dueDate) {
       data.due_time = dueDate.toJSON();
     }
     data.workspace_id = currWorkspace.workspace_id;
@@ -67,6 +101,25 @@ export default function CreateIssueDialog({ isOpen, closeDialog }) {
     const res = await api.post("/protected/issue/create", data);
     if (res.data.Success) {
       addIssue(res.data.Data);
+      onClose();
+    }
+  };
+
+  const editIssue = async (data) => {
+    if (dueDate) {
+      data.due_time = dueDate.toJSON();
+    }
+    data.workspace_id = currWorkspace.workspace_id;
+    data.story_point = parseInt(data.story_point);
+    data.issue_id = issue.issue_id;
+    removeEmptyFields(data);
+    const payload = {
+      issue: data,
+    };
+    const res = await api.post("/protected/issue/update", payload);
+    if (res.data.Success) {
+      updateIssue(res.data.Data);
+      setIssue(res.data.Data);
       onClose();
     }
   };
@@ -119,11 +172,11 @@ export default function CreateIssueDialog({ isOpen, closeDialog }) {
                 as="h3"
                 className="text-lg font-medium leading-6 text-gray-900"
               >
-                Create Issue
+                {editMode ? "Edit Issue" : "Create Issue"}
               </Dialog.Title>
               <form
                 onSubmit={handleSubmit((data) => {
-                  createIssue(data);
+                  editMode ? editIssue(data) : createIssue(data);
                 })}
                 className="rounded-lg flex-col space-y-5 w-96 h-auto self-center py-5"
               >
@@ -178,7 +231,6 @@ export default function CreateIssueDialog({ isOpen, closeDialog }) {
                   <select
                     {...register("epic_link")}
                     className="w-2/3 p-2 rounded bg-gray-200 hover:cursor-pointer focus:outline-none"
-                    defaultValue={null}
                   >
                     {epicLinkOptions &&
                       epicLinkOptions.map((option) => (
@@ -186,6 +238,7 @@ export default function CreateIssueDialog({ isOpen, closeDialog }) {
                           {option.summary}
                         </option>
                       ))}
+                    <option value={""}>No</option>
                   </select>
                   <ErrorMessage errors={errors} name="epic_link" as="p" />
                 </div>
@@ -286,6 +339,20 @@ export default function CreateIssueDialog({ isOpen, closeDialog }) {
                     dateFormat="Pp"
                   />
                 </div>
+                {editMode && (
+                  <div>
+                    <Title text="Status" required={true} />
+                    <select
+                      {...register("status")}
+                      className="w-2/3 p-2 rounded bg-gray-200 hover:cursor-pointer focus:outline-none"
+                    >
+                      <option value="ACTIVE">ACTIVE</option>
+                      <option value="INACTIVE">INACTIVE</option>
+                      <option value="CLOSED">CLOSED</option>
+                    </select>
+                    <ErrorMessage errors={errors} name="status" as="p" />
+                  </div>
+                )}
 
                 {errMsg !== "" && (
                   <div className="text-red-600 self-center">{errMsg}</div>
@@ -296,7 +363,7 @@ export default function CreateIssueDialog({ isOpen, closeDialog }) {
                     className="bg-indigo-600 text-white self-center p-2 rounded-l
                     hover:bg-indigo-800"
                   >
-                    Create
+                    {editMode ? "Edit" : "Create"}
                   </button>
                   <button
                     type="button"

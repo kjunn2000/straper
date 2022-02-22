@@ -119,6 +119,7 @@ type Querier interface {
 	// bug
 	CreateIssue(ctx context.Context, issue bug.Issue) error
 	GetIssuesByWorkspaceId(ctx context.Context, workspaceId string, limit, offset uint64) ([]bug.Issue, error)
+	GetIssueByIssueId(ctx context.Context, issueId string) (bug.Issue, error)
 	UpdateIssue(ctx context.Context, issue bug.Issue) error
 	DeleteIssue(ctx context.Context, issueId string) error
 	CreateIssueAttachment(ctx context.Context, a bug.Attachment) error

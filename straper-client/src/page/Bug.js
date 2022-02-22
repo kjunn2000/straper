@@ -1,8 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import SubPage from "../components/border/SubPage";
-import CreateIssueDialog from "../components/bug/CreateIssueDialog";
 import Table, {
-  AvatarCell,
   DateCell,
   SelectColumnFilter,
   StatusPill,
@@ -12,6 +10,7 @@ import Table, {
 import api from "../axios/api";
 import useWorkspaceStore from "../store/workspaceStore";
 import useIssueStore from "../store/issueStore";
+import IssueDialog from "../components/bug/IssueDialog";
 
 const Bug = () => {
   const columns = useMemo(
@@ -105,7 +104,7 @@ const Bug = () => {
           <Table columns={columns} data={issues} />
         </div>
       </div>
-      <CreateIssueDialog
+      <IssueDialog
         isOpen={createIssueDialogOpen}
         closeDialog={() => setCreateIssueDialogOpen(false)}
       />

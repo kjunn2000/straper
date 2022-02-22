@@ -64,6 +64,25 @@ func (q *Queries) GetIssuesByWorkspaceId(ctx context.Context, workspaceId string
 	return issues, nil
 }
 
+func (q *Queries) GetIssueByIssueId(ctx context.Context, issueId string) (bug.Issue, error) {
+	var issue bug.Issue
+	sql, arg, err := sq.Select("issue_id", "type", "backlog_priority", "summary", "description", "acceptance_criteria",
+		"epic_link", "story_point", "replicate_step", "environment", "workaround", "serverity",
+		"label", "assignee", "reporter", "due_time", "status", "workspace_id", "created_date").
+		From("issue").
+		Where(sq.Eq{"issue_id": issueId}).
+		ToSql()
+	if err != nil {
+		q.log.Warn("Failed to create select sql.")
+		return bug.Issue{}, err
+	}
+	err = q.db.Get(&issue, sql, arg...)
+	if err != nil {
+		return bug.Issue{}, err
+	}
+	return issue, nil
+}
+
 func (q *Queries) UpdateIssue(ctx context.Context, issue bug.Issue) error {
 	sql, args, err := sq.Update("issue").
 		Set("type", issue.Type).
