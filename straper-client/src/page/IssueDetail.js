@@ -7,6 +7,7 @@ import { useHistory } from "react-router-dom";
 import { convertToDateString } from "../service/object";
 import EditIssueBtn from "../components/bug/EditIssueBtn";
 import DeleteIssueBtn from "../components/bug/DeleteIssueBtn";
+import FileDropZone from "../components/bug/FileDropZone";
 
 const IssueDetail = () => {
   const { issueId } = useParams();
@@ -15,13 +16,13 @@ const IssueDetail = () => {
   const issues = useIssueStore((state) => state.issues);
   const assigneeOptions = useIssueStore((state) => state.assigneeOptions);
 
-  useEffect(() => {
-    getIssueData();
-  }, [issueId]);
-
   const getIssueData = () => {
     setIssue(issues.find((i) => i.issue_id === issueId));
   };
+
+  useEffect(() => {
+    getIssueData();
+  }, [issueId]);
 
   const detailHeaders = [
     "Type",
@@ -98,6 +99,7 @@ const IssueDetail = () => {
               </div>
               <div>
                 <div className="font-bold">Attachments</div>
+                <FileDropZone />
               </div>
               <div>
                 <div className="font-bold">Acceptance Criteria</div>
