@@ -102,6 +102,7 @@ const IssueDetail = () => {
                 <FileDropZone
                   issueId={issue.issue_id}
                   attachments={issue.attachments}
+                  getIssueData={getIssueData}
                 />
               </div>
               <div>

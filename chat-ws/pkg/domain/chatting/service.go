@@ -1,10 +1,12 @@
 package chatting
 
 import (
+	"bytes"
 	"context"
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"io"
 	"time"
 
 	"github.com/go-redis/redis/v8"
@@ -32,9 +34,9 @@ type PubSub interface {
 }
 
 type SeaweedfsClient interface {
-	SaveSeaweedfsFile(ctx context.Context, fileBytes []byte) (string, error)
-	GetSeaweedfsFile(ctx context.Context, fid string) ([]byte, error)
-	DeleteSeaweedfsFile(ctx context.Context, fid string) error
+	SaveFile(ctx context.Context, reader io.Reader) (string, error)
+	GetFile(ctx context.Context, fid string) ([]byte, error)
+	DeleteFile(ctx context.Context, fid string) error
 }
 
 type service struct {
@@ -92,7 +94,7 @@ func (s *service) handleAddMessage(ctx context.Context, bytePayload []byte) ([]b
 	message.MessageId = newId.String()
 	message.CreatedDate = time.Now()
 	if message.Type == TypeFile {
-		fid, err := s.sc.SaveSeaweedfsFile(ctx, message.FileBytes)
+		fid, err := s.sc.SaveFile(ctx, bytes.NewReader(message.FileBytes))
 		if err != nil {
 			return []byte{}, err
 		}
@@ -128,7 +130,7 @@ func (service *service) handleDeleteMessage(ctx context.Context, bytePayload []b
 		return err
 	}
 	if deleteChatMessageParams.Type == TypeFile {
-		if err := service.sc.DeleteSeaweedfsFile(ctx, deleteChatMessageParams.Fid); err != nil {
+		if err := service.sc.DeleteFile(ctx, deleteChatMessageParams.Fid); err != nil {
 			return err
 		}
 	}
@@ -148,7 +150,7 @@ func (s *service) GetChannelMessages(ctx context.Context, channelId string, user
 	}
 	for i, msg := range msgs {
 		if msg.Type == "FILE" {
-			bytesData, err := s.sc.GetSeaweedfsFile(ctx, msg.Content)
+			bytesData, err := s.sc.GetFile(ctx, msg.Content)
 			if err != nil {
 				return []Message{}, err
 			}
@@ -187,7 +189,7 @@ func (s *service) DeleteSeaweedfsMessagesByWorkspaceId(ctx context.Context, work
 func (s *service) deleteSeaweedfsMessages(ctx context.Context, msgs []Message) error {
 	for _, msg := range msgs {
 		if msg.Type == TypeFile {
-			if err := s.sc.DeleteSeaweedfsFile(ctx, msg.Content); err != nil {
+			if err := s.sc.DeleteFile(ctx, msg.Content); err != nil {
 				return err
 			}
 		}

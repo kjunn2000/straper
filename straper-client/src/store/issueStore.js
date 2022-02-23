@@ -29,6 +29,9 @@ const useIssueStore = create((set) => ({
     set((state) => {
       const newIssues = state.issues.map((issue) => {
         if (issue.issue_id === issueId) {
+          if (!issue.attachments) {
+            issue.attachments = [];
+          }
           issue.attachments = [...issue.attachments, ...attachments];
         }
         return issue;
@@ -67,6 +70,20 @@ const useIssueStore = create((set) => ({
       return map;
     }, {});
     set(() => ({ assigneeOptions: map }));
+  },
+  deleteAttachment: (issueId, fid) => {
+    set((state) => {
+      const newIssues = state.issues.map((issue) => {
+        if (issue.issue_id === issueId) {
+          issue.attachments = issue.attachments.filter((a) => a.fid !== fid);
+        }
+        return issue;
+      });
+      setLocalStorage("issues", newIssues);
+      return {
+        issues: newIssues,
+      };
+    });
   },
 }));
 

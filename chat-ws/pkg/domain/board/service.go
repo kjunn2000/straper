@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"io"
 
 	ws "github.com/kjunn2000/straper/chat-ws/pkg/domain/websocket"
 	"go.uber.org/zap"
@@ -17,9 +18,9 @@ type Service interface {
 }
 
 type SeaweedfsClient interface {
-	SaveSeaweedfsFile(ctx context.Context, fileBytes []byte) (string, error)
-	GetSeaweedfsFile(ctx context.Context, fid string) ([]byte, error)
-	DeleteSeaweedfsFile(ctx context.Context, fid string) error
+	SaveFile(ctx context.Context, reader io.Reader) (string, error)
+	GetFile(ctx context.Context, fid string) ([]byte, error)
+	DeleteFile(ctx context.Context, fid string) error
 }
 
 type service struct {
@@ -188,7 +189,7 @@ func (s *service) GetCardComments(ctx context.Context, cardId string, limit, off
 	}
 	for i, msg := range msgs {
 		if msg.Type == TypeFile {
-			bytesData, err := s.sc.GetSeaweedfsFile(ctx, msg.Content)
+			bytesData, err := s.sc.GetFile(ctx, msg.Content)
 			if err != nil {
 				return []CardComment{}, err
 			}
@@ -207,7 +208,7 @@ func (s *service) GetCardComments(ctx context.Context, cardId string, limit, off
 
 func (s *service) deleteSeaweedfsFiles(ctx context.Context, fileComment []CardComment) error {
 	for _, comment := range fileComment {
-		if err := s.sc.DeleteSeaweedfsFile(ctx, comment.Content); err != nil {
+		if err := s.sc.DeleteFile(ctx, comment.Content); err != nil {
 			return err
 		}
 	}

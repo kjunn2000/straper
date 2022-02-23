@@ -14,9 +14,9 @@ import (
 )
 
 type SeaweedfsClient interface {
-	SaveSeaweedfsFile(ctx context.Context, fileBytes []byte) (string, error)
-	GetSeaweedfsFile(ctx context.Context, fid string) ([]byte, error)
-	DeleteSeaweedfsFile(ctx context.Context, fid string) error
+	SaveFile(ctx context.Context, fileBytes []byte) (string, error)
+	GetFile(ctx context.Context, fid string) ([]byte, error)
+	DeleteFile(ctx context.Context, fid string) error
 }
 
 type seaweedfsClient struct {
@@ -27,7 +27,7 @@ func NewSeaweedfsClient(log *zap.Logger) seaweedfsClient {
 	return seaweedfsClient{log: log}
 }
 
-func (s *seaweedfsClient) SaveSeaweedfsFile(ctx context.Context, fileBytes []byte) (string, error) {
+func (s *seaweedfsClient) SaveFile(ctx context.Context, reader io.Reader) (string, error) {
 	resp, err := http.Get("http://localhost:9333/dir/assign")
 	if err != nil {
 		return "", err
@@ -45,13 +45,13 @@ func (s *seaweedfsClient) SaveSeaweedfsFile(ctx context.Context, fileBytes []byt
 	// url := "http://" + weedMasterResponse.Url + "/" + weedMasterResponse.Fid
 	// Local
 	url := "http://" + "localhost:8080" + "/" + weedMasterResponse.Fid
-	if err := s.sendMultiPartRequest(fileBytes, url); err != nil {
+	if err := s.sendMultiPartRequest(reader, url); err != nil {
 		return "", err
 	}
 	return weedMasterResponse.Fid, nil
 }
 
-func (s *seaweedfsClient) sendMultiPartRequest(fileBytes []byte, url string) error {
+func (s *seaweedfsClient) sendMultiPartRequest(reader io.Reader, url string) error {
 	client := &http.Client{
 		Timeout: time.Second * 10,
 	}
@@ -62,7 +62,7 @@ func (s *seaweedfsClient) sendMultiPartRequest(fileBytes []byte, url string) err
 	if err != nil {
 		return err
 	}
-	_, err = io.Copy(fw, bytes.NewReader(fileBytes))
+	_, err = io.Copy(fw, reader)
 	if err != nil {
 		return err
 	}
@@ -80,7 +80,7 @@ func (s *seaweedfsClient) sendMultiPartRequest(fileBytes []byte, url string) err
 	return nil
 }
 
-func (s *seaweedfsClient) GetSeaweedfsFile(ctx context.Context, fid string) ([]byte, error) {
+func (s *seaweedfsClient) GetFile(ctx context.Context, fid string) ([]byte, error) {
 	// fidArr := strings.Split(fid, ",")
 	// resp, err := http.Get("http://localhost:9333/dir/lookup?volumeId=" + fidArr[0])
 	// if err != nil {
@@ -112,7 +112,7 @@ func (s *seaweedfsClient) GetSeaweedfsFile(ctx context.Context, fid string) ([]b
 	return body, nil
 }
 
-func (s *seaweedfsClient) DeleteSeaweedfsFile(ctx context.Context, fid string) error {
+func (s *seaweedfsClient) DeleteFile(ctx context.Context, fid string) error {
 	// fidArr := strings.Split(fid, ",")
 	// resp, err := http.Get("http://localhost:9333/dir/lookup?volumeId=" + fidArr[0])
 	// if err != nil {
