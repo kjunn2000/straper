@@ -1,9 +1,6 @@
 User,
  To view other users’ status
-
  To sort tasks on the task board by the task priority or created time
-
- To link tasks on the task board to the corresponding ticket if exists
 
 Straper allows Administrator,
  To login and logout from the system
