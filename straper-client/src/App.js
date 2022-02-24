@@ -17,6 +17,7 @@ import Setting from "./page/Setting";
 import TaskBoard from "./page/TaskBoard";
 import LogOutNotice from "./page/LogOutNotice";
 import Bug from "./page/Bug";
+import IssueDetail from "./page/IssueDetail";
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
           <UserAuthGuard path="/setting" component={Setting} />
           <UserAuthGuard path="/board" component={TaskBoard} />
           <UserAuthGuard path="/bug" component={Bug} />
+          <UserAuthGuard path="/issue/:issueId" component={IssueDetail} />
           <UserAuthGuard path="/logout-notice" component={LogOutNotice} />
           <NoAuthGuard path="/login/timeout" component={Login} />
           <NoAuthGuard path="/login" component={Login} />

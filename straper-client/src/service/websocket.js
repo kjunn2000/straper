@@ -67,6 +67,9 @@ const sendBoardMsg = (type, workspaceId, payload) => {
 };
 
 const sendUnregisterMsg = () => {
+  if (!socket) {
+    return;
+  }
   const dto = {
     type: "USER_LEAVE",
   };

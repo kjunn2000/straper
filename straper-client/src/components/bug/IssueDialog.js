@@ -6,21 +6,62 @@ import DatePicker from "react-datepicker";
 import useWorkpaceStore from "../../store/workspaceStore";
 import api from "../../axios/api";
 import useIdentityStore from "../../store/identityStore";
+import useIssueStore from "../../store/issueStore";
+import { removeEmptyFields } from "../../service/object";
 
-export default function CreateIssueDialog({ isOpen, closeDialog }) {
+export default function IssueDialog({ isOpen, closeDialog, issue, setIssue }) {
   const cancelButtonRef = useRef();
   const [errMsg, setErrMsg] = useState("");
-  const [dueDate, setDueDate] = useState(new Date());
+  const [dueDate, setDueDate] = useState();
   const [epicLinkOptions, setEpicLinkOptions] = useState([]);
   const [assigneeOptions, setAssigneeOptions] = useState([]);
+  const [editMode, setEditMode] = useState(issue != null);
 
   const currWorkspace = useWorkpaceStore((state) => state.currWorkspace);
-  const identity = useIdentityStore((state) => state.identity);
+  const addIssue = useIssueStore((state) => state.addIssue);
+  const updateIssue = useIssueStore((state) => state.updateIssue);
+  const setStateAssigneeOptions = useIssueStore(
+    (state) => state.setAssigneeOptions
+  );
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    clearErrors,
+    setValue,
+    formState: { errors },
+  } = useForm();
 
   useEffect(() => {
     fetchEpicLinkOptions();
     fetchAssigneeOptions();
   }, []);
+
+  useEffect(() => {
+    initFields();
+  }, [issue]);
+
+  const initFields = () => {
+    if (!issue) {
+      return;
+    }
+    setValue("type", issue.type);
+    setValue("summary", issue.summary);
+    setValue("description", issue.description);
+    setValue("acceptance_criteria", issue.acceptance_criteria);
+    setValue("epic_link", issue.epic_link);
+    setValue("story_point", issue.story_point);
+    setValue("replicate_step", issue.replicate_step);
+    setValue("environment", issue.environment);
+    setValue("workaround", issue.workaround);
+    setValue("priority", issue.priority);
+    setValue("serverity", issue.serverity);
+    setValue("label", issue.label);
+    setValue("assignee", issue.assignee);
+    setDueDate(new Date(issue.due_time));
+    setValue("status", issue.status);
+  };
 
   const fetchEpicLinkOptions = async () => {
     const res = await api.get(
@@ -36,35 +77,47 @@ export default function CreateIssueDialog({ isOpen, closeDialog }) {
       `/protected/issue/assignee/option/${currWorkspace.workspace_id}`
     );
     if (res.data.Success) {
-      const data = res.data.Data.filter(
-        (user) => user.user_id !== identity.user_id
-      );
-      setAssigneeOptions(data);
+      setAssigneeOptions(res.data.Data);
+      setStateAssigneeOptions(res.data.Data);
     }
   };
 
-  const {
-    register,
-    handleSubmit,
-    resetField,
-    clearErrors,
-    formState: { errors },
-  } = useForm();
-
   const onClose = () => {
-    resetField();
-    clearErrors();
+    if (!editMode) {
+      reset();
+      setDueDate();
+      clearErrors();
+    }
     closeDialog();
   };
 
   const createIssue = async (data) => {
-    dueDate.setHours(0, 0, 0, 0);
-    data.due_time = dueDate.toJSON();
+    if (dueDate) {
+      data.due_time = dueDate.toJSON();
+    }
     data.workspace_id = currWorkspace.workspace_id;
     data.story_point = parseInt(data.story_point);
+    removeEmptyFields(data);
     const res = await api.post("/protected/issue/create", data);
     if (res.data.Success) {
-      console.log(res.data.Data);
+      addIssue(res.data.Data);
+      onClose();
+    }
+  };
+
+  const editIssue = async (data) => {
+    if (dueDate) {
+      data.due_time = dueDate.toJSON();
+    }
+    data.workspace_id = currWorkspace.workspace_id;
+    data.story_point = parseInt(data.story_point);
+    data.issue_id = issue.issue_id;
+    removeEmptyFields(data);
+    const res = await api.post("/protected/issue/update", data);
+    if (res.data.Success) {
+      updateIssue(res.data.Data);
+      setIssue(res.data.Data);
+      onClose();
     }
   };
 
@@ -116,11 +169,11 @@ export default function CreateIssueDialog({ isOpen, closeDialog }) {
                 as="h3"
                 className="text-lg font-medium leading-6 text-gray-900"
               >
-                Create Issue
+                {editMode ? "Edit Issue" : "Create Issue"}
               </Dialog.Title>
               <form
                 onSubmit={handleSubmit((data) => {
-                  createIssue(data);
+                  editMode ? editIssue(data) : createIssue(data);
                 })}
                 className="rounded-lg flex-col space-y-5 w-96 h-auto self-center py-5"
               >
@@ -178,10 +231,11 @@ export default function CreateIssueDialog({ isOpen, closeDialog }) {
                   >
                     {epicLinkOptions &&
                       epicLinkOptions.map((option) => (
-                        <option value={option.issue_id}>
-                          {option.Summary}
+                        <option key={option.issue_id} value={option.issue_id}>
+                          {option.summary}
                         </option>
                       ))}
+                    <option value={""}>No</option>
                   </select>
                   <ErrorMessage errors={errors} name="epic_link" as="p" />
                 </div>
@@ -225,7 +279,9 @@ export default function CreateIssueDialog({ isOpen, closeDialog }) {
                     className="w-2/3 p-2 rounded bg-gray-200 hover:cursor-pointer focus:outline-none"
                   >
                     {Array.from({ length: 5 }, (v, k) => k + 1).map((val) => (
-                      <option value={val}>{val}</option>
+                      <option key={val} value={val}>
+                        {val}
+                      </option>
                     ))}
                   </select>
                   <ErrorMessage
@@ -264,7 +320,7 @@ export default function CreateIssueDialog({ isOpen, closeDialog }) {
                   >
                     {assigneeOptions &&
                       assigneeOptions.map((option) => (
-                        <option value={option.user_id}>
+                        <option key={option.user_id} value={option.user_id}>
                           {option.username}
                         </option>
                       ))}
@@ -277,8 +333,25 @@ export default function CreateIssueDialog({ isOpen, closeDialog }) {
                     selected={dueDate}
                     onChange={(date) => setDueDate(date)}
                     className="p-1 rounded-lg bg-gray-200"
+                    showTimeSelect
+                    timeIntervals={15}
+                    dateFormat="Pp"
                   />
                 </div>
+                {editMode && (
+                  <div>
+                    <Title text="Status" required={true} />
+                    <select
+                      {...register("status")}
+                      className="w-2/3 p-2 rounded bg-gray-200 hover:cursor-pointer focus:outline-none"
+                    >
+                      <option value="ACTIVE">ACTIVE</option>
+                      <option value="INACTIVE">INACTIVE</option>
+                      <option value="CLOSED">CLOSED</option>
+                    </select>
+                    <ErrorMessage errors={errors} name="status" as="p" />
+                  </div>
+                )}
 
                 {errMsg !== "" && (
                   <div className="text-red-600 self-center">{errMsg}</div>
@@ -289,7 +362,7 @@ export default function CreateIssueDialog({ isOpen, closeDialog }) {
                     className="bg-indigo-600 text-white self-center p-2 rounded-l
                     hover:bg-indigo-800"
                   >
-                    Create
+                    {editMode ? "Edit" : "Create"}
                   </button>
                   <button
                     type="button"

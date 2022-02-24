@@ -14,11 +14,16 @@ import (
 func (server *Server) SetUpBugRouter(mr *mux.Router, bs bug.Service) {
 	br := mr.PathPrefix("/protected/issue").Subrouter()
 	br.HandleFunc("/create", server.CreateIssue(bs)).Methods("POST")
-	br.HandleFunc("/list/read/{workspace_id}", server.GetIssues(bs)).Methods("GET")
+	br.HandleFunc("/list/{workspace_id}", server.GetIssues(bs)).Methods("GET")
 	br.HandleFunc("/update", server.UpdateIssue(bs)).Methods("POST")
 	br.HandleFunc("/delete/{issue_id}", server.DeleteIssue(bs)).Methods("POST")
+
 	br.HandleFunc("/epic-link/option/{workspace_id}", server.GetEpicLinkOptions(bs)).Methods("GET")
 	br.HandleFunc("/assignee/option/{workspace_id}", server.GetAssigneeOptions(bs)).Methods("GET")
+
+	br.HandleFunc("/attachments/upload", server.AddIssueAttachments(bs)).Methods("POST")
+	br.HandleFunc("/attachment/delete/{fid}", server.DeleteIssueAttachment(bs)).Methods("POST")
+	br.HandleFunc("/attachment/download/{fid}", server.DownloadAttachment(bs)).Methods("GET")
 	br.Use(middleware.TokenVerifier(server.tokenMaker))
 }
 
@@ -32,12 +37,33 @@ func (server *Server) CreateIssue(bs bug.Service) func(http.ResponseWriter, *htt
 		var issue bug.Issue
 		json.NewDecoder(r.Body).Decode(&issue)
 		issue.Reporter = userId
+		issue.Status = "ACTIVE"
 		issue, err = bs.CreateIssue(r.Context(), issue)
 		if err != nil {
 			rest.AddResponseToResponseWritter(rw, nil, err.Error())
 			return
 		}
 		rest.AddResponseToResponseWritter(rw, issue, "")
+	}
+}
+
+func (server *Server) AddIssueAttachments(bs bug.Service) func(http.ResponseWriter, *http.Request) {
+	return func(rw http.ResponseWriter, r *http.Request) {
+		err := r.ParseMultipartForm(32 << 2)
+		if err != nil {
+			rest.AddResponseToResponseWritter(rw, nil, err.Error())
+			return
+		}
+		issueId := r.PostFormValue("issue_id")
+		fileTypes := r.PostForm["types"]
+		files := r.MultipartForm.File["files"]
+
+		attachments, err := bs.AddIssueAttachments(r.Context(), issueId, fileTypes, files)
+		if err != nil {
+			rest.AddResponseToResponseWritter(rw, nil, err.Error())
+			return
+		}
+		rest.AddResponseToResponseWritter(rw, attachments, "")
 	}
 }
 
@@ -70,10 +96,10 @@ func (server *Server) GetIssues(bs bug.Service) func(w http.ResponseWriter, r *h
 
 func (server *Server) UpdateIssue(bs bug.Service) func(http.ResponseWriter, *http.Request) {
 	return func(rw http.ResponseWriter, r *http.Request) {
-		var param bug.UpdateIssueParam
-		json.NewDecoder(r.Body).Decode(&param)
+		var issue bug.Issue
+		json.NewDecoder(r.Body).Decode(&issue)
 
-		issue, err := bs.UpdateIssue(r.Context(), param)
+		issue, err := bs.UpdateIssue(r.Context(), issue)
 		if err != nil {
 			rest.AddResponseToResponseWritter(rw, nil, err.Error())
 			return
@@ -91,6 +117,23 @@ func (server *Server) DeleteIssue(bs bug.Service) func(w http.ResponseWriter, r 
 			return
 		}
 		err := bs.DeleteIssue(r.Context(), issueId)
+		if err != nil {
+			rest.AddResponseToResponseWritter(w, nil, err.Error())
+			return
+		}
+		rest.AddResponseToResponseWritter(w, nil, "")
+	}
+}
+
+func (server *Server) DeleteIssueAttachment(bs bug.Service) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		fid, ok := vars["fid"]
+		if !ok {
+			rest.AddResponseToResponseWritter(w, nil, "fid.not.found")
+			return
+		}
+		err := bs.DeleteIssueAttachment(r.Context(), fid)
 		if err != nil {
 			rest.AddResponseToResponseWritter(w, nil, err.Error())
 			return
@@ -130,5 +173,23 @@ func (server *Server) GetAssigneeOptions(bs bug.Service) func(w http.ResponseWri
 			return
 		}
 		rest.AddResponseToResponseWritter(w, options, "")
+	}
+}
+
+func (server *Server) DownloadAttachment(bs bug.Service) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		fid, ok := vars["fid"]
+		if !ok {
+			rest.AddResponseToResponseWritter(w, nil, "fid.not.found")
+			return
+		}
+		bytes, err := bs.GetAttachment(r.Context(), fid)
+		if err != nil {
+			rest.AddResponseToResponseWritter(w, nil, err.Error())
+			return
+		}
+		w.Write(bytes)
+		rest.AddResponseToResponseWritter(w, nil, "")
 	}
 }

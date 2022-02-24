@@ -14,7 +14,7 @@ type Service interface {
 }
 
 type SeaweedfsClient interface {
-	DeleteSeaweedfsFile(ctx context.Context, fid string) error
+	DeleteFile(ctx context.Context, fid string) error
 }
 
 type service struct {
@@ -41,7 +41,7 @@ func (s *service) DeleteWorkspace(ctx context.Context, workspaceId string) error
 		return err
 	}
 	for _, fid := range fids {
-		if err := s.sc.DeleteSeaweedfsFile(ctx, fid); err != nil {
+		if err := s.sc.DeleteFile(ctx, fid); err != nil {
 			return err
 		}
 	}

@@ -14,8 +14,15 @@ import {
   HiChevronDoubleRight,
 } from "react-icons/hi";
 import { classNames } from "../../shared/Utils";
-import { SortIcon, SortUpIcon, SortDownIcon } from "../../shared/Icons";
+import {
+  SortIcon,
+  SortUpIcon,
+  SortDownIcon,
+  IssueIcon,
+} from "../../shared/Icons";
 import { Button, PageButton } from "../../shared/button/Button";
+import { convertToDateString } from "../../service/object";
+import { Link } from "react-router-dom";
 
 // Define a default UI for filtering
 function GlobalFilter({
@@ -34,7 +41,7 @@ function GlobalFilter({
       <span className="text-gray-700">Search: </span>
       <input
         type="text"
-        className="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+        className="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 p-1"
         value={value || ""}
         onChange={(e) => {
           setValue(e.target.value);
@@ -66,7 +73,7 @@ export function SelectColumnFilter({
     <label className="flex gap-x-2 items-baseline">
       <span className="text-gray-700">{render("Header")}: </span>
       <select
-        className="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50"
+        className="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 p-1"
         name={id}
         id={id}
         value={filterValue}
@@ -86,15 +93,15 @@ export function SelectColumnFilter({
 }
 
 export function StatusPill({ value }) {
-  const status = value ? value.toLowerCase() : "unknown";
+  const status = value ? value.toUpperCase() : "UNKNOWN";
 
   return (
     <span
       className={classNames(
         "px-3 py-1 uppercase leading-wide font-bold text-xs rounded-full shadow-sm",
-        status.startsWith("active") ? "bg-green-100 text-green-800" : null,
-        status.startsWith("inactive") ? "bg-yellow-100 text-yellow-800" : null,
-        status.startsWith("offline") ? "bg-red-100 text-red-800" : null
+        status === "ACTIVE" ? "bg-green-100 text-green-800" : null,
+        status === "REVIEWING" ? "bg-yellow-100 text-yellow-800" : null,
+        status === "CLOSED" ? "bg-red-100 text-red-800" : null
       )}
     >
       {status}
@@ -102,24 +109,23 @@ export function StatusPill({ value }) {
   );
 }
 
-export function AvatarCell({ value, column, row }) {
+export function SummaryCell({ value, column, row }) {
   return (
-    <div className="flex items-center">
-      <div className="flex-shrink-0 h-10 w-10">
-        <img
-          className="h-10 w-10 rounded-full"
-          src={row.original[column.imgAccessor]}
-          alt=""
-        />
-      </div>
-      <div className="ml-4">
-        <div className="text-sm font-medium text-gray-900">{value}</div>
-        <div className="text-sm text-gray-500">
-          {row.original[column.emailAccessor]}
-        </div>
-      </div>
-    </div>
+    <Link
+      to={"/issue/" + row.original[column.idAccessor]}
+      className="text-indigo-500 self-center cursor-pointer hover:text-indigo-300 hover:underline transition duration-150"
+    >
+      {value}
+    </Link>
   );
+}
+
+export function TypeCell({ value }) {
+  return <IssueIcon value={value} size={20} />;
+}
+
+export function DateCell({ value }) {
+  return <div>{convertToDateString(value)}</div>;
 }
 
 function Table({ columns, data }) {

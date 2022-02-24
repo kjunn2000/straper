@@ -1,6 +1,7 @@
 package board
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"time"
@@ -158,7 +159,7 @@ func (s *service) handleBoardAddComment(ctx context.Context, bytePayload []byte)
 	comment.CommentId = newId.String()
 	comment.CreatedDate = time.Now()
 	if comment.Type == TypeFile {
-		fid, err := s.sc.SaveSeaweedfsFile(ctx, comment.FileBytes)
+		fid, err := s.sc.SaveFile(ctx, bytes.NewReader(comment.FileBytes))
 		if err != nil {
 			return []byte{}, err
 		}
@@ -194,7 +195,7 @@ func (service *service) handleCardDeleteComment(ctx context.Context, bytePayload
 		return err
 	}
 	if cardDeleteCommentParams.Type == TypeFile {
-		if err := service.sc.DeleteSeaweedfsFile(ctx, cardDeleteCommentParams.Fid); err != nil {
+		if err := service.sc.DeleteFile(ctx, cardDeleteCommentParams.Fid); err != nil {
 			return err
 		}
 	}
