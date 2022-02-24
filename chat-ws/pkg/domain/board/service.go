@@ -121,6 +121,10 @@ func (service *service) HandleBroadcast(ctx context.Context, msg *ws.Message, pu
 		if err := service.handleUpdateCardDueDate(ctx, bytePayload); err != nil {
 			return err
 		}
+	case BoardUpdateCardIssueLink:
+		if err := service.handleUpdateIssueLink(ctx, bytePayload); err != nil {
+			return err
+		}
 	case BoardDeleteCard:
 		if err := service.handleDeleteCard(ctx, bytePayload); err != nil {
 			return err

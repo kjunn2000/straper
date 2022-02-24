@@ -6,7 +6,7 @@ import { handleWsChatMsg } from "./chat";
 var socket;
 
 const isSocketOpen = () => {
-  return socket !== undefined;
+  return socket !== undefined && socket.readyState === socket.OPEN;
 };
 
 const connect = () => {

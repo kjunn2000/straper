@@ -1,41 +1,40 @@
-name: Run unit tests 
+# name: Run unit tests
 
-on:
-  push:
-    branches: [ main ]
-  pull_request:
-    branches: [ main ]
+# on:
+#   push:
+#     branches: [main]
+#   pull_request:
+#     branches: [main]
 
-jobs:
+# jobs:
+#   test:
+#     runs-on: ubuntu-latest
+#     env:
+#       DB_DATABASE: straperdb
+#       DB_USER: root
+#       DB_PASSWORD: root
+#     defaults:
+#       run:
+#         working-directory: ./chat-ws
+#     steps:
+#       - uses: actions/checkout@v2
 
-  test:
-    runs-on: ubuntu-latest
-    env:
-      DB_DATABASE: straperdb
-      DB_USER: root
-      DB_PASSWORD: root 
-    defaults:
-      run:
-        working-directory: ./chat-ws
-    steps:
-    - uses: actions/checkout@v2
+#       - name: Set up Go
+#         uses: actions/setup-go@v2
+#         with:
+#           go-version: 1.16
 
-    - name: Set up Go
-      uses: actions/setup-go@v2
-      with:
-        go-version: 1.16
+#       - name: Install golang-migrate
+#         run: |
+#           curl -L https://github.com/golang-migrate/migrate/releases/download/v4.14.1/migrate.linux-amd64.tar.gz | tar xvz
+#           sudo mv migrate.linux-amd64 /usr/bin/migrate
+#           which migrate
 
-    - name: Install golang-migrate
-      run: |
-        curl -L https://github.com/golang-migrate/migrate/releases/download/v4.14.1/migrate.linux-amd64.tar.gz | tar xvz
-        sudo mv migrate.linux-amd64 /usr/bin/migrate
-        which migrate
+#       - name: Set up MYSQL
+#         run: |
+#           sudo /etc/init.d/mysql start
+#           mysql -e 'CREATE DATABASE ${{ env.DB_DATABASE }};' -u${{ env.DB_USER }} -p${{ env.DB_PASSWORD }}
+#           make migrate_action_up
 
-    - name: Set up MYSQL
-      run: |
-        sudo /etc/init.d/mysql start
-        mysql -e 'CREATE DATABASE ${{ env.DB_DATABASE }};' -u${{ env.DB_USER }} -p${{ env.DB_PASSWORD }}
-        make migrate_action_up 
-
-    - name: Test
-      run: DB_PASSWORD=root make test
+#       - name: Test
+#         run: DB_PASSWORD=root make test

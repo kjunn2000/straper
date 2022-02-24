@@ -40,7 +40,11 @@ func (s *service) DeleteWorkspace(ctx context.Context, workspaceId string) error
 	if err != nil {
 		return err
 	}
-	for _, fid := range fids {
+	aFids, err := s.r.GetAttachmentFidsByWorkspaceId(ctx, workspaceId)
+	if err != nil {
+		return err
+	}
+	for _, fid := range append(fids, aFids...) {
 		if err := s.sc.DeleteFile(ctx, fid); err != nil {
 			return err
 		}

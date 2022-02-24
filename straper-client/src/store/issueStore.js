@@ -3,17 +3,20 @@ import { getLocalStorage, setLocalStorage } from "./localStorage";
 
 const useIssueStore = create((set) => ({
   issues: getLocalStorage("issues") || [],
+  isSet: getLocalStorage("isSet") || false,
   assigneeOptions: getLocalStorage("assigneeOptions") || {},
   setIssues: (issues) => {
     setLocalStorage("issues", issues);
     set(() => ({
       issues: issues,
+      isSet: true,
     }));
   },
   clearIssues: () => {
     setLocalStorage("issues", []);
     set(() => ({
       issues: [],
+      isSet: false,
     }));
   },
   addIssue: (issue) => {

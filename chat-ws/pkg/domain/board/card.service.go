@@ -43,6 +43,14 @@ func (service *service) handleUpdateCardDueDate(ctx context.Context, bytePayload
 	return service.store.UpdateCardDueDate(ctx, updateCardDueDateParams)
 }
 
+func (service *service) handleUpdateIssueLink(ctx context.Context, bytePayload []byte) error {
+	var param UpdateCardIssueLinkParams
+	if err := json.Unmarshal(bytePayload, &param); err != nil {
+		return err
+	}
+	return service.store.UpdateCardIssueLink(ctx, param.CardId, param.IssueLink)
+}
+
 func (service *service) handleDeleteCard(ctx context.Context, bytePayload []byte) error {
 	var deleteCardParams DeleteCardParams
 	if err := json.Unmarshal(bytePayload, &deleteCardParams); err != nil {

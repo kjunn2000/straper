@@ -37,10 +37,6 @@ const CardComment = ({ cardId }) => {
   };
 
   const fetchComments = async (firstTime, limit, offset) => {
-    console.log(isBottom);
-    console.log(firstTime);
-    console.log(limit);
-    console.log(offset);
     if (isBottom && !firstTime) {
       return;
     } else if (firstTime) {
@@ -63,8 +59,10 @@ const CardComment = ({ cardId }) => {
   };
 
   const handleScroll = () => {
-    if (commentsRef.current.scrollTop + commentsRef.current.offsetHeight 
-      === commentsRef.current.scrollHeight) {
+    if (
+      commentsRef.current.scrollTop + commentsRef.current.offsetHeight ===
+      commentsRef.current.scrollHeight
+    ) {
       fetchComments(false, 10, offset);
     }
   };

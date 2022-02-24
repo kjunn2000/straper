@@ -21,6 +21,7 @@ type Repository interface {
 	UpdateCard(ctx context.Context, params UpdateCardParams) error
 	UpdateCardDueDate(ctx context.Context, params UpdateCardDueDateParams) error
 	UpdateCardOrder(ctx context.Context, cardId string, orderIndex int, listId string, updateListId bool) error
+	UpdateCardIssueLink(ctx context.Context, cardId, issueLink string) error
 	DeleteCard(ctx context.Context, cardId string) error
 
 	GetUserFromCard(ctx context.Context, cardId string) ([]string, error)

@@ -15,4 +15,5 @@ type Repository interface {
 	RemoveUserFromChannel(ctx context.Context, channelId string, userId string) error
 
 	GetFidsByWorkspaceId(ctx context.Context, workspaceId string) ([]string, error)
+	GetAttachmentFidsByWorkspaceId(ctx context.Context, workspaceId string) ([]string, error)
 }

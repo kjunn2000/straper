@@ -27,7 +27,7 @@ func (q *Queries) CreateCard(ctx context.Context, card board.Card) error {
 
 func (q *Queries) GetCardListByListId(ctx context.Context, listId string) ([]board.Card, error) {
 	sql, args, err := sq.Select("card_id", "title", "priority", "list_id", "description", "creator_id", "created_date",
-		"due_date", "order_index").From("card").
+		"due_date", "order_index", "issue_link").From("card").
 		Where(sq.Eq{"list_id": listId}).
 		OrderBy("order_index").
 		ToSql()
@@ -92,6 +92,22 @@ func (q *Queries) UpdateCardOrder(ctx context.Context, cardId string, orderIndex
 	_, err = q.db.Exec(sql, args...)
 	if err != nil {
 		q.log.Info("Failed to update card order.", zap.Error(err))
+		return err
+	}
+	return nil
+}
+
+func (q *Queries) UpdateCardIssueLink(ctx context.Context, cardId, issueLink string) error {
+	sql, args, err := sq.Update("card").
+		Set("issue_link", issueLink).
+		Where(sq.Eq{"card_id": cardId}).ToSql()
+	if err != nil {
+		q.log.Info("Failed to create update issue link sql.", zap.Error(err))
+		return err
+	}
+	_, err = q.db.Exec(sql, args...)
+	if err != nil {
+		q.log.Info("Failed to update issue link card.", zap.Error(err))
 		return err
 	}
 	return nil
