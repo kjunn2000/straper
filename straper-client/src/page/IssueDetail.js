@@ -77,14 +77,14 @@ const IssueDetail = () => {
                 <div className="flex space-x-5">
                   <div>
                     {detailHeaders.map((title) => (
-                      <div className="font-semibold text-gray-500">
+                      <div key={title} className="font-semibold text-gray-500">
                         {title}:
                       </div>
                     ))}
                   </div>
                   <div>
                     {detailFields.map((field) => (
-                      <div>{issue[field] || "-"}</div>
+                      <div key={field}>{issue[field] || "-"}</div>
                     ))}
                   </div>
                 </div>

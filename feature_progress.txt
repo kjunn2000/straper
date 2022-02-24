@@ -3,43 +3,9 @@ User,
 
  To sort tasks on the task board by the task priority or created time
 
- To raise tickets with detailed description and attachments
- To close tickets after completed
-
  To link tasks on the task board to the corresponding ticket if exists
 
 Straper allows Administrator,
  To login and logout from the system
  To view and manage all the users
  To view and manage all the workspaces
-
-Issue
-Issue Type
-1. Story
-2. Bug
-3. Epic
-Backlog Priority
-Summary
-Description
-Attachments
-Acceptance criteria
-Epic Link
-Sprint
-Story Points
-Steps to recreate/replicate
-Environment
-1. DEV (Local)
-2. TEST
-3. INTEGRATION
-4. ACCEPTANCE
-5. PRODUCTION
-Workaround
-Serverity
-1. Blocking
-2. Critical
-3. Major
-4. Normal
-5. Minor
-Labels
-Estimate Time
-Assignee

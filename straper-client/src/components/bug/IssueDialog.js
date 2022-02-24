@@ -231,7 +231,7 @@ export default function IssueDialog({ isOpen, closeDialog, issue, setIssue }) {
                   >
                     {epicLinkOptions &&
                       epicLinkOptions.map((option) => (
-                        <option value={option.issue_id}>
+                        <option key={option.issue_id} value={option.issue_id}>
                           {option.summary}
                         </option>
                       ))}
@@ -279,7 +279,9 @@ export default function IssueDialog({ isOpen, closeDialog, issue, setIssue }) {
                     className="w-2/3 p-2 rounded bg-gray-200 hover:cursor-pointer focus:outline-none"
                   >
                     {Array.from({ length: 5 }, (v, k) => k + 1).map((val) => (
-                      <option value={val}>{val}</option>
+                      <option key={val} value={val}>
+                        {val}
+                      </option>
                     ))}
                   </select>
                   <ErrorMessage
@@ -318,7 +320,7 @@ export default function IssueDialog({ isOpen, closeDialog, issue, setIssue }) {
                   >
                     {assigneeOptions &&
                       assigneeOptions.map((option) => (
-                        <option value={option.user_id}>
+                        <option key={option.user_id} value={option.user_id}>
                           {option.username}
                         </option>
                       ))}

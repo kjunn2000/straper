@@ -107,7 +107,10 @@ function FileDropZone({ issueId, attachments, getIssueData }) {
   const thumbs =
     attachments &&
     attachments.map((file) => (
-      <div className="group bg-gray-100 rounded p-2 text-semibold text-sm italic flex justify-between">
+      <div
+        className="group bg-gray-100 rounded p-2 text-semibold text-sm italic flex justify-between"
+        key={file.fid}
+      >
         <span>{file.file_name}</span>
         <div className="flex">
           <span
