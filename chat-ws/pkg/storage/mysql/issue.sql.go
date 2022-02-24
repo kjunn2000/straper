@@ -183,6 +183,24 @@ func (q *Queries) GetIssueAttachments(ctx context.Context, issueId string) ([]bu
 	return attacments, nil
 }
 
+func (q *Queries) GetAttachmentFidsByWorkspaceId(ctx context.Context, workspaceId string) ([]string, error) {
+	var fids []string
+	sql, arg, err := sq.Select("ia.fid").
+		From("issue_attachment ia").
+		InnerJoin("issue i on ia.issue_id = i.issue_id").
+		Where(sq.Eq{"i.workspace_id": workspaceId}).
+		ToSql()
+	if err != nil {
+		q.log.Warn("Failed to create select sql.")
+		return []string{}, err
+	}
+	err = q.db.Select(&fids, sql, arg...)
+	if err != nil {
+		return []string{}, err
+	}
+	return fids, nil
+}
+
 func (q *Queries) DeleteIssueAttachment(ctx context.Context, fid string) error {
 	sql, args, err := sq.Delete("issue_attachment").
 		Where(sq.Eq{"fid": fid}).

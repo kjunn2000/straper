@@ -29,6 +29,7 @@ type Card struct {
 	CreatedDate time.Time           `json:"created_date" db:"created_date"`
 	DueDate     time.Time           `json:"due_date" db:"due_date"`
 	OrderIndex  int                 `json:"order_index" db:"order_index"`
+	IssueLink   NullString          `json:"issue_link" db:"issue_link"`
 	MemberList  []string            `json:"member_list"`
 	Checklist   []CardChecklistItem `json:"checklist"`
 }

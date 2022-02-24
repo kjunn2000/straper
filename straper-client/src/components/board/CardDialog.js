@@ -18,6 +18,8 @@ import "react-datepicker/dist/react-datepicker.css";
 import AddMember from "./AddMember";
 import useWorkspaceStore from "../../store/workspaceStore";
 import Checklist from "./Checklist";
+import { Link } from "react-router-dom";
+import EditIssueLink from "./EditIssueLink";
 
 const CardDialog = ({ open, closeModal, card }) => {
   let initialFocus = useRef(null);
@@ -56,9 +58,9 @@ const CardDialog = ({ open, closeModal, card }) => {
     sendBoardMsg("BOARD_DELETE_CARD", board.workspace_id, payload);
   };
 
-  const moreActionBtn = (text, action, Icon) => (
+  const moreActionBtn = (text, action, Icon, bg) => (
     <button
-      className="w-full bg-indigo-400 text-white hover:bg-indigo-600 rounded shadow-lg shadow-indigo-500/50"
+      className={`w-full text-white rounded shadow-lg ${bg}`}
       onClick={() => action()}
     >
       <div className="flex space-x-3 p-2">
@@ -186,7 +188,7 @@ const CardDialog = ({ open, closeModal, card }) => {
                       </div>
                       <button
                         type="submit"
-                        className="self-end bg-indigo-400 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-full"
+                        className="self-end bg-indigo-600 hover:bg-indigo-400 text-white font-bold py-2 px-4 rounded-full"
                       >
                         SAVE
                       </button>
@@ -258,6 +260,23 @@ const CardDialog = ({ open, closeModal, card }) => {
                         </ul>
                       </div>
                     </div>
+                    <div>
+                      <div className="flex py-3 space-x-3">
+                        <span className="font-semibold ">Issue Link</span>
+                        <EditIssueLink card={card} />
+                      </div>
+                      {card.issue_link && (
+                        <div>
+                          <Link
+                            to={`/issue/${card.issue_link}`}
+                            className="text-indigo-500 self-center cursor-pointer 
+                          hover:text-indigo-300 hover:underline transition duration-150 font-semibold text-sm"
+                          >
+                            VIEW
+                          </Link>
+                        </div>
+                      )}
+                    </div>
                     <div className="flex flex-col space-y-2">
                       <div className="font-semibold py-3">MORE ACTION</div>
                       <div className="flex flex-col space-y-5">
@@ -266,7 +285,8 @@ const CardDialog = ({ open, closeModal, card }) => {
                           () => {
                             setIsChecklistOpen((state) => !state);
                           },
-                          BsCardChecklist
+                          BsCardChecklist,
+                          "bg-indigo-600 hover:bg-indigo-400"
                         )}
                       </div>
                       <div className="flex flex-col space-y-5">
@@ -275,7 +295,8 @@ const CardDialog = ({ open, closeModal, card }) => {
                           () => {
                             setIsDeleteDialogOpen(true);
                           },
-                          AiFillDelete
+                          AiFillDelete,
+                          "bg-red-600 hover:bg-red-400"
                         )}
                       </div>
                     </div>

@@ -26,6 +26,11 @@ type UpdateCardDueDateParams struct {
 	DueDate time.Time `json:"due_date"`
 }
 
+type UpdateCardIssueLinkParams struct {
+	CardId    string `json:"card_id"`
+	IssueLink string `json:"issue_link"`
+}
+
 type DeleteCardParams struct {
 	ListId string `json:"list_id"`
 	CardId string `json:"card_id"`

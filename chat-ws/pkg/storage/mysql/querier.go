@@ -96,6 +96,7 @@ type Querier interface {
 	UpdateCard(ctx context.Context, params board.UpdateCardParams) error
 	UpdateCardDueDate(ctx context.Context, params board.UpdateCardDueDateParams) error
 	UpdateCardOrder(ctx context.Context, cardId string, orderIndex int, listId string, updateListId bool) error
+	UpdateCardIssueLink(ctx context.Context, cardId, issueLink string) error
 	DeleteCard(ctx context.Context, cardId string) error
 
 	GetUserFromCard(ctx context.Context, cardId string) ([]string, error)
@@ -120,6 +121,7 @@ type Querier interface {
 	CreateIssue(ctx context.Context, issue bug.Issue) error
 	GetIssuesByWorkspaceId(ctx context.Context, workspaceId string, limit, offset uint64) ([]bug.Issue, error)
 	GetIssueByIssueId(ctx context.Context, issueId string) (bug.Issue, error)
+	GetAttachmentFidsByWorkspaceId(ctx context.Context, workspaceId string) ([]string, error)
 	UpdateIssue(ctx context.Context, issue bug.Issue) error
 	DeleteIssue(ctx context.Context, issueId string) error
 	CreateIssueAttachment(ctx context.Context, a bug.Attachment) error

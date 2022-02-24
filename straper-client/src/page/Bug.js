@@ -7,26 +7,18 @@ import Table, {
   SummaryCell,
   TypeCell,
 } from "../components/bug/Table";
-import api from "../axios/api";
-import useWorkspaceStore from "../store/workspaceStore";
 import useIssueStore from "../store/issueStore";
 import IssueDialog from "../components/bug/IssueDialog";
+import { getIssueData } from "../service/bug";
 
 const Bug = () => {
   const columns = useMemo(
     () => [
-      // {
-      //   Header: "Name",
-      //   accessor: "name",
-      //   Cell: AvatarCell,
-      //   imgAccessor: "imgUrl",
-      //   emailAccessor: "email",
-      // },
       {
         Header: "T",
         accessor: "type",
         Cell: TypeCell,
-        Filter: SelectColumnFilter, // new
+        Filter: SelectColumnFilter,
         filter: "includes",
       },
       {
@@ -57,32 +49,15 @@ const Bug = () => {
         accessor: "due_time",
         Cell: DateCell,
       },
-      // {
-      //   Header: "Role",
-      //   accessor: "role",
-      //   Filter: SelectColumnFilter, // new
-      //   filter: "includes",
-      // },
     ],
     []
   );
 
-  const currWorkspace = useWorkspaceStore((state) => state.currWorkspace);
-  const setIssues = useIssueStore((state) => state.setIssues);
   const issues = useIssueStore((state) => state.issues);
 
   useEffect(() => {
-    getData();
+    getIssueData();
   }, []);
-
-  const getData = async () => {
-    const res = await api.get(
-      `/protected/issue/list/${currWorkspace.workspace_id}?limit=100&offset=0`
-    );
-    if (res.data.Success && res.data.Data) {
-      setIssues(res.data.Data);
-    }
-  };
 
   const [createIssueDialogOpen, setCreateIssueDialogOpen] = useState(false);
 

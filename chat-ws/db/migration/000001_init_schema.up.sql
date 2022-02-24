@@ -96,7 +96,8 @@ CREATE TABLE `card` (
   `creator_id` VARCHAR(255) NOT NULL,
   `created_date` DATETIME NOT NULL DEFAULT (now()),
   `due_date` DATETIME NOT NULL,
-  `order_index` INT NOT NULL
+  `order_index` INT NOT NULL,
+  `issue_link` CHAR(36) NULL
 );
 
 CREATE TABLE `card_user` (
@@ -186,6 +187,8 @@ ALTER TABLE `card` ADD FOREIGN KEY (`list_id`) REFERENCES `task_list` (`list_id`
 
 ALTER TABLE `card` ADD FOREIGN KEY (`creator_id`) REFERENCES `user_detail` (`user_id`) ON DELETE CASCADE;
 
+ALTER TABLE `card` ADD FOREIGN KEY (`issue_link`) REFERENCES `issue` (`issue_id`) ON DELETE CASCADE;
+
 ALTER TABLE `card_user` ADD FOREIGN KEY (`card_id`) REFERENCES `card` (`card_id`) ON DELETE CASCADE;
 
 ALTER TABLE `card_user` ADD FOREIGN KEY (`user_id`) REFERENCES `user_detail` (`user_id`) ON DELETE CASCADE;
@@ -204,7 +207,7 @@ ALTER TABLE `issue` ADD FOREIGN KEY (`workspace_id`) REFERENCES `workspace` (`wo
 
 ALTER TABLE `issue` ADD FOREIGN KEY (`reporter`) REFERENCES `user_detail` (`user_id`) ON DELETE CASCADE;
 
-ALTER TABLE `issue_attacehment` ADD FOREIGN KEY (`issue_id`) REFERENCES `issue` (`issue_id`) ON DELETE CASCADE;
+ALTER TABLE `issue_attachment` ADD FOREIGN KEY (`issue_id`) REFERENCES `issue` (`issue_id`) ON DELETE CASCADE;
 
 CREATE TRIGGER trigger_user_detail
 BEFORE INSERT
