@@ -2,13 +2,13 @@ import React from "react";
 import { Route, Redirect } from "react-router-dom";
 import useIdentityStore from "../../store/identityStore";
 
-const UserAuthGuard = ({ component: Component, ...rest }) => {
+const AdminAuthGuard = ({ component: Component, ...rest }) => {
   const identity = useIdentityStore((state) => state.identity);
   return (
     <Route
       {...rest}
       render={(props) =>
-        identity?.role === "USER" ? (
+        identity?.role === "ADMIN" ? (
           <Component {...props} />
         ) : (
           <Redirect to="/login" />
@@ -18,4 +18,4 @@ const UserAuthGuard = ({ component: Component, ...rest }) => {
   );
 };
 
-export default UserAuthGuard;
+export default AdminAuthGuard;
