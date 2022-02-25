@@ -122,7 +122,7 @@ func (server *Server) SetServerRoute() (*mux.Router, error) {
 
 func getCORSHandler() func(http.Handler) http.Handler {
 	return handlers.CORS(
-		handlers.AllowedOrigins([]string{"http://localhost:3000"}),
+		handlers.AllowedOrigins([]string{"http://localhost:3000", "http://localhost:3001"}),
 		handlers.AllowedHeaders([]string{"X-Requested-With", "Origin", "Content-Type", "Accept", "Authorization"}),
 		handlers.AllowCredentials(),
 	)

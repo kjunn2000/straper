@@ -29,21 +29,20 @@ const Login = () => {
   }, []);
 
   const onLogin = async (data) => {
-    console.log(data);
-    // const res = await api.post("/auth/login", data, { withCredentials: true });
-    // if (res.data?.Success) {
-    //   await updateAuthAndIdentityState(
-    //     res.data?.Data.access_token,
-    //     res.data?.Data.user
-    //   );
-    //   history.push("/manage/user");
-    // } else if (res.data?.ErrorMessage === "invalid.credential") {
-    //   updateErrMsg("Invalid credenital.");
-    // } else if (res.data?.ErrorMessage === "user.not.found") {
-    //   updateErrMsg("User not found.");
-    // } else if (res.data?.ErrorMessage === "invalid.account.status") {
-    //   updateErrMsg("Invalid account status.");
-    // }
+    const res = await api.post("/auth/login", data, { withCredentials: true });
+    if (res.data?.Success) {
+      await updateAuthAndIdentityState(
+        res.data?.Data.access_token,
+        res.data?.Data.user
+      );
+      history.push("/manage/user");
+    } else if (res.data?.ErrorMessage === "invalid.credential") {
+      updateErrMsg("Invalid credenital.");
+    } else if (res.data?.ErrorMessage === "user.not.found") {
+      updateErrMsg("User not found.");
+    } else if (res.data?.ErrorMessage === "invalid.account.status") {
+      updateErrMsg("Invalid account status.");
+    }
   };
 
   const updateAuthAndIdentityState = async (accessToken, identity) => {

@@ -12,8 +12,11 @@ import (
 
 func (server *Server) SetUpAuthRouter(mr *mux.Router, as auth.Service) {
 	ar := mr.PathPrefix("/auth").Subrouter()
+	aar := mr.PathPrefix("/admin/auth").Subrouter()
 	ar.HandleFunc("/login", server.Login(as)).Methods("POST")
+	aar.HandleFunc("/login", server.Login(as)).Methods("POST")
 	ar.HandleFunc("/refresh-token", server.RefreshToken(as)).Methods("GET")
+	aar.HandleFunc("/refresh-token", server.Login(as)).Methods("POST")
 }
 
 type LoginResponseModal struct {
