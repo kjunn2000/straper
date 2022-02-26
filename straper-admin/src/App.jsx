@@ -10,11 +10,13 @@ import {
 } from "react-router-dom";
 import AdminAuthGuard from "./utils/guards/AdminAuthGuard";
 import NoAuthGuard from "./utils/guards/NoAuthGuard";
+import Nav from "./components/Nav/Nav";
 
 function App() {
   return (
-    <div className="App">
+    <div className="App" className="bg-gray-200 h-screen">
       <Router>
+        <Nav />
         <Switch>
           <AdminAuthGuard path="/manage/user" component={ManageUser} />
           <AdminAuthGuard
