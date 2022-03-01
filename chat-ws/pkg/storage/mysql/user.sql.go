@@ -6,6 +6,7 @@ import (
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/account"
+	"github.com/kjunn2000/straper/chat-ws/pkg/domain/admin"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/auth"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/board"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/bug"
@@ -207,6 +208,30 @@ func (q *Queries) GetUserCredentialByUsername(ctx context.Context, username stri
 	return user, nil
 }
 
+func (q *Queries) GetPaginationUsers(ctx context.Context, limit uint64, cursor string, isNext bool) ([]admin.User, error) {
+	var users []admin.User
+	sb := sq.Select("ud.user_id", "ud.username", "ud.email", "ud.phone_no", "uc.role",
+		"uc.status", "ud.created_date", "ud.updated_date").
+		From("user_detail ud").
+		InnerJoin("user_credential uc on ud.user_id = uc.user_id")
+	if isNext {
+		sb.Where(sq.Lt{"user_id": cursor}).
+			OrderBy("user_id desc")
+	} else {
+		sb.Where(sq.Gt{"user_id": cursor})
+	}
+	sql, arg, err := sb.Limit(limit).ToSql()
+	if err != nil {
+		q.log.Warn("Failed to create select sql.")
+		return []admin.User{}, err
+	}
+	err = q.db.Select(&users, sql, arg...)
+	if err != nil {
+		return []admin.User{}, err
+	}
+	return users, nil
+}
+
 func (q *Queries) UpdateUser(ctx context.Context, params account.UpdateUserParam) error {
 	sql, arg, err := sq.Update("user_detail").
 		Set("username", params.Username).
@@ -230,6 +255,26 @@ func (q *Queries) UpdateUser(ctx context.Context, params account.UpdateUserParam
 		return err
 	}
 	q.log.Info("Successful update user.", zap.Int64("count", r))
+	return nil
+}
+
+func (q *Queries) UpdateUserDetailByAdmin(ctx context.Context, params admin.UpdateUserDetailParm) error {
+	sql, arg, err := sq.Update("user_detail").
+		Set("username", params.Username).
+		Set("email", params.Email).
+		Set("phone_no", params.PhoneNo).
+		Set("updated_date", params.UpdatedDate).
+		Where(sq.Eq{"user_id": params.UserId}).
+		ToSql()
+	if err != nil {
+		q.log.Warn("Failed to create update user query.")
+		return err
+	}
+	_, err = q.db.Exec(sql, arg...)
+	if err != nil {
+		q.log.Warn("Failed to update user to db.", zap.Error(err))
+		return err
+	}
 	return nil
 }
 
@@ -264,6 +309,26 @@ func (q *Queries) UpdateAccountPassword(ctx context.Context, userId, password st
 	_, err = q.db.Exec(sql, args...)
 	if err != nil {
 		q.log.Warn("Failed to update account password to db.", zap.Error(err))
+		return err
+	}
+	return nil
+}
+
+func (q *Queries) UpdateUserCredential(ctx context.Context, param admin.UpdateCredentialParam) error {
+	ub := sq.Update("user_credential").
+		Set("status", param.Status).
+		Set("updated_date", time.Now())
+	if param.Password != "" {
+		ub.Set("password", param.Password)
+	}
+	sql, args, err := ub.Where(sq.Eq{"user_id": param.UserId}).ToSql()
+	if err != nil {
+		q.log.Warn("Failed to create update credential query.")
+		return err
+	}
+	_, err = q.db.Exec(sql, args...)
+	if err != nil {
+		q.log.Warn("Failed to update credential to db.", zap.Error(err))
 		return err
 	}
 	return nil

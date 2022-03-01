@@ -20,7 +20,6 @@ type Service interface {
 	ResetAccountPassword(ctx context.Context, email string) error
 	UpdateAccountPassword(ctx context.Context, params UpdatePasswordParam) error
 
-	DeleteUser(ctx context.Context, userId string) error
 	ValidateVerifyEmailToken(ctx context.Context, tokenId string) error
 }
 
@@ -89,10 +88,6 @@ func (us *service) UpdateUser(ctx context.Context, params UpdateUserParam) error
 		}
 	}
 	return nil
-}
-
-func (us *service) DeleteUser(ctx context.Context, userId string) error {
-	return us.ur.DeleteUser(ctx, userId)
 }
 
 func BcrptHashPassword(password string) (string, error) {

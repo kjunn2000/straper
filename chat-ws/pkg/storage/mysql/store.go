@@ -6,6 +6,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/account"
+	"github.com/kjunn2000/straper/chat-ws/pkg/domain/admin"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/bug"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/adding"
 	"go.uber.org/zap"
@@ -18,6 +19,7 @@ type Store interface {
 	AddNewUserToWorkspace(ctx context.Context, workspaceId string, userIdList []string) error
 	ValidateAccountEmail(ctx context.Context, userId string, tokenId string) error
 	DeleteIssueAndAttachments(ctx context.Context, issueId string, attachments []bug.Attachment) error
+	UpdateUserByAdmin(ctx context.Context, param admin.UpdateUserParam) error
 	Querier
 }
 
