@@ -7,8 +7,12 @@ import Table, {
   StatusPill,
 } from "../shared/table/Table";
 import api from "../axios/api";
+import ActionDialog from "../shared/dialog/ActionDialog";
 
 const ManageUser = () => {
+  const [deleteWarningDialogOpen, setDeleteWarningDialogOpen] = useState(false);
+  const [toDeleteUserId, setToDeleteUserId] = useState();
+
   const columns = useMemo(
     () => [
       {
@@ -46,6 +50,13 @@ const ManageUser = () => {
         Header: "Action",
         idAccessor: "user_id",
         Cell: ActionCell,
+        editAction: () => {
+          console.log("hello");
+        },
+        deleteAction: (userId) => {
+          setToDeleteUserId(userId);
+          setDeleteWarningDialogOpen(true);
+        },
       },
     ],
     []
@@ -69,11 +80,10 @@ const ManageUser = () => {
     }));
 
     const res = await api.get(
-      `/protected/users?limit=10&cursor=${cursor}&isNext=${isNext}`
+      `/protected/users/read?limit=10&cursor=${cursor}&isNext=${isNext}`
     );
     if (res.data.Success) {
       const data = res.data.Data;
-      console.log(data.users);
       if (!data.users && data.total_users === 0) {
         setPageData((prevState) => ({
           ...prevState,
@@ -89,6 +99,23 @@ const ManageUser = () => {
     }
   };
 
+  const handleDeleteUser = async (userId) => {
+    if (!userId || userId === "") {
+      return;
+    }
+    const res = await api.post(`/protected/users/delete/${userId}`);
+    if (res.data.Success) {
+      const newData = pageData.rowData.filter(
+        (user) => user.user_id !== userId
+      );
+      setPageData((prevState) => ({
+        ...prevState,
+        rowData: newData,
+        totalUsers: prevState.totalUsers - 1,
+      }));
+    }
+  };
+
   return (
     <div>
       <Table
@@ -100,6 +127,16 @@ const ManageUser = () => {
         totalRows={pageData.totalUsers}
         pageChangeHandler={fetchData}
         rowsPerPage={10}
+      />
+      <ActionDialog
+        isOpen={deleteWarningDialogOpen}
+        setIsOpen={setDeleteWarningDialogOpen}
+        title="Delete Issue Confirmation"
+        content="Please confirm that the deleted issue will not able to be recovered."
+        buttonText="Delete Anyway"
+        buttonStatus="fail"
+        buttonAction={() => handleDeleteUser(toDeleteUserId)}
+        closeButtonText="Close"
       />
     </div>
   );

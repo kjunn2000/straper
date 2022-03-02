@@ -11,9 +11,9 @@ import (
 	"github.com/kjunn2000/straper/chat-ws/pkg/http/rest/middleware"
 )
 
-func (server *Server) SetUpAdminRouter(mr *mux.Router, as admin.Service) {
-	r := mr.PathPrefix("/admin/protected").Subrouter()
-	r.HandleFunc("/users", server.GetPaginationUsers(as)).Methods("GET")
+func (server *Server) SetUpManageUserRouter(mr *mux.Router, as admin.Service) {
+	r := mr.PathPrefix("/admin/protected/users").Subrouter()
+	r.HandleFunc("/read", server.GetPaginationUsers(as)).Methods("GET")
 	r.HandleFunc("/update", server.UpdateUser(as)).Methods("POST")
 	r.HandleFunc("/delete/{user_id}", server.DeleteUser(as)).Methods("POST")
 	r.Use(middleware.TokenVerifier(server.tokenMaker))
