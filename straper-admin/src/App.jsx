@@ -11,16 +11,18 @@ import {
 import AdminAuthGuard from "./utils/guards/AdminAuthGuard";
 import NoAuthGuard from "./utils/guards/NoAuthGuard";
 import Nav from "./components/Nav/Nav";
+import EditUser from "./page/EditUser";
 
 function App() {
   return (
-    <div className="App" className="bg-gray-200 h-screen">
+    <div className="App" className="bg-gray-200 min-h-screen">
       <Router>
         <Nav />
         <Switch>
-          <AdminAuthGuard path="/manage/user" component={ManageUser} />
+          <AdminAuthGuard path="/manage/user/:userId" component={EditUser} />
+          <AdminAuthGuard path="/manage/users" component={ManageUser} />
           <AdminAuthGuard
-            path="/manage/workspace"
+            path="/manage/workspaces"
             component={ManageWorkspace}
           />
           <NoAuthGuard path="/login/timeout" component={Login} />

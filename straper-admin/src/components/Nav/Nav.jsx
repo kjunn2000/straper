@@ -1,5 +1,4 @@
 import React from "react";
-import { FaDev } from "react-icons/fa";
 
 import styles from "./Nav.module.css";
 import useNavigation from "../../hooks/useNavigation";

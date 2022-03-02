@@ -8,10 +8,12 @@ import Table, {
 } from "../shared/table/Table";
 import api from "../axios/api";
 import ActionDialog from "../shared/dialog/ActionDialog";
+import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 
 const ManageUser = () => {
   const [deleteWarningDialogOpen, setDeleteWarningDialogOpen] = useState(false);
   const [toDeleteUserId, setToDeleteUserId] = useState();
+  const history = useHistory();
 
   const columns = useMemo(
     () => [
@@ -50,8 +52,8 @@ const ManageUser = () => {
         Header: "Action",
         idAccessor: "user_id",
         Cell: ActionCell,
-        editAction: () => {
-          console.log("hello");
+        editAction: (userId) => {
+          history.push(`/manage/user/${userId}`);
         },
         deleteAction: (userId) => {
           setToDeleteUserId(userId);
@@ -80,7 +82,7 @@ const ManageUser = () => {
     }));
 
     const res = await api.get(
-      `/protected/users/read?limit=10&cursor=${cursor}&isNext=${isNext}`
+      `/protected/user/list?limit=10&cursor=${cursor}&isNext=${isNext}`
     );
     if (res.data.Success) {
       const data = res.data.Data;
@@ -103,7 +105,7 @@ const ManageUser = () => {
     if (!userId || userId === "") {
       return;
     }
-    const res = await api.post(`/protected/users/delete/${userId}`);
+    const res = await api.post(`/protected/user/delete/${userId}`);
     if (res.data.Success) {
       const newData = pageData.rowData.filter(
         (user) => user.user_id !== userId

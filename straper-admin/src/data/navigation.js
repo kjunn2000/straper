@@ -1,1 +1,1 @@
-export default ["User", "Workspace"];
+export default ["Users", "Workspaces"];

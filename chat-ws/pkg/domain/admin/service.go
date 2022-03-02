@@ -9,6 +9,7 @@ import (
 )
 
 type Service interface {
+	GetUser(ctx context.Context, userId string) (User, error)
 	GetPaginationUsers(ctx context.Context, limit uint64, cursor string, isNext bool) (PaginationUsersResp, error)
 	UpdateUser(ctx context.Context, param UpdateUserParam) error
 	DeleteUser(ctx context.Context, userId string) error
@@ -24,6 +25,10 @@ func NewService(log *zap.Logger, r Repository) *service {
 		log: log,
 		r:   r,
 	}
+}
+
+func (s *service) GetUser(ctx context.Context, userId string) (User, error) {
+	return s.r.GetUser(ctx, userId)
 }
 
 func (s *service) GetPaginationUsers(ctx context.Context, limit uint64, cursor string, isNext bool) (PaginationUsersResp, error) {

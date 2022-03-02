@@ -208,6 +208,24 @@ func (q *Queries) GetUserCredentialByUsername(ctx context.Context, username stri
 	return user, nil
 }
 
+func (q *Queries) GetUser(ctx context.Context, userId string) (admin.User, error) {
+	var user admin.User
+	sql, arg, err := sq.Select("ud.user_id", "ud.username", "ud.email", "ud.phone_no",
+		"uc.status", "ud.created_date", "ud.updated_date").
+		From("user_detail ud").
+		InnerJoin("user_credential uc on ud.user_id = uc.user_id").
+		Where(sq.Eq{"uc.user_id": userId}).ToSql()
+	if err != nil {
+		q.log.Warn("Failed to create select sql.")
+		return admin.User{}, err
+	}
+	err = q.db.Get(&user, sql, arg...)
+	if err != nil {
+		return admin.User{}, err
+	}
+	return user, nil
+}
+
 func (q *Queries) GetUsersByCursor(ctx context.Context, limit uint64, cursor string, isNext bool) ([]admin.User, error) {
 	var users []admin.User
 	sb := sq.Select("ud.user_id", "ud.username", "ud.email", "ud.phone_no",

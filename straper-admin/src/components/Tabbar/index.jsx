@@ -14,9 +14,9 @@ const Tabbar = ({ navigationData, currentRoute, setCurrentRoute }) => {
 
   const getTabIcon = useCallback((item) => {
     switch (item) {
-      case "User":
+      case "Users":
         return <FiUsers />;
-      case "Workspace":
+      case "Workspaces":
         return <MdWork />;
       case "LogOut":
         return <RiLogoutBoxLine />;

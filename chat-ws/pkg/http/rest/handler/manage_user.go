@@ -12,11 +12,29 @@ import (
 )
 
 func (server *Server) SetUpManageUserRouter(mr *mux.Router, as admin.Service) {
-	r := mr.PathPrefix("/admin/protected/users").Subrouter()
-	r.HandleFunc("/read", server.GetPaginationUsers(as)).Methods("GET")
+	r := mr.PathPrefix("/admin/protected/user").Subrouter()
+	r.HandleFunc("/read/{user_id}", server.GetUser(as)).Methods("GET")
+	r.HandleFunc("/list", server.GetPaginationUsers(as)).Methods("GET")
 	r.HandleFunc("/update", server.UpdateUser(as)).Methods("POST")
 	r.HandleFunc("/delete/{user_id}", server.DeleteUser(as)).Methods("POST")
 	r.Use(middleware.TokenVerifier(server.tokenMaker))
+}
+
+func (server *Server) GetUser(as admin.Service) func(http.ResponseWriter, *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		userId, ok := vars["user_id"]
+		if !ok {
+			rest.AddResponseToResponseWritter(w, nil, "invalid.user.id")
+			return
+		}
+		user, err := as.GetUser(r.Context(), userId)
+		if err != nil {
+			rest.AddResponseToResponseWritter(w, nil, err.Error())
+			return
+		}
+		rest.AddResponseToResponseWritter(w, user, "")
+	}
 }
 
 func (server *Server) GetPaginationUsers(as admin.Service) func(http.ResponseWriter, *http.Request) {

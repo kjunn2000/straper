@@ -3,6 +3,7 @@ package admin
 import "context"
 
 type Repository interface {
+	GetUser(ctx context.Context, userId string) (User, error)
 	GetUsersByCursor(ctx context.Context, limit uint64, cursor string, isNext bool) ([]User, error)
 	GetUsersCount(ctx context.Context) (int, error)
 	UpdateUserByAdmin(ctx context.Context, params UpdateUserParam) error
