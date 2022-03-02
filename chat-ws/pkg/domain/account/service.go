@@ -43,7 +43,7 @@ func (us *service) Register(ctx context.Context, params CreateUserParam) error {
 		return err
 	}
 	params.Password = hashedPassword
-	params.Role = RoleAdmin
+	params.Role = RoleUser
 	// params.Status = StatusVerifying
 	params.Status = StatusActive
 	params.CreatedDate = time.Now()

@@ -27,10 +27,6 @@ func (server *Server) GetPaginationUsers(as admin.Service) func(http.ResponseWri
 			return
 		}
 		cursor := r.URL.Query().Get("cursor")
-		if cursor == "" {
-			rest.AddResponseToResponseWritter(w, nil, "invalid.cursor")
-			return
-		}
 		isNext, err := strconv.ParseBool(r.URL.Query().Get("isNext"))
 		if err != nil {
 			rest.AddResponseToResponseWritter(w, nil, "invalid.is.next.attribute")

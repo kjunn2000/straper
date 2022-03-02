@@ -59,7 +59,7 @@ const Login = () => {
 
   return (
     <div className="w-full h-screen flex justify-center content-center">
-      <div className="bg-gradient-to-r from-purple-800 to-indigo-500 w-full h-full"></div>
+      <div className="bg-gradient-to-r from-purple-800 to-indigo-900 w-full h-full"></div>
       <form
         onSubmit={handleSubmit(onLogin)}
         className="bg-gray-700 text-white flex flex-col space-y-5 justify-center self-center w-full h-full"

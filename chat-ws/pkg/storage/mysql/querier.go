@@ -28,7 +28,8 @@ type Querier interface {
 	GetUserDetailByEmail(ctx context.Context, email string) (account.UserDetail, error)
 	GetUserCredentialByUsername(ctx context.Context, username string) (auth.User, error)
 	GetUserCredentialByUserId(ctx context.Context, userId string) (auth.User, error)
-	GetPaginationUsers(ctx context.Context, limit uint64, cursor string, isNext bool) ([]admin.User, error)
+	GetUsersByCursor(ctx context.Context, limit uint64, cursor string, isNext bool) ([]admin.User, error)
+	GetUsersCount(ctx context.Context) (int, error)
 
 	UpdateUser(ctx context.Context, params account.UpdateUserParam) error
 	UpdateAccountStatus(ctx context.Context, userId, status string) error

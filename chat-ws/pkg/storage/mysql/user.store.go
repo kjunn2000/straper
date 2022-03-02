@@ -123,13 +123,20 @@ func (s *SQLStore) ValidateAccountEmail(ctx context.Context, userId, tokenId str
 func (s *SQLStore) UpdateUserByAdmin(ctx context.Context, param admin.UpdateUserParam) error {
 	err := s.execTx(func(q *Queries) error {
 		err := q.UpdateUserDetailByAdmin(ctx, admin.UpdateUserDetailParm{
-			param.UserId, param.Username, param.Email, param.PhoneNo, time.Now(),
+			UserId:      param.UserId,
+			Username:    param.Username,
+			Email:       param.Email,
+			PhoneNo:     param.PhoneNo,
+			UpdatedDate: time.Now(),
 		})
 		if err != nil {
 			return err
 		}
 		err = q.UpdateUserCredential(ctx, admin.UpdateCredentialParam{
-			param.UserId, param.Status, param.Password, time.Now(),
+			UserId:      param.UserId,
+			Status:      param.Status,
+			Password:    param.Password,
+			UpdatedDate: time.Now(),
 		})
 		if err != nil {
 			return err

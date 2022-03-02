@@ -12,6 +12,7 @@ import (
 	"github.com/kjunn2000/straper/chat-ws/configs"
 
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/account"
+	"github.com/kjunn2000/straper/chat-ws/pkg/domain/admin"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/auth"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/board"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/bug"
@@ -106,6 +107,7 @@ func (server *Server) SetServerRoute() (*mux.Router, error) {
 	deletingService := deleting.NewService(server.log, server.store, server.seaweedfsClient)
 	bugService := bug.NewService(server.log, server.store, server.seaweedfsClient)
 	websocketService := websocket.NewService(server.log, server.redisClient, chattingService, boardService)
+	adminService := admin.NewService(server.log, server.store)
 	websocketService.SetUpWSServer(context.Background())
 
 	server.SetUpAuthRouter(mr, authService)
@@ -115,6 +117,7 @@ func (server *Server) SetServerRoute() (*mux.Router, error) {
 	server.SetUpBoardRouter(mr, boardService)
 	server.SetUpBugRouter(mr, bugService)
 	server.SetUpWebsocketRouter(mr, websocketService, chattingService, boardService)
+	server.SetUpAdminRouter(mr, adminService)
 
 	server.httpServer.Handler = getCORSHandler()(mr)
 	return mr, nil

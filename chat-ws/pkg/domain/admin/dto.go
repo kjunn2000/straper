@@ -2,6 +2,11 @@ package admin
 
 import "time"
 
+type PaginationUsersResp struct {
+	Users      []User `json:"users"`
+	TotalUsers int    `json:"total_users"`
+}
+
 type UpdateUserParam struct {
 	UserId      string    `json:"user_id" db:"user_id"`
 	Username    string    `json:"username"`

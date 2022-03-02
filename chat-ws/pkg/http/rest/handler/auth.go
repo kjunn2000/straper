@@ -16,7 +16,7 @@ func (server *Server) SetUpAuthRouter(mr *mux.Router, as auth.Service) {
 	ar.HandleFunc("/login", server.Login(as)).Methods("POST")
 	aar.HandleFunc("/login", server.Login(as)).Methods("POST")
 	ar.HandleFunc("/refresh-token", server.RefreshToken(as)).Methods("GET")
-	aar.HandleFunc("/refresh-token", server.Login(as)).Methods("POST")
+	aar.HandleFunc("/refresh-token", server.RefreshToken(as)).Methods("GET")
 }
 
 type LoginResponseModal struct {

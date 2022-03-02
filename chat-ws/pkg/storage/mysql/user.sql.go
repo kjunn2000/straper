@@ -208,17 +208,20 @@ func (q *Queries) GetUserCredentialByUsername(ctx context.Context, username stri
 	return user, nil
 }
 
-func (q *Queries) GetPaginationUsers(ctx context.Context, limit uint64, cursor string, isNext bool) ([]admin.User, error) {
+func (q *Queries) GetUsersByCursor(ctx context.Context, limit uint64, cursor string, isNext bool) ([]admin.User, error) {
 	var users []admin.User
-	sb := sq.Select("ud.user_id", "ud.username", "ud.email", "ud.phone_no", "uc.role",
+	sb := sq.Select("ud.user_id", "ud.username", "ud.email", "ud.phone_no",
 		"uc.status", "ud.created_date", "ud.updated_date").
 		From("user_detail ud").
-		InnerJoin("user_credential uc on ud.user_id = uc.user_id")
-	if isNext {
-		sb.Where(sq.Lt{"user_id": cursor}).
-			OrderBy("user_id desc")
+		InnerJoin("user_credential uc on ud.user_id = uc.user_id").
+		Where(sq.Eq{"uc.role": "USER"})
+	if cursor == "" {
+		sb = sb.OrderBy("user_id DESC")
+	} else if isNext {
+		sb = sb.Where(sq.Lt{"user_id": cursor}).
+			OrderBy("user_id DESC")
 	} else {
-		sb.Where(sq.Gt{"user_id": cursor})
+		sb = sb.Where(sq.Gt{"user_id": cursor})
 	}
 	sql, arg, err := sb.Limit(limit).ToSql()
 	if err != nil {
@@ -230,6 +233,23 @@ func (q *Queries) GetPaginationUsers(ctx context.Context, limit uint64, cursor s
 		return []admin.User{}, err
 	}
 	return users, nil
+}
+
+func (q *Queries) GetUsersCount(ctx context.Context) (int, error) {
+	var count int
+	sql, arg, err := sq.Select("COUNT(user_id)").
+		From("user_credential").
+		Where(sq.Eq{"role": "USER"}).
+		ToSql()
+	if err != nil {
+		q.log.Warn("Failed to create select sql.")
+		return 0, err
+	}
+	err = q.db.Get(&count, sql, arg...)
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
 }
 
 func (q *Queries) UpdateUser(ctx context.Context, params account.UpdateUserParam) error {
