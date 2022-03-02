@@ -38,7 +38,7 @@ const Login = () => {
       );
       history.push("/channel");
     } else if (res.data?.ErrorMessage === "invalid.credential") {
-      updateErrMsg("Invalid credenital.");
+      updateErrMsg("Invalid credential.");
     } else if (res.data?.ErrorMessage === "user.not.found") {
       updateErrMsg("User not found.");
     } else if (res.data?.ErrorMessage === "invalid.account.status") {

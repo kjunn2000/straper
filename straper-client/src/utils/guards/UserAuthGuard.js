@@ -10,8 +10,6 @@ const UserAuthGuard = ({ component: Component, ...rest }) => {
       render={(props) =>
         identity?.role === "USER" ? (
           <Component {...props} />
-        ) : identity?.role === "ADMIN" ? (
-          <Redirect to="/dashboard" />
         ) : (
           <Redirect to="/login" />
         )

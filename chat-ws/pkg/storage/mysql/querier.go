@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/account"
+	"github.com/kjunn2000/straper/chat-ws/pkg/domain/admin"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/auth"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/board"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/bug"
@@ -27,9 +28,14 @@ type Querier interface {
 	GetUserDetailByEmail(ctx context.Context, email string) (account.UserDetail, error)
 	GetUserCredentialByUsername(ctx context.Context, username string) (auth.User, error)
 	GetUserCredentialByUserId(ctx context.Context, userId string) (auth.User, error)
+	GetUser(ctx context.Context, userId string) (admin.User, error)
+	GetUsersByCursor(ctx context.Context, limit uint64, cursor string, isNext bool) ([]admin.User, error)
+	GetUsersCount(ctx context.Context) (int, error)
+
 	UpdateUser(ctx context.Context, params account.UpdateUserParam) error
 	UpdateAccountStatus(ctx context.Context, userId, status string) error
 	UpdateAccountPassword(ctx context.Context, userId, password string) error
+
 	DeleteUser(ctx context.Context, userId string) error
 
 	// verify_email

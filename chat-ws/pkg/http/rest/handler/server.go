@@ -12,6 +12,7 @@ import (
 	"github.com/kjunn2000/straper/chat-ws/configs"
 
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/account"
+	"github.com/kjunn2000/straper/chat-ws/pkg/domain/admin"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/auth"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/board"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/bug"
@@ -97,6 +98,7 @@ func (server *Server) SetServerRoute() (*mux.Router, error) {
 	mr := mux.NewRouter().PathPrefix("/api/v1").Subrouter()
 
 	accountService := account.NewService(server.log, server.store, server.config)
+	// accountService.SeedUserAccount()
 	authService := auth.NewService(server.log, server.store, server.tokenMaker, server.config)
 	addingService := adding.NewService(server.log, server.store)
 	chattingService := chatting.NewService(server.log, server.store, server.seaweedfsClient)
@@ -106,6 +108,7 @@ func (server *Server) SetServerRoute() (*mux.Router, error) {
 	deletingService := deleting.NewService(server.log, server.store, server.seaweedfsClient)
 	bugService := bug.NewService(server.log, server.store, server.seaweedfsClient)
 	websocketService := websocket.NewService(server.log, server.redisClient, chattingService, boardService)
+	adminService := admin.NewService(server.log, server.store)
 	websocketService.SetUpWSServer(context.Background())
 
 	server.SetUpAuthRouter(mr, authService)
@@ -115,6 +118,7 @@ func (server *Server) SetServerRoute() (*mux.Router, error) {
 	server.SetUpBoardRouter(mr, boardService)
 	server.SetUpBugRouter(mr, bugService)
 	server.SetUpWebsocketRouter(mr, websocketService, chattingService, boardService)
+	server.SetUpManageUserRouter(mr, adminService)
 
 	server.httpServer.Handler = getCORSHandler()(mr)
 	return mr, nil
@@ -122,7 +126,7 @@ func (server *Server) SetServerRoute() (*mux.Router, error) {
 
 func getCORSHandler() func(http.Handler) http.Handler {
 	return handlers.CORS(
-		handlers.AllowedOrigins([]string{"http://localhost:3000"}),
+		handlers.AllowedOrigins([]string{"http://localhost:3000", "http://localhost:3001"}),
 		handlers.AllowedHeaders([]string{"X-Requested-With", "Origin", "Content-Type", "Accept", "Authorization"}),
 		handlers.AllowCredentials(),
 	)

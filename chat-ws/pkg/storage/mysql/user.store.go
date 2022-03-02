@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/account"
+	"github.com/kjunn2000/straper/chat-ws/pkg/domain/admin"
 	"go.uber.org/zap"
 )
 
@@ -114,6 +115,37 @@ func (s *SQLStore) ValidateAccountEmail(ctx context.Context, userId, tokenId str
 	})
 	if err != nil {
 		s.log.Info("Failed to validate account email.", zap.Error(err))
+		return err
+	}
+	return nil
+}
+
+func (s *SQLStore) UpdateUserByAdmin(ctx context.Context, param admin.UpdateUserParam) error {
+	err := s.execTx(func(q *Queries) error {
+		err := q.UpdateUserDetailByAdmin(ctx, admin.UpdateUserDetailParm{
+			UserId:      param.UserId,
+			Username:    param.Username,
+			Email:       param.Email,
+			PhoneNo:     param.PhoneNo,
+			UpdatedDate: param.UpdatedDate,
+		})
+		if err != nil {
+			return err
+		}
+		err = q.UpdateUserCredential(ctx, admin.UpdateCredentialParam{
+			UserId:         param.UserId,
+			Status:         param.Status,
+			IsPasswdUpdate: param.IsPasswdUpdate,
+			Password:       param.Password,
+			UpdatedDate:    param.UpdatedDate,
+		})
+		if err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		s.log.Info("Failed to update user.", zap.Error(err))
 		return err
 	}
 	return nil

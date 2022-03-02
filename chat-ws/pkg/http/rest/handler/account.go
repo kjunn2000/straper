@@ -27,7 +27,6 @@ func (server *Server) SetUpAccountRouter(mr *mux.Router, as account.Service) {
 	pr.HandleFunc("/read/{user_id}", server.GetAccount(as)).Methods("GET")
 	pr.HandleFunc("/list/{workspace_id}", server.GetAccountListByWorkspaceId(as)).Methods("GET")
 	pr.HandleFunc("/update", server.UpdateAccount(as)).Methods("POST")
-	pr.HandleFunc("/delete/{user_id}", server.DeleteAccount(as)).Methods("POST")
 	ar.HandleFunc("/email/verify/{token_id}", server.ValidateVerifyEmailToken(as)).Methods("POST")
 	ar.HandleFunc("/reset-password/create", server.ResetPasswordRequest(as)).Methods("POST")
 	ar.HandleFunc("/password/update", server.UpdatePassword(as)).Methods("POST")
@@ -130,23 +129,6 @@ func (server *Server) ValidateVerifyEmailToken(as account.Service) func(http.Res
 			return
 		}
 		err := as.ValidateVerifyEmailToken(r.Context(), tokenId)
-		if err != nil {
-			rest.AddResponseToResponseWritter(w, nil, err.Error())
-			return
-		}
-		rest.AddResponseToResponseWritter(w, nil, "")
-	}
-}
-
-func (server *Server) DeleteAccount(as account.Service) func(http.ResponseWriter, *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		vars := mux.Vars(r)
-		userId, ok := vars["user_id"]
-		if !ok {
-			rest.AddResponseToResponseWritter(w, nil, "invalid.user.id")
-			return
-		}
-		err := as.DeleteUser(r.Context(), userId)
 		if err != nil {
 			rest.AddResponseToResponseWritter(w, nil, err.Error())
 			return
