@@ -70,10 +70,18 @@ const ManageUser = () => {
   });
 
   useEffect(() => {
-    fetchData("", false);
+    fetchData(false);
   }, []);
 
-  const fetchData = async (cursor, isNext) => {
+  const fetchData = async (isNext) => {
+    var cursor = "";
+    if (pageData.rowData && pageData.rowData.length > 0) {
+      if (isNext) {
+        cursor = pageData.rowData[pageData.rowData.length - 1].user_id;
+      } else {
+        cursor = pageData.rowData[0].user_id;
+      }
+    }
     setPageData((prevState) => ({
       ...prevState,
       rowData: [],

@@ -234,12 +234,12 @@ func (q *Queries) GetUsersByCursor(ctx context.Context, limit uint64, cursor str
 		InnerJoin("user_credential uc on ud.user_id = uc.user_id").
 		Where(sq.Eq{"uc.role": "USER"})
 	if cursor == "" {
-		sb = sb.OrderBy("user_id DESC")
+		sb = sb.OrderBy("ud.user_id DESC")
 	} else if isNext {
-		sb = sb.Where(sq.Lt{"user_id": cursor}).
-			OrderBy("user_id DESC")
+		sb = sb.Where(sq.Lt{"ud.user_id": cursor}).
+			OrderBy("ud.user_id DESC")
 	} else {
-		sb = sb.Where(sq.Gt{"user_id": cursor})
+		sb = sb.Where(sq.Gt{"ud.user_id": cursor})
 	}
 	sql, arg, err := sb.Limit(limit).ToSql()
 	if err != nil {
@@ -249,6 +249,11 @@ func (q *Queries) GetUsersByCursor(ctx context.Context, limit uint64, cursor str
 	err = q.db.Select(&users, sql, arg...)
 	if err != nil {
 		return []admin.User{}, err
+	}
+	if cursor != "" && !isNext {
+		for i, j := 0, len(users)-1; i < j; i, j = i+1, j-1 {
+			users[i], users[j] = users[j], users[i]
+		}
 	}
 	return users, nil
 }

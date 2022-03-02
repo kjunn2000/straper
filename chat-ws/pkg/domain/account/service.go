@@ -3,6 +3,8 @@ package account
 import (
 	"context"
 	"errors"
+	"math/rand"
+	"strconv"
 	"strings"
 	"time"
 
@@ -35,6 +37,30 @@ func NewService(log *zap.Logger, ur Repository, config configs.Config) *service 
 		ur:     ur,
 		config: config,
 	}
+}
+
+var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
+func randSeq(n int) string {
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(b)
+}
+
+func (us *service) SeedUserAccount() error {
+	for i := 1; i <= 20; i++ {
+		index := strconv.Itoa(i)
+		param := CreateUserParam{
+			Username: "user" + index,
+			Password: "password" + index,
+			Email:    "testemail" + index,
+			PhoneNo:  "010123123" + index,
+		}
+		us.Register(context.Background(), param)
+	}
+	return nil
 }
 
 func (us *service) Register(ctx context.Context, params CreateUserParam) error {

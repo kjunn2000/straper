@@ -24,16 +24,16 @@ const Pagination = ({ pageChangeHandler, totalRows, rowsPerPage }) => {
 
   const handlePageChange = (targetPage, isNext) => {
     setCurrentPage(targetPage);
-    pageChangeHandler(targetPage, isNext);
+    pageChangeHandler(isNext);
   };
 
-  const onNextPage = () => setCurrentPage(currentPage + 1);
-  const onPrevPage = () => setCurrentPage(currentPage - 1);
+  const onNextPage = () => handlePageChange(currentPage + 1, true);
+  const onPrevPage = () => handlePageChange(currentPage - 1, false);
 
   return (
     <>
       {noOfPages > 1 ? (
-        <div className="py-3 flex items-center justify-between">
+        <div className="p-5 flex items-center justify-between">
           <div className="flex-1 flex justify-between sm:hidden">
             <Button onClick={onPrevPage} disabled={!canGoBack}>
               Previous

@@ -98,6 +98,7 @@ func (server *Server) SetServerRoute() (*mux.Router, error) {
 	mr := mux.NewRouter().PathPrefix("/api/v1").Subrouter()
 
 	accountService := account.NewService(server.log, server.store, server.config)
+	// accountService.SeedUserAccount()
 	authService := auth.NewService(server.log, server.store, server.tokenMaker, server.config)
 	addingService := adding.NewService(server.log, server.store)
 	chattingService := chatting.NewService(server.log, server.store, server.seaweedfsClient)
