@@ -11,7 +11,7 @@ import (
 )
 
 type Service interface {
-	Login(ctx context.Context, req LoginRequest) (LoginResponse, error)
+	Login(ctx context.Context, req LoginRequest, role string) (LoginResponse, error)
 	RefreshToken(ctx context.Context, refreshToken string) (string, error)
 }
 
@@ -50,7 +50,7 @@ func NewService(log *zap.Logger, ar Repository, tokenMaker Maker, config configs
 	}
 }
 
-func (as *service) Login(ctx context.Context, req LoginRequest) (LoginResponse, error) {
+func (as *service) Login(ctx context.Context, req LoginRequest, role string) (LoginResponse, error) {
 
 	u, err := as.ar.GetUserCredentialByUsername(ctx, req.Username)
 
@@ -58,6 +58,8 @@ func (as *service) Login(ctx context.Context, req LoginRequest) (LoginResponse, 
 		return LoginResponse{}, errors.New("user.not.found")
 	} else if err = as.comparePassword(u.Password, req.Password); err != nil {
 		return LoginResponse{}, errors.New("invalid.credential")
+	} else if u.Role != role {
+		return LoginResponse{}, errors.New("invalid.user.role")
 	} else if u.Status != "ACTIVE" {
 		return LoginResponse{}, errors.New("invalid.account.status")
 	}

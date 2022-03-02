@@ -35,14 +35,32 @@ const Login = () => {
         res.data?.Data.access_token,
         res.data?.Data.user
       );
-      history.push("/manage/user");
-    } else if (res.data?.ErrorMessage === "invalid.credential") {
-      updateErrMsg("Invalid credenital.");
-    } else if (res.data?.ErrorMessage === "user.not.found") {
-      updateErrMsg("User not found.");
-    } else if (res.data?.ErrorMessage === "invalid.account.status") {
-      updateErrMsg("Invalid account status.");
+      history.push("/manage/users");
+      return;
     }
+    var errMsg = "";
+    switch (res.data?.ErrorMessage) {
+      case "invalid.credential": {
+        errMsg = "Invalid credential.";
+        break;
+      }
+      case "user.not.found": {
+        errMsg = "User not found.";
+        break;
+      }
+      case "invalid.account.status": {
+        errMsg = "Invalid account status.";
+        break;
+      }
+      case "invalid.user.role": {
+        errMsg = "Invalid user role.";
+        break;
+      }
+      default: {
+        errMsg = "Something went wrong, please try again later.";
+      }
+    }
+    setErrMsg(errMsg);
   };
 
   const updateAuthAndIdentityState = async (accessToken, identity) => {

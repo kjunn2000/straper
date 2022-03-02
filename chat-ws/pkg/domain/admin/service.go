@@ -2,6 +2,8 @@ package admin
 
 import (
 	"context"
+	"errors"
+	"strings"
 	"time"
 
 	"go.uber.org/zap"
@@ -48,16 +50,37 @@ func (s *service) GetPaginationUsers(ctx context.Context, limit uint64, cursor s
 
 func (s *service) UpdateUser(ctx context.Context, params UpdateUserParam) error {
 	params.UpdatedDate = time.Now()
-	if params.Password != "" {
+	if params.IsPasswdUpdate {
 		hashedBytePassword, err := bcrypt.GenerateFromPassword([]byte(params.Password), bcrypt.DefaultCost)
 		if err != nil {
 			return err
 		}
 		params.Password = string(hashedBytePassword)
 	}
-	return s.r.UpdateUserByAdmin(ctx, params)
+	params.UpdatedDate = time.Now()
+	err := s.r.UpdateUserByAdmin(ctx, params)
+	if err != nil {
+		return s.verigyUserFieldError(err)
+	}
+	return nil
 }
 
 func (s *service) DeleteUser(ctx context.Context, userId string) error {
 	return s.r.DeleteUser(ctx, userId)
+}
+
+func (us *service) verigyUserFieldError(err error) error {
+	fetchField := strings.Split(err.Error(), ".")
+	field := fetchField[len(fetchField)-1]
+	field = field[:len(field)-1]
+	switch field {
+	case "username":
+		return errors.New("username.registered")
+	case "email":
+		return errors.New("email.registered")
+	case "phone_no":
+		return errors.New("phone.no.registered")
+	default:
+		return err
+	}
 }

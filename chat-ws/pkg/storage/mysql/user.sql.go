@@ -356,8 +356,8 @@ func (q *Queries) UpdateUserCredential(ctx context.Context, param admin.UpdateCr
 	ub := sq.Update("user_credential").
 		Set("status", param.Status).
 		Set("updated_date", time.Now())
-	if param.Password != "" {
-		ub.Set("password", param.Password)
+	if param.IsPasswdUpdate {
+		ub = ub.Set("password", param.Password)
 	}
 	sql, args, err := ub.Where(sq.Eq{"user_id": param.UserId}).ToSql()
 	if err != nil {

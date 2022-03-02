@@ -9,20 +9,24 @@ const EditUser = () => {
   const {
     handleSubmit,
     register,
-    watch,
     formState: { errors },
+    reset,
+    watch,
   } = useForm();
+
   const { userId } = useParams();
   const [user, setUser] = useState();
   const [showSuccessDialog, setShowSuccessDialog] = useState(false);
   const [showFailDialog, setShowFailDialog] = useState(false);
   const [dialogErrMsg, setDialogErrMsg] = useState("");
-  const watchIsPassUpdate = watch("is_pass_update");
+  const [isPasswdUpdate, setIsPasswdUpdate] = useState(false);
+  const watchIsPasswdUpdate = watch("is_passwd_update");
 
   useEffect(() => {
     fetchUser();
-    console.log(userId);
   }, [userId]);
+
+  useEffect(() => resetForm(), [user]);
 
   const fetchUser = async () => {
     const res = await api.get(`/protected/user/read/${userId}`);
@@ -31,18 +35,32 @@ const EditUser = () => {
     }
   };
 
-  const onUpdate = (data) => {
-    if (
+  const isFormDirty = (data) => {
+    return !(
       data.username === user.username &&
       data.email === user.email &&
-      data.phone_no === user.phone_no
-    ) {
+      data.phone_no === user.phone_no &&
+      data.status === user.status &&
+      !data.is_passwd_update
+    );
+  };
+
+  const onUpdate = (data) => {
+    if (!isFormDirty(data)) {
       return;
     }
+    data.user_id = user.user_id;
     api
-      .post("/protected/user", data)
+      .post("/protected/user/update", data)
       .then((res) => {
         if (res.data.Success) {
+          setUser((prev) => ({
+            ...prev,
+            username: data.username,
+            email: data.email,
+            phone_no: data.phone_no,
+            status: data.status,
+          }));
           setShowSuccessDialog(true);
         } else {
           switch (res.data.ErrorMessage) {
@@ -88,6 +106,21 @@ const EditUser = () => {
       });
   };
 
+  const resetForm = () => {
+    if (!user) {
+      return;
+    }
+    setIsPasswdUpdate(false);
+    reset({
+      username: user.username,
+      email: user.email,
+      phone_no: user.phone_no,
+      status: user.status,
+      is_passwd_update: false,
+      password: "",
+    });
+  };
+
   return (
     <div className="flex justify-center">
       {user && (
@@ -114,7 +147,12 @@ const EditUser = () => {
                   },
                 })}
               />
-              <ErrorMessage errors={errors} name="username" as="p" />
+              <ErrorMessage
+                errors={errors}
+                name="username"
+                as="p"
+                className="text-red-500"
+              />
             </div>
             <div>
               <div>Email</div>
@@ -129,7 +167,12 @@ const EditUser = () => {
                   },
                 })}
               />
-              <ErrorMessage errors={errors} name="email" as="p" />
+              <ErrorMessage
+                errors={errors}
+                name="email"
+                as="p"
+                className="text-red-500"
+              />
             </div>
             <div>
               <div>Phone No</div>
@@ -145,7 +188,12 @@ const EditUser = () => {
                   },
                 })}
               />
-              <ErrorMessage errors={errors} name="phone_no" as="p" />
+              <ErrorMessage
+                errors={errors}
+                name="phone_no"
+                as="p"
+                className="text-red-500"
+              />
             </div>
             <div>
               <div>Status</div>
@@ -160,25 +208,38 @@ const EditUser = () => {
                 <option value="VERIFYING">VERIFYING</option>
                 <option value="INACTIVE">INACTIVE</option>
               </select>
-              <ErrorMessage errors={errors} name="status" as="p" />
+              <ErrorMessage
+                errors={errors}
+                name="status"
+                as="p"
+                className="text-red-500"
+              />
             </div>
             <div className="flex space-x-2 items-center">
               <input
                 className="bg-white p-2 rounded-lg hover:cursor-pointer"
-                {...register("is_pass_update", {})}
+                {...register("is_passwd_update", {})}
                 type="checkbox"
+                onChange={(e) => setIsPasswdUpdate(e.target.checked)}
               />
               <span>Update New Password</span>
             </div>
-            {watchIsPassUpdate && (
+            {isPasswdUpdate && (
               <div>
                 <div>New Password</div>
                 <input
                   className="bg-white p-2 rounded-lg"
                   {...register("password", {})}
                   placeholder="Enter new password..."
+                  type="password"
+                  defaultValue=""
                 />
-                <ErrorMessage errors={errors} name="password" as="p" />
+                <ErrorMessage
+                  errors={errors}
+                  name="password"
+                  as="p"
+                  className="text-red-500"
+                />
               </div>
             )}
             <button
@@ -187,12 +248,18 @@ const EditUser = () => {
             >
               CONFIRM UPDATE
             </button>
+            <span
+              className="text-sm text-blue-600 hover:text-blue-300 hover:cursor-pointer text-underline self-end"
+              onClick={() => resetForm()}
+            >
+              RESET
+            </span>
           </form>
           <SimpleDialog
             isOpen={showSuccessDialog}
             setIsOpen={setShowSuccessDialog}
             title="Update Successfully"
-            content="The selected user is updated to lastest information."
+            content="User's lastest information is saved to database."
             buttonText="Close"
             buttonAction={() => setShowSuccessDialog(false)}
             buttonStatus="success"

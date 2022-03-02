@@ -13,8 +13,8 @@ import (
 func (server *Server) SetUpAuthRouter(mr *mux.Router, as auth.Service) {
 	ar := mr.PathPrefix("/auth").Subrouter()
 	aar := mr.PathPrefix("/admin/auth").Subrouter()
-	ar.HandleFunc("/login", server.Login(as)).Methods("POST")
-	aar.HandleFunc("/login", server.Login(as)).Methods("POST")
+	ar.HandleFunc("/login", server.Login(as, "USER")).Methods("POST")
+	aar.HandleFunc("/login", server.Login(as, "ADMIN")).Methods("POST")
 	ar.HandleFunc("/refresh-token", server.RefreshToken(as)).Methods("GET")
 	aar.HandleFunc("/refresh-token", server.RefreshToken(as)).Methods("GET")
 }
@@ -24,7 +24,7 @@ type LoginResponseModal struct {
 	User        auth.LoginResponseUser `json:"user"`
 }
 
-func (server *Server) Login(as auth.Service) func(http.ResponseWriter, *http.Request) {
+func (server *Server) Login(as auth.Service, role string) func(http.ResponseWriter, *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		user := auth.LoginRequest{}
 		json.NewDecoder(r.Body).Decode(&user)
@@ -32,7 +32,7 @@ func (server *Server) Login(as auth.Service) func(http.ResponseWriter, *http.Req
 			rest.AddResponseToResponseWritter(w, nil, "invalid.credential")
 			return
 		}
-		loginResponse, err := as.Login(r.Context(), user)
+		loginResponse, err := as.Login(r.Context(), user, role)
 		if err != nil {
 			rest.AddResponseToResponseWritter(w, nil, err.Error())
 			return

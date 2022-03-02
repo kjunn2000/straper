@@ -127,16 +127,17 @@ func (s *SQLStore) UpdateUserByAdmin(ctx context.Context, param admin.UpdateUser
 			Username:    param.Username,
 			Email:       param.Email,
 			PhoneNo:     param.PhoneNo,
-			UpdatedDate: time.Now(),
+			UpdatedDate: param.UpdatedDate,
 		})
 		if err != nil {
 			return err
 		}
 		err = q.UpdateUserCredential(ctx, admin.UpdateCredentialParam{
-			UserId:      param.UserId,
-			Status:      param.Status,
-			Password:    param.Password,
-			UpdatedDate: time.Now(),
+			UserId:         param.UserId,
+			Status:         param.Status,
+			IsPasswdUpdate: param.IsPasswdUpdate,
+			Password:       param.Password,
+			UpdatedDate:    param.UpdatedDate,
 		})
 		if err != nil {
 			return err
