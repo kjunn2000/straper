@@ -13,6 +13,7 @@ import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 const ManageUser = () => {
   const [deleteWarningDialogOpen, setDeleteWarningDialogOpen] = useState(false);
   const [toDeleteUserId, setToDeleteUserId] = useState();
+  const [refreshPage, doRefreshPage] = useState(0);
   const history = useHistory();
 
   const columns = useMemo(
@@ -67,30 +68,35 @@ const ManageUser = () => {
     isLoading: false,
     rowData: [],
     totalUsers: 0,
+    searchStr: "",
   });
 
   useEffect(() => {
     fetchData(false);
   }, []);
 
-  const fetchData = async (isNext) => {
+  const fetchData = async (isNext, reload, searchStr) => {
     var cursor = "";
-    if (pageData.rowData && pageData.rowData.length > 0) {
+    if (!reload && pageData.rowData && pageData.rowData.length > 0) {
       if (isNext) {
         cursor = pageData.rowData[pageData.rowData.length - 1].user_id;
       } else {
         cursor = pageData.rowData[0].user_id;
       }
     }
+
+    const newSearchStr = reload ? searchStr : pageData.searchStr;
+
     setPageData((prevState) => ({
       ...prevState,
       rowData: [],
       isLoading: true,
       totalUsers: 0,
+      searchStr: newSearchStr,
     }));
 
     const res = await api.get(
-      `/protected/user/list?limit=10&cursor=${cursor}&isNext=${isNext}`
+      `/protected/user/list?limit=10&cursor=${cursor}&isNext=${isNext}&searchStr=${newSearchStr}`
     );
     if (res.data.Success) {
       const data = res.data.Data;
@@ -101,12 +107,20 @@ const ManageUser = () => {
         }));
         return;
       }
-      setPageData({
+      setPageData((prevState) => ({
+        ...prevState,
         isLoading: false,
         rowData: data.users,
         totalUsers: data.total_users,
-      });
+      }));
     }
+  };
+
+  const handleSearch = (value) => {
+    fetchData(false, true, value);
+    console.log("refresh");
+    console.log(value);
+    doRefreshPage((prev) => prev + 1);
   };
 
   const handleDeleteUser = async (userId) => {
@@ -132,11 +146,14 @@ const ManageUser = () => {
         columns={columns}
         data={pageData.rowData}
         isLoading={pageData.isLoading}
+        totalCount={pageData.totalUsers}
+        onSearch={handleSearch}
       />
       <Pagination
         totalRows={pageData.totalUsers}
         pageChangeHandler={fetchData}
         rowsPerPage={10}
+        refreshPage={refreshPage}
       />
       <ActionDialog
         isOpen={deleteWarningDialogOpen}

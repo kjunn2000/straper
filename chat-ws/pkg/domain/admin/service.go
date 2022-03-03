@@ -12,7 +12,7 @@ import (
 
 type Service interface {
 	GetUser(ctx context.Context, userId string) (User, error)
-	GetPaginationUsers(ctx context.Context, limit uint64, cursor string, isNext bool) (PaginationUsersResp, error)
+	GetPaginationUsers(ctx context.Context, param GetPaginationUsersParam) (PaginationUsersResp, error)
 	UpdateUser(ctx context.Context, param UpdateUserParam) error
 	DeleteUser(ctx context.Context, userId string) error
 }
@@ -33,12 +33,12 @@ func (s *service) GetUser(ctx context.Context, userId string) (User, error) {
 	return s.r.GetUser(ctx, userId)
 }
 
-func (s *service) GetPaginationUsers(ctx context.Context, limit uint64, cursor string, isNext bool) (PaginationUsersResp, error) {
-	users, err := s.r.GetUsersByCursor(ctx, limit, cursor, isNext)
+func (s *service) GetPaginationUsers(ctx context.Context, param GetPaginationUsersParam) (PaginationUsersResp, error) {
+	users, err := s.r.GetUsersByCursor(ctx, param)
 	if err != nil {
 		return PaginationUsersResp{}, err
 	}
-	count, err := s.r.GetUsersCount(ctx)
+	count, err := s.r.GetUsersCount(ctx, param.SearchStr)
 	if err != nil {
 		return PaginationUsersResp{}, err
 	}

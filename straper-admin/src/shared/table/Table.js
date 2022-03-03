@@ -1,5 +1,5 @@
 import classNames from "classnames";
-import React from "react";
+import React, { useState } from "react";
 import {
   useTable,
   useFilters,
@@ -12,72 +12,6 @@ import { SortIcon, SortUpIcon, SortDownIcon } from "../../shared/Icons";
 import Loader from "../Loader";
 
 // Define a default UI for filtering
-function GlobalFilter({
-  preGlobalFilteredRows,
-  globalFilter,
-  setGlobalFilter,
-}) {
-  const count = preGlobalFilteredRows.length;
-  const [value, setValue] = React.useState(globalFilter);
-  const onChange = useAsyncDebounce((value) => {
-    setGlobalFilter(value || undefined);
-  }, 200);
-
-  return (
-    <label className="flex gap-x-2 items-baseline">
-      <span className="text-gray-700 font-semibold">Search: </span>
-      <input
-        type="text"
-        className="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 p-1"
-        value={value || ""}
-        onChange={(e) => {
-          setValue(e.target.value);
-          onChange(e.target.value);
-        }}
-        placeholder={`${count} records...`}
-      />
-    </label>
-  );
-}
-
-// This is a custom filter UI for selecting
-// a unique option from a list
-export function SelectColumnFilter({
-  column: { filterValue, setFilter, preFilteredRows, id, render },
-}) {
-  // Calculate the options for filtering
-  // using the preFilteredRows
-  const options = React.useMemo(() => {
-    const options = new Set();
-    preFilteredRows.forEach((row) => {
-      options.add(row.values[id]);
-    });
-    return [...options.values()];
-  }, [id, preFilteredRows]);
-
-  // Render a multi-select box
-  return (
-    <label className="flex gap-x-2 items-baseline">
-      <span className="text-gray-700">{render("Header")}: </span>
-      <select
-        className="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 p-1"
-        name={id}
-        id={id}
-        value={filterValue}
-        onChange={(e) => {
-          setFilter(e.target.value || undefined);
-        }}
-      >
-        <option value="">All</option>
-        {options.map((option, i) => (
-          <option key={i} value={option}>
-            {option}
-          </option>
-        ))}
-      </select>
-    </label>
-  );
-}
 
 export function DateCell({ value }) {
   return <div className="text-gray-500">{convertToDateString(value)}</div>;
@@ -121,27 +55,23 @@ export function ActionCell({ value, column, row }) {
   );
 }
 
-function Table({ columns, data, isLoading }) {
-  const {
-    getTableProps,
-    getTableBodyProps,
-    headerGroups,
-    prepareRow,
-    rows,
+function Table({ columns, data, isLoading, totalCount, onSearch }) {
+  const { getTableProps, getTableBodyProps, headerGroups, prepareRow, rows } =
+    useTable(
+      {
+        columns,
+        data,
+        manualPaginations: true,
+      },
+      useSortBy
+    );
 
-    state,
-    preGlobalFilteredRows,
-    setGlobalFilter,
-  } = useTable(
-    {
-      columns,
-      data,
-      manualPaginations: true,
-    },
-    useFilters,
-    useGlobalFilter,
-    useSortBy
-  );
+  const [searchStr, setSearchStr] = useState("");
+
+  const handleSearch = (value) => {
+    setSearchStr(value);
+    onSearch(value);
+  };
 
   return (
     <>
@@ -150,11 +80,17 @@ function Table({ columns, data, isLoading }) {
       ) : (
         <>
           <div className="sm:flex sm:gap-x-2 p-5">
-            <GlobalFilter
-              preGlobalFilteredRows={preGlobalFilteredRows}
-              globalFilter={state.globalFilter}
-              setGlobalFilter={setGlobalFilter}
-            />
+            <label className="flex gap-x-2 items-baseline">
+              <span className="text-gray-700 font-semibold">Search: </span>
+              <input
+                type="text"
+                className="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 p-1"
+                placeholder={`${totalCount} records...`}
+                onKeyDown={(e) =>
+                  e.key === "Enter" && handleSearch(e.target.value)
+                }
+              />
+            </label>
             {headerGroups.map((headerGroup) =>
               headerGroup.headers.map((column) =>
                 column.Filter ? (
@@ -165,6 +101,15 @@ function Table({ columns, data, isLoading }) {
               )
             )}
           </div>
+          {searchStr && searchStr !== "" && (
+            <div className="text-gray-500 text-sm px-5">
+              There are {totalCount} records for seach string "
+              <span className="font-semibold italic text-indigo-600">
+                {searchStr}
+              </span>
+              ".
+            </div>
+          )}
           <div className="mt-4 flex flex-col">
             <div className="-my-2 overflow-x-auto">
               <div className="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">

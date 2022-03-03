@@ -2,12 +2,22 @@ import React, { useEffect, useState } from "react";
 import { Button, PageButton } from "../Button";
 import { HiChevronLeft, HiChevronRight } from "react-icons/hi";
 
-const Pagination = ({ pageChangeHandler, totalRows, rowsPerPage }) => {
+const Pagination = ({
+  pageChangeHandler,
+  totalRows,
+  rowsPerPage,
+  refreshPage,
+}) => {
   const noOfPages = Math.ceil(totalRows / rowsPerPage);
 
   const [currentPage, setCurrentPage] = useState(1);
   const [canGoBack, setCanGoBack] = useState(false);
   const [canGoNext, setCanGoNext] = useState(true);
+
+  useEffect(() => {
+    console.log("Call use effect update pointer");
+    setCurrentPage(1);
+  }, [refreshPage]);
 
   useEffect(() => {
     if (noOfPages === currentPage) {

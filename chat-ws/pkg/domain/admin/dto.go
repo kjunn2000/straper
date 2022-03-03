@@ -7,6 +7,13 @@ type PaginationUsersResp struct {
 	TotalUsers int    `json:"total_users"`
 }
 
+type GetPaginationUsersParam struct {
+	Limit     uint64
+	Cursor    string
+	IsNext    bool
+	SearchStr string
+}
+
 type UpdateUserParam struct {
 	UserId         string    `json:"user_id" db:"user_id"`
 	Username       string    `json:"username"`
