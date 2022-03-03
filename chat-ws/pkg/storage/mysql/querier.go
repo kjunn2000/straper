@@ -28,8 +28,9 @@ type Querier interface {
 	GetUserDetailByEmail(ctx context.Context, email string) (account.UserDetail, error)
 	GetUserCredentialByUsername(ctx context.Context, username string) (auth.User, error)
 	GetUserCredentialByUserId(ctx context.Context, userId string) (auth.User, error)
+	// admin_user
 	GetUser(ctx context.Context, userId string) (admin.User, error)
-	GetUsersByCursor(ctx context.Context, param admin.GetPaginationUsersParam) ([]admin.User, error)
+	GetUsersByCursor(ctx context.Context, param admin.PaginationUsersParam) ([]admin.User, error)
 	GetUsersCount(ctx context.Context, searchStr string) (int, error)
 
 	UpdateUser(ctx context.Context, params account.UpdateUserParam) error
@@ -54,6 +55,12 @@ type Querier interface {
 	AddUserToWorkspace(ctx context.Context, workspaceId string, userIdList []string) error
 	GetWorkspaceByWorkspaceId(ctx context.Context, workspaceId string) (listing.Workspace, error)
 	GetWorkspacesByUserId(ctx context.Context, userId string) ([]listing.Workspace, error)
+
+	// admin_workspace
+	GetWorkspace(ctx context.Context, workspaceId string) (admin.Workspace, error)
+	GetWorkspacesByCursor(ctx context.Context, param admin.PaginationWorkspacesParam) ([]admin.WorkspaceSummary, error)
+	GetWorkspacesCount(ctx context.Context, searchStr string) (int, error)
+
 	UpdateWorkspace(ctx context.Context, workspace editing.Workspace) error
 	DeleteWorkspace(ctx context.Context, id string) error
 	RemoveUserFromWorkspace(ctx context.Context, workspaceId, userId string) error

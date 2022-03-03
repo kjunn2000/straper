@@ -101,6 +101,7 @@ func (server *Server) SetServerRoute() (*mux.Router, error) {
 	// accountService.SeedUserAccount()
 	authService := auth.NewService(server.log, server.store, server.tokenMaker, server.config)
 	addingService := adding.NewService(server.log, server.store)
+	// addingService.SeedWorkspaces()
 	chattingService := chatting.NewService(server.log, server.store, server.seaweedfsClient)
 	boardService := board.NewService(server.log, server.store, server.seaweedfsClient)
 	listingService := listing.NewService(server.log, server.store)
@@ -119,6 +120,7 @@ func (server *Server) SetServerRoute() (*mux.Router, error) {
 	server.SetUpBugRouter(mr, bugService)
 	server.SetUpWebsocketRouter(mr, websocketService, chattingService, boardService)
 	server.SetUpManageUserRouter(mr, adminService)
+	server.SetUpManageWorkspaceRouter(mr, adminService, editingService, listingService, deletingService, chattingService)
 
 	server.httpServer.Handler = getCORSHandler()(mr)
 	return mr, nil

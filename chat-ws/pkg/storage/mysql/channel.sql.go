@@ -5,6 +5,7 @@ import (
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
+	"github.com/kjunn2000/straper/chat-ws/pkg/domain/admin"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/websocket"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/adding"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/editing"
@@ -97,6 +98,28 @@ func (q *Queries) GetChannelListByWorkspaceId(ctx context.Context, workspaceId s
 	}
 
 	var channels []listing.Channel
+	err = q.db.Select(&channels, sql, args...)
+	if err != nil {
+		q.log.Info("Failed to select channel by workspace id.", zap.Error(err))
+		return nil, err
+	}
+	return channels, nil
+}
+
+func (q *Queries) GetWorkspaceChannelsByAdmin(ctx context.Context, workspaceId string) ([]admin.Channel, error) {
+
+	sql, args, err := sq.Select("channel_id, channel_name, workspace_id, creator_id, is_default, created_date").
+		From("channel").
+		Where(sq.Eq{"workspace_id": workspaceId}).
+		OrderBy("created_date").
+		ToSql()
+
+	if err != nil {
+		q.log.Info("Unable to create select channel sql.", zap.Error(err))
+		return nil, err
+	}
+
+	var channels []admin.Channel
 	err = q.db.Select(&channels, sql, args...)
 	if err != nil {
 		q.log.Info("Failed to select channel by workspace id.", zap.Error(err))

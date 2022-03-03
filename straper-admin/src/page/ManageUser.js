@@ -118,8 +118,6 @@ const ManageUser = () => {
 
   const handleSearch = (value) => {
     fetchData(false, true, value);
-    console.log("refresh");
-    console.log(value);
     doRefreshPage((prev) => prev + 1);
   };
 
@@ -158,8 +156,8 @@ const ManageUser = () => {
       <ActionDialog
         isOpen={deleteWarningDialogOpen}
         setIsOpen={setDeleteWarningDialogOpen}
-        title="Delete Issue Confirmation"
-        content="Please confirm that the deleted issue will not able to be recovered."
+        title="Delete User Confirmation"
+        content="Please confirm that the deleted user will not able to be recovered."
         buttonText="Delete Anyway"
         buttonStatus="fail"
         buttonAction={() => handleDeleteUser(toDeleteUserId)}

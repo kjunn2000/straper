@@ -51,7 +51,7 @@ func (server *Server) GetPaginationUsers(as admin.Service) func(http.ResponseWri
 			return
 		}
 		searchStr := r.URL.Query().Get("searchStr")
-		param := admin.GetPaginationUsersParam{
+		param := admin.PaginationUsersParam{
 			Limit:     limit,
 			Cursor:    cursor,
 			IsNext:    isNext,

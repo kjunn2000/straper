@@ -2,8 +2,10 @@ package mysql
 
 import (
 	"context"
+	"fmt"
 
 	sq "github.com/Masterminds/squirrel"
+	"github.com/kjunn2000/straper/chat-ws/pkg/domain/admin"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/websocket"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/adding"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/editing"
@@ -44,6 +46,24 @@ func (q *Queries) AddUserToWorkspace(ctx context.Context, workspaceId string, us
 	return nil
 }
 
+func (q *Queries) GetWorkspace(ctx context.Context, workspaceId string) (admin.Workspace, error) {
+	workspace, err := q.GetWorkspaceByAdmin(ctx, workspaceId)
+	if err != nil {
+		return admin.Workspace{}, err
+	}
+	channelList, err := q.GetWorkspaceChannelsByAdmin(ctx, workspaceId)
+	if err != nil {
+		return admin.Workspace{}, err
+	}
+	userList, err := q.GetWorkspaceUsersByAdmin(ctx, workspaceId)
+	if err != nil {
+		return admin.Workspace{}, err
+	}
+	workspace.ChannelList = channelList
+	workspace.UserList = userList
+	return workspace, nil
+}
+
 func (q *Queries) GetWorkspaceByWorkspaceId(ctx context.Context, workspaceId string) (listing.Workspace, error) {
 	sql, args, err := sq.Select("workspace_id", "workspace_name, creator_id, created_date").
 		From("workspace").
@@ -60,6 +80,26 @@ func (q *Queries) GetWorkspaceByWorkspaceId(ctx context.Context, workspaceId str
 	if err != nil {
 		q.log.Info("Unable to select workspace from db")
 		return listing.Workspace{}, err
+	}
+	return workspace, nil
+}
+
+func (q *Queries) GetWorkspaceByAdmin(ctx context.Context, workspaceId string) (admin.Workspace, error) {
+	sql, args, err := sq.Select("workspace_id", "workspace_name, creator_id, created_date").
+		From("workspace").
+		Where(sq.Eq{"workspace_id": workspaceId}).
+		OrderBy("created_date").
+		ToSql()
+
+	if err != nil {
+		q.log.Warn("Unable to create select workspace query.")
+		return admin.Workspace{}, err
+	}
+	var workspace admin.Workspace
+	err = q.db.Get(&workspace, sql, args...)
+	if err != nil {
+		q.log.Info("Unable to select workspace from db")
+		return admin.Workspace{}, err
 	}
 	return workspace, nil
 }
@@ -81,6 +121,107 @@ func (q *Queries) GetWorkspacesByUserId(ctx context.Context, userId string) ([]l
 		return nil, err
 	}
 	return Workspaces, nil
+}
+
+func (q *Queries) GetWorkspacesByCursor(ctx context.Context, param admin.PaginationWorkspacesParam) ([]admin.WorkspaceSummary, error) {
+	var workspaces []admin.WorkspaceSummary
+	sb := sq.Select("workspace_id", "workspace_name, creator_id, created_date").
+		From("workspace").
+		Where(sq.Or{
+			sq.Like{"workspace_id": fmt.Sprintf("%%%s%%", param.SearchStr)},
+			sq.Like{"workspace_name": fmt.Sprintf("%%%s%%", param.SearchStr)},
+			sq.Like{"creator_id": fmt.Sprintf("%%%s%%", param.SearchStr)},
+		})
+	if param.Cursor == "" {
+		sb = sb.OrderBy("created_date desc", "workspace_id")
+	} else if param.Cursor != "" && param.IsNext {
+		sb = sb.Where(sq.Or{
+			sq.And{
+				sq.Eq{"created_date": param.CreatedTime},
+				sq.Gt{"workspace_id": param.Id}},
+			sq.Lt{"created_date": param.CreatedTime}}).
+			OrderBy("created_date desc", "workspace_id")
+	} else {
+		sb = sb.Where(sq.Or{
+			sq.And{
+				sq.Eq{"created_date": param.CreatedTime},
+				sq.Lt{"workspace_id": param.Id}},
+			sq.Gt{"created_date": param.CreatedTime}}).
+			OrderBy("created_date", "workspace_id desc")
+	}
+	sql, arg, err := sb.Limit(uint64(param.Limit)).ToSql()
+	if err != nil {
+		q.log.Warn("Failed to create select sql.")
+		return []admin.WorkspaceSummary{}, err
+	}
+	err = q.db.Select(&workspaces, sql, arg...)
+	if err != nil {
+		return []admin.WorkspaceSummary{}, err
+	}
+	if param.Cursor != "" && !param.IsNext {
+		for i, j := 0, len(workspaces)-1; i < j; i, j = i+1, j-1 {
+			workspaces[i], workspaces[j] = workspaces[j], workspaces[i]
+		}
+	}
+	return workspaces, nil
+}
+
+func (q *Queries) GetWorkspacesCount(ctx context.Context, searchStr string) (int, error) {
+	var count int
+	sql, arg, err := sq.Select("COUNT(workspace_id)").
+		From("workspace").
+		Where(sq.Or{
+			sq.Like{"workspace_id": fmt.Sprintf("%%%s%%", searchStr)},
+			sq.Like{"workspace_name": fmt.Sprintf("%%%s%%", searchStr)},
+			sq.Like{"creator_id": fmt.Sprintf("%%%s%%", searchStr)},
+		}).
+		ToSql()
+	if err != nil {
+		q.log.Warn("Failed to create select sql.")
+		return 0, err
+	}
+	err = q.db.Get(&count, sql, arg...)
+	if err != nil {
+		return 0, err
+	}
+	return count, nil
+}
+
+func (q *Queries) GetWorkspaceUserCount(ctx context.Context, workspaceId string) (int, error) {
+	sql, args, err := sq.Select("COUNT(w.workspace_id) as total_users").
+		From("workspace w").
+		InnerJoin("workspace_user wc on w.workspace_id = wc.workspace_id").
+		Where(sq.Eq{"w.workspace_id": workspaceId}).
+		ToSql()
+	if err != nil {
+		q.log.Warn("Unable to create count workspace users query")
+		return 0, err
+	}
+	var totalUser int
+	err = q.db.Get(&totalUser, sql, args...)
+	if err != nil {
+		q.log.Info("Unable to count workspace users from db")
+		return 0, err
+	}
+	return totalUser, nil
+}
+
+func (q *Queries) GetWorkspaceChannelCount(ctx context.Context, workspaceId string) (int, error) {
+	sql, args, err := sq.Select("COUNT(workspace_id) as total_channels").
+		From("channel").
+		Where(sq.Eq{"workspace_id": workspaceId}).
+		ToSql()
+	if err != nil {
+		q.log.Warn("Unable to create count workspace channels query")
+		return 0, err
+	}
+	var totalChannel int
+	err = q.db.Get(&totalChannel, sql, args...)
+	if err != nil {
+		q.log.Info("Unable to count workspace channel from db")
+		return 0, err
+	}
+	return totalChannel, nil
 }
 
 func (q *Queries) UpdateWorkspace(ctx context.Context, workspace editing.Workspace) error {

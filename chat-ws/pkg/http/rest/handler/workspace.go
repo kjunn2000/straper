@@ -20,7 +20,7 @@ func (server *Server) SetUpWorkspaceRouter(mr *mux.Router, as adding.Service, ls
 	wr.HandleFunc("/join/{workspace_id}", server.JoinWorkspace(as, ls)).Methods("POST")
 	wr.HandleFunc("/list", server.GetWorkspaces(ls)).Methods("GET")
 	wr.HandleFunc("/update", server.UpdateWorkspace(es)).Methods("POST")
-	wr.HandleFunc("/delete/{workspace_id}", server.DeleteWorkspace(ls, ds, cs)).Methods("POST")
+	wr.HandleFunc("/delete/{workspace_id}", server.DeleteWorkspace(ls, ds, cs, false)).Methods("POST")
 	wr.HandleFunc("/leave/{workspace_id}", server.LeaveWorkspace(ds)).Methods("POST")
 	wr.Use(middleware.TokenVerifier(server.tokenMaker))
 }
@@ -113,28 +113,30 @@ func (server *Server) UpdateWorkspace(as editing.Service) func(http.ResponseWrit
 	}
 }
 
-func (server *Server) DeleteWorkspace(ls listing.Service, ds deleting.Service, cs chatting.Service) func(http.ResponseWriter, *http.Request) {
+func (server *Server) DeleteWorkspace(ls listing.Service, ds deleting.Service, cs chatting.Service, isAdmin bool) func(http.ResponseWriter, *http.Request) {
 	return func(rw http.ResponseWriter, r *http.Request) {
-		userId, err := server.getUserIdFromToken(r)
-		if err != nil {
-			rest.AddResponseToResponseWritter(rw, nil, err.Error())
-			return
-		}
 		vars := mux.Vars(r)
 		workspaceId, ok := vars["workspace_id"]
 		if !ok {
 			rest.AddResponseToResponseWritter(rw, nil, "Id not found.")
 			return
 		}
-		if err := ls.VerfiyDeleteWorkspace(r.Context(), workspaceId, userId); err != nil {
-			rest.AddResponseToResponseWritter(rw, nil, err.Error())
-			return
+		if !isAdmin {
+			userId, err := server.getUserIdFromToken(r)
+			if err != nil {
+				rest.AddResponseToResponseWritter(rw, nil, err.Error())
+				return
+			}
+			if err := ls.VerfiyDeleteWorkspace(r.Context(), workspaceId, userId); err != nil {
+				rest.AddResponseToResponseWritter(rw, nil, err.Error())
+				return
+			}
 		}
 		if err := cs.DeleteSeaweedfsMessagesByWorkspaceId(r.Context(), workspaceId); err != nil {
 			rest.AddResponseToResponseWritter(rw, nil, err.Error())
 			return
 		}
-		if err = ds.DeleteWorkspace(r.Context(), workspaceId); err != nil {
+		if err := ds.DeleteWorkspace(r.Context(), workspaceId); err != nil {
 			rest.AddResponseToResponseWritter(rw, nil, err.Error())
 			return
 		}

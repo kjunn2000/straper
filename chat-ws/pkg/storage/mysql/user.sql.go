@@ -157,6 +157,25 @@ func (q *Queries) GetUserInfoListByWorkspaceId(ctx context.Context, workspaceId 
 	return userList, nil
 }
 
+func (q *Queries) GetWorkspaceUsersByAdmin(ctx context.Context, workspaceId string) ([]admin.UserInfo, error) {
+	var userList []admin.UserInfo
+	sta, arg, err := sq.Select("wu.user_id", "username", "email", "phone_no").
+		From("user_detail").
+		InnerJoin("workspace_user wu on user_detail.user_id = wu.user_id").
+		Where(sq.Eq{"workspace_id": workspaceId}).
+		ToSql()
+	if err != nil {
+		q.log.Warn("Failed to create select sql.")
+		return []admin.UserInfo{}, err
+	}
+	err = q.db.Select(&userList, sta, arg...)
+	if err != nil {
+		q.log.Warn("Failed to get user info list.", zap.Error(err))
+		return []admin.UserInfo{}, err
+	}
+	return userList, nil
+}
+
 func (q *Queries) GetAssigneeListByWorkspaceId(ctx context.Context, workspaceId string) ([]bug.Assignee, error) {
 	var userList []bug.Assignee
 	sta, arg, err := sq.Select("wu.user_id", "username").
@@ -227,7 +246,7 @@ func (q *Queries) GetUser(ctx context.Context, userId string) (admin.User, error
 	return user, nil
 }
 
-func (q *Queries) GetUsersByCursor(ctx context.Context, param admin.GetPaginationUsersParam) ([]admin.User, error) {
+func (q *Queries) GetUsersByCursor(ctx context.Context, param admin.PaginationUsersParam) ([]admin.User, error) {
 	var users []admin.User
 	sb := sq.Select("ud.user_id", "ud.username", "ud.email", "ud.phone_no",
 		"uc.status", "ud.created_date", "ud.updated_date").

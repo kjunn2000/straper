@@ -15,7 +15,6 @@ const Pagination = ({
   const [canGoNext, setCanGoNext] = useState(true);
 
   useEffect(() => {
-    console.log("Call use effect update pointer");
     setCurrentPage(1);
   }, [refreshPage]);
 
