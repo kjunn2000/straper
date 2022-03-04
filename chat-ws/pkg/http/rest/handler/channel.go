@@ -21,7 +21,7 @@ func (server *Server) SetUpChannelRouter(mr *mux.Router, as adding.Service, ls l
 	cr.HandleFunc("/create", server.CreateChannel(as, ls, cs)).Methods("POST")
 	cr.HandleFunc("/join", server.JoinChannel(as, ls, cs)).Methods("POST")
 	cr.HandleFunc("/update", server.UpdateChannel(es)).Methods("POST")
-	cr.HandleFunc("/delete/{channel_id}", server.DeleteChannel(ls, ds, cs)).Methods("POST")
+	cr.HandleFunc("/delete/{channel_id}", server.DeleteChannel(ls, ds, cs, false)).Methods("POST")
 	cr.HandleFunc("/leave/{channel_id}", server.LeaveChannel(ds)).Methods("POST")
 	cr.HandleFunc("/{channel_id}/messages", server.GetChannelMessages(cs)).Methods("GET")
 	cr.Use(middleware.TokenVerifier(server.tokenMaker))
@@ -106,22 +106,24 @@ func (server *Server) UpdateChannel(es editing.Service) func(w http.ResponseWrit
 	}
 }
 
-func (server *Server) DeleteChannel(ls listing.Service, ds deleting.Service, cs chatting.Service) func(w http.ResponseWriter, r *http.Request) {
+func (server *Server) DeleteChannel(ls listing.Service, ds deleting.Service, cs chatting.Service, isAdmin bool) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		userId, err := server.getUserIdFromToken(r)
-		if err != nil {
-			rest.AddResponseToResponseWritter(w, nil, err.Error())
-			return
-		}
 		vars := mux.Vars(r)
 		channelId, ok := vars["channel_id"]
 		if !ok {
 			rest.AddResponseToResponseWritter(w, nil, "channel.id.not.found")
 			return
 		}
-		if err := ls.VerfiyDeleteChannel(r.Context(), channelId, userId); err != nil {
-			rest.AddResponseToResponseWritter(w, nil, err.Error())
-			return
+		if !isAdmin {
+			userId, err := server.getUserIdFromToken(r)
+			if err != nil {
+				rest.AddResponseToResponseWritter(w, nil, err.Error())
+				return
+			}
+			if err := ls.VerfiyDeleteChannel(r.Context(), channelId, userId); err != nil {
+				rest.AddResponseToResponseWritter(w, nil, err.Error())
+				return
+			}
 		}
 		if err := cs.DeleteSeaweedfsMessagesByChannelId(r.Context(), channelId); err != nil {
 			rest.AddResponseToResponseWritter(w, nil, "failed.to.delete.files")

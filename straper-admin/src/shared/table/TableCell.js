@@ -2,7 +2,6 @@ import classNames from "classnames";
 import React from "react";
 import { convertToDateString } from "../../service/object";
 import { TiTick } from "react-icons/ti";
-import { Link } from "react-router-dom";
 
 export function DateCell({ value }) {
   return <div className="text-gray-500">{convertToDateString(value)}</div>;
@@ -25,7 +24,7 @@ export function StatusPill({ value }) {
   );
 }
 
-export function ActionCell({ value, column, row }) {
+export function ActionCell({ column, row }) {
   return (
     <div className="inline-flex rounded-md shadow-sm" role="group">
       <button
@@ -48,15 +47,4 @@ export function ActionCell({ value, column, row }) {
 
 export function IsDefaultCell({ value }) {
   return value ? <TiTick className="text-green-500" size={20} /> : <></>;
-}
-
-export function UserIdCell({ value }) {
-  return (
-    <Link
-      className="text-blue-600 hover:text-blue-300 italic text-sm"
-      to={`/manage/user/${value}`}
-    >
-      {value}
-    </Link>
-  );
 }

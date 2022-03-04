@@ -73,6 +73,58 @@ const EditWorkspace = () => {
     });
   };
 
+  const handleRemoveUser = async (userId) => {
+    if (!userId || userId === "") {
+      return;
+    }
+    const res = await api.post(
+      `/protected/workspace/remove/${workspace.workspace_id}/${userId}`
+    );
+    if (res.data.Success) {
+      const newUserList = workspace.user_list.filter(
+        (user) => user.user_id !== userId
+      );
+      console.log(newUserList);
+      console.log(workspace);
+      setWorkspace((prevState) => ({
+        ...prevState,
+        user_list: newUserList,
+      }));
+    }
+  };
+
+  const handleUpdateChannel = async (data) => {
+    const res = await api.post("/protected/workspace/channel/update", data);
+    if (res.data.Success) {
+      const newChannelList = workspace.channel_list.map((channel) => {
+        if (channel.channel_id !== data.channel_id) {
+          return channel;
+        }
+        channel.channel_name = data.channel_name;
+        return channel;
+      });
+      setWorkspace((prevState) => ({
+        ...prevState,
+        channel_list: newChannelList,
+      }));
+    }
+  };
+
+  const handleDeleteChannel = async (channelId) => {
+    const res = await api.post(
+      `/protected/workspace/channel/delete/${channelId}`
+    );
+    if (res.data.Success) {
+      const newChannelList = workspace.channel_list.filter(
+        (channel) => channel.channel_id !== channelId
+      );
+      setWorkspace((prevState) => ({
+        ...prevState,
+        channel_list: newChannelList,
+      }));
+    }
+  };
+
   return (
     <div className="flex p-5">
       {workspace && (
@@ -150,6 +202,10 @@ const EditWorkspace = () => {
             <Tabs
               userData={workspace.user_list}
               channelData={workspace.channel_list}
+              creatorId={workspace.creator_id}
+              handleRemoveUser={handleRemoveUser}
+              handleUpdateChannel={handleUpdateChannel}
+              handleDeleteChannel={handleDeleteChannel}
             />
           </div>
           <SimpleDialog
