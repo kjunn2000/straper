@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Pagination from "../shared/table/Pagination";
-import Table, { ActionCell, DateCell } from "../shared/table/Table";
+import Table from "../shared/table/Table";
+import { ActionCell, DateCell } from "../shared/table/TableCell";
 import api from "../axios/api";
 import ActionDialog from "../shared/dialog/ActionDialog";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";

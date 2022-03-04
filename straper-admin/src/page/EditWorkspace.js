@@ -7,6 +7,7 @@ import {
 } from "react-router-dom/cjs/react-router-dom.min";
 import api from "../axios/api";
 import SimpleDialog from "../shared/dialog/SimpleDialog";
+import Tabs from "../components/workspace/Tabs";
 
 const EditWorkspace = () => {
   const {
@@ -90,7 +91,7 @@ const EditWorkspace = () => {
               <input
                 className="bg-gray-200 p-2 rounded-lg"
                 defaultValue={workspace.workspace_id}
-                disabled
+                readOnly
                 {...register("workspace_id", {
                   required: "Id is required.",
                 })}
@@ -127,7 +128,7 @@ const EditWorkspace = () => {
               <input
                 className="bg-gray-200 p-2 rounded-lg"
                 defaultValue={workspace.creator_id}
-                disabled
+                readOnly
               />
               <span
                 className="text-sm text-blue-600 hover:text-blue-300 hover:cursor-pointer text-underline self-end p-1"
@@ -145,6 +146,12 @@ const EditWorkspace = () => {
               CONFIRM UPDATE
             </button>
           </form>
+          <div className="p-3 w-3/4">
+            <Tabs
+              userData={workspace.user_list}
+              channelData={workspace.channel_list}
+            />
+          </div>
           <SimpleDialog
             isOpen={showSuccessDialog}
             setIsOpen={setShowSuccessDialog}
