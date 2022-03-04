@@ -17,7 +17,7 @@ import (
 func (server *Server) SetUpManageWorkspaceRouter(mr *mux.Router, as admin.Service, es editing.Service,
 	ls listing.Service, ds deleting.Service, cs chatting.Service) {
 	r := mr.PathPrefix("/admin/protected/workspace").Subrouter()
-	r.HandleFunc("/read/{user_id}", server.GetWorkspace(as)).Methods("GET")
+	r.HandleFunc("/read/{workspace_id}", server.GetWorkspace(as)).Methods("GET")
 	r.HandleFunc("/list", server.GetPaginationWorkspace(as)).Methods("GET")
 	r.HandleFunc("/update", server.UpdateWorkspace(es)).Methods("POST")
 	r.HandleFunc("/delete/{workspace_id}", server.DeleteWorkspace(ls, ds, cs, true)).Methods("POST")

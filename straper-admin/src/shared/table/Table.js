@@ -39,14 +39,14 @@ export function ActionCell({ value, column, row }) {
     <div className="inline-flex rounded-md shadow-sm" role="group">
       <button
         type="button"
-        className="py-2 px-4 text-sm font-medium text-white bg-green-500 rounded-l-lg border border-gray-200 hover:bg-green-400 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:text-white dark:hover:bg-gray-600"
+        className="py-2 px-4 text-sm font-medium text-white bg-green-500 rounded-l-lg border border-gray-200 hover:bg-green-400"
         onClick={() => column.editAction(row.original[column.idAccessor])}
       >
         Edit
       </button>
       <button
         type="button"
-        className="py-2 px-4 text-sm font-medium text-white bg-red-500 rounded-r-md border border-gray-200 hover:bg-red-400 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:text-white dark:hover:bg-gray-600"
+        className="py-2 px-4 text-sm font-medium text-white bg-red-500 rounded-r-md border border-gray-200 hover:bg-red-400"
         onClick={() => column.deleteAction(row.original[column.idAccessor])}
       >
         Delete
