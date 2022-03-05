@@ -126,11 +126,11 @@ const EditWorkspace = () => {
   };
 
   return (
-    <div className="flex p-5">
+    <>
       {workspace && (
-        <>
+        <div className="flex p-5">
           <form
-            className="h-auto rounded-lg flex flex-col space-y-5 p-5 bg-white"
+            className="w-1/3 h-auto rounded-lg flex flex-col space-y-5 p-5 bg-white"
             onSubmit={handleSubmit(onUpdate)}
           >
             <div>
@@ -141,7 +141,7 @@ const EditWorkspace = () => {
             <div>
               <div>Workspace ID</div>
               <input
-                className="bg-gray-200 p-2 rounded-lg"
+                className="bg-gray-200 p-2 rounded-lg w-full"
                 defaultValue={workspace.workspace_id}
                 readOnly
                 {...register("workspace_id", {
@@ -152,7 +152,7 @@ const EditWorkspace = () => {
             <div>
               <div>Workspace Name</div>
               <input
-                className="bg-gray-100 p-2 rounded-lg"
+                className="w-full bg-gray-100 p-2 rounded-lg"
                 defaultValue={workspace.workspace_name}
                 {...register("workspace_name", {
                   required: "Workspace name is required.",
@@ -178,7 +178,7 @@ const EditWorkspace = () => {
             <div>
               <div>Creator ID</div>
               <input
-                className="bg-gray-200 p-2 rounded-lg"
+                className="w-full bg-gray-200 p-2 rounded-lg"
                 defaultValue={workspace.creator_id}
                 readOnly
               />
@@ -198,7 +198,7 @@ const EditWorkspace = () => {
               CONFIRM UPDATE
             </button>
           </form>
-          <div className="p-3 w-3/4">
+          <div className="w-2/3 p-3">
             <Tabs
               userData={workspace.user_list}
               channelData={workspace.channel_list}
@@ -226,9 +226,9 @@ const EditWorkspace = () => {
             buttonText="Close"
             buttonStatus="fail"
           />
-        </>
+        </div>
       )}
-    </div>
+    </>
   );
 };
 

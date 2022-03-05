@@ -15,7 +15,7 @@ export default function Tabs({
   const [tables] = useState(["Users", "Channels"]);
 
   return (
-    <div className="w-full px-2 py-16 sm:px-0">
+    <div className="w-full px-2 sm:px-0">
       <Tab.Group>
         <Tab.List className="flex p-1 space-x-1 bg-blue-900/20 rounded-xl">
           {tables.map((key) => (
