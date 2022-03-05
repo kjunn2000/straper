@@ -2,6 +2,5 @@ User,
  To view other users’ status
  To sort tasks on the task board by the task priority or created time
 
-Straper allows Administrator,
- To view and manage all the users
+Admin,
  To view and manage all the workspaces

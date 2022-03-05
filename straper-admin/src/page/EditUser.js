@@ -122,22 +122,22 @@ const EditUser = () => {
   };
 
   return (
-    <div className="flex justify-center">
+    <div className="flex justify-center p-5">
       {user && (
         <>
           <form
-            className="h-auto rounded-lg flex flex-col space-y-5 py-5"
+            className="h-auto rounded-lg flex flex-col space-y-5 bg-white p-5"
             onSubmit={handleSubmit(onUpdate)}
           >
             <div>
               <div className="text-xl font-medium text-center">
-                Edit Dashboard
+                User Information
               </div>
             </div>
             <div>
               <div>Username</div>
               <input
-                className="bg-white p-2 rounded-lg"
+                className="bg-gray-100 p-2 rounded-lg"
                 defaultValue={user.username}
                 {...register("username", {
                   required: "Username is required.",
@@ -157,7 +157,7 @@ const EditUser = () => {
             <div>
               <div>Email</div>
               <input
-                className="bg-white p-2 rounded-lg"
+                className="bg-gray-100 p-2 rounded-lg"
                 defaultValue={user.email}
                 {...register("email", {
                   required: "Email is required.",
@@ -177,7 +177,7 @@ const EditUser = () => {
             <div>
               <div>Phone No</div>
               <input
-                className="bg-white p-2 rounded-lg"
+                className="bg-gray-100 p-2 rounded-lg"
                 type="number"
                 defaultValue={user.phone_no}
                 {...register("phone_no", {
@@ -201,7 +201,7 @@ const EditUser = () => {
                 {...register("status", {
                   required: "Status is required.",
                 })}
-                className="p-2 rounded bg-white hover:cursor-pointer focus:outline-none"
+                className="p-2 rounded bg-gray-100 hover:cursor-pointer focus:outline-none"
                 defaultValue={user.status}
               >
                 <option value="ACTIVE">ACTIVE</option>
@@ -217,7 +217,7 @@ const EditUser = () => {
             </div>
             <div className="flex space-x-2 items-center">
               <input
-                className="bg-white p-2 rounded-lg hover:cursor-pointer"
+                className="p-2 rounded-lg hover:cursor-pointer"
                 {...register("is_passwd_update", {})}
                 type="checkbox"
                 onChange={(e) => setIsPasswdUpdate(e.target.checked)}
@@ -228,7 +228,7 @@ const EditUser = () => {
               <div>
                 <div>New Password</div>
                 <input
-                  className="bg-white p-2 rounded-lg"
+                  className="bg-gray-100 p-2 rounded-lg"
                   {...register("password", {})}
                   placeholder="Enter new password..."
                   type="password"

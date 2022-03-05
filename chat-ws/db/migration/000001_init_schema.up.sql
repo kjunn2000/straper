@@ -41,6 +41,8 @@ CREATE TABLE `workspace` (
   `created_date` DATETIME NOT NULL DEFAULT (now())
 );
 
+CREATE INDEX `idx_workspace_pagination` ON `workspace` (`created_date`, `workspace_id`);
+
 CREATE TABLE `workspace_user` (
   `workspace_id` CHAR(36),
   `user_id` VARCHAR(255),

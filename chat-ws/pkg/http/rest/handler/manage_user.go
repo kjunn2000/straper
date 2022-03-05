@@ -50,7 +50,14 @@ func (server *Server) GetPaginationUsers(as admin.Service) func(http.ResponseWri
 			rest.AddResponseToResponseWritter(w, nil, "invalid.is.next.attribute")
 			return
 		}
-		users, err := as.GetPaginationUsers(r.Context(), limit, cursor, isNext)
+		searchStr := r.URL.Query().Get("searchStr")
+		param := admin.PaginationUsersParam{
+			Limit:     limit,
+			Cursor:    cursor,
+			IsNext:    isNext,
+			SearchStr: searchStr,
+		}
+		users, err := as.GetPaginationUsers(r.Context(), param)
 		if err != nil {
 			rest.AddResponseToResponseWritter(w, nil, err.Error())
 			return

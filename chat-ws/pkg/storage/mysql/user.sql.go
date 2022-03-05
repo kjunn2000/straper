@@ -2,6 +2,7 @@ package mysql
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	sq "github.com/Masterminds/squirrel"
@@ -156,6 +157,25 @@ func (q *Queries) GetUserInfoListByWorkspaceId(ctx context.Context, workspaceId 
 	return userList, nil
 }
 
+func (q *Queries) GetWorkspaceUsersByAdmin(ctx context.Context, workspaceId string) ([]admin.UserInfo, error) {
+	var userList []admin.UserInfo
+	sta, arg, err := sq.Select("wu.user_id", "username", "email", "phone_no").
+		From("user_detail").
+		InnerJoin("workspace_user wu on user_detail.user_id = wu.user_id").
+		Where(sq.Eq{"workspace_id": workspaceId}).
+		ToSql()
+	if err != nil {
+		q.log.Warn("Failed to create select sql.")
+		return []admin.UserInfo{}, err
+	}
+	err = q.db.Select(&userList, sta, arg...)
+	if err != nil {
+		q.log.Warn("Failed to get user info list.", zap.Error(err))
+		return []admin.UserInfo{}, err
+	}
+	return userList, nil
+}
+
 func (q *Queries) GetAssigneeListByWorkspaceId(ctx context.Context, workspaceId string) ([]bug.Assignee, error) {
 	var userList []bug.Assignee
 	sta, arg, err := sq.Select("wu.user_id", "username").
@@ -226,22 +246,29 @@ func (q *Queries) GetUser(ctx context.Context, userId string) (admin.User, error
 	return user, nil
 }
 
-func (q *Queries) GetUsersByCursor(ctx context.Context, limit uint64, cursor string, isNext bool) ([]admin.User, error) {
+func (q *Queries) GetUsersByCursor(ctx context.Context, param admin.PaginationUsersParam) ([]admin.User, error) {
 	var users []admin.User
 	sb := sq.Select("ud.user_id", "ud.username", "ud.email", "ud.phone_no",
 		"uc.status", "ud.created_date", "ud.updated_date").
 		From("user_detail ud").
 		InnerJoin("user_credential uc on ud.user_id = uc.user_id").
-		Where(sq.Eq{"uc.role": "USER"})
-	if cursor == "" {
+		Where(sq.Eq{"uc.role": "USER"}).
+		Where(sq.Or{
+			sq.Like{"ud.user_id": fmt.Sprintf("%%%s%%", param.SearchStr)},
+			sq.Like{"ud.username": fmt.Sprintf("%%%s%%", param.SearchStr)},
+			sq.Like{"ud.email": fmt.Sprintf("%%%s%%", param.SearchStr)},
+			sq.Like{"ud.phone_no": fmt.Sprintf("%%%s%%", param.SearchStr)},
+			sq.Like{"uc.status": fmt.Sprintf("%%%s%%", param.SearchStr)},
+		})
+	if param.Cursor == "" {
 		sb = sb.OrderBy("ud.user_id DESC")
-	} else if isNext {
-		sb = sb.Where(sq.Lt{"ud.user_id": cursor}).
+	} else if param.IsNext {
+		sb = sb.Where(sq.Lt{"ud.user_id": param.Cursor}).
 			OrderBy("ud.user_id DESC")
 	} else {
-		sb = sb.Where(sq.Gt{"ud.user_id": cursor})
+		sb = sb.Where(sq.Gt{"ud.user_id": param.Cursor})
 	}
-	sql, arg, err := sb.Limit(limit).ToSql()
+	sql, arg, err := sb.Limit(uint64(param.Limit)).ToSql()
 	if err != nil {
 		q.log.Warn("Failed to create select sql.")
 		return []admin.User{}, err
@@ -250,7 +277,7 @@ func (q *Queries) GetUsersByCursor(ctx context.Context, limit uint64, cursor str
 	if err != nil {
 		return []admin.User{}, err
 	}
-	if cursor != "" && !isNext {
+	if param.Cursor != "" && !param.IsNext {
 		for i, j := 0, len(users)-1; i < j; i, j = i+1, j-1 {
 			users[i], users[j] = users[j], users[i]
 		}
@@ -258,11 +285,19 @@ func (q *Queries) GetUsersByCursor(ctx context.Context, limit uint64, cursor str
 	return users, nil
 }
 
-func (q *Queries) GetUsersCount(ctx context.Context) (int, error) {
+func (q *Queries) GetUsersCount(ctx context.Context, searchStr string) (int, error) {
 	var count int
-	sql, arg, err := sq.Select("COUNT(user_id)").
-		From("user_credential").
-		Where(sq.Eq{"role": "USER"}).
+	sql, arg, err := sq.Select("COUNT(uc.user_id)").
+		From("user_credential uc").
+		InnerJoin("user_detail ud on uc.user_id = ud.user_id").
+		Where(sq.Eq{"uc.role": "USER"}).
+		Where(sq.Or{
+			sq.Like{"ud.user_id": fmt.Sprintf("%%%s%%", searchStr)},
+			sq.Like{"ud.username": fmt.Sprintf("%%%s%%", searchStr)},
+			sq.Like{"ud.email": fmt.Sprintf("%%%s%%", searchStr)},
+			sq.Like{"ud.phone_no": fmt.Sprintf("%%%s%%", searchStr)},
+			sq.Like{"uc.status": fmt.Sprintf("%%%s%%", searchStr)},
+		}).
 		ToSql()
 	if err != nil {
 		q.log.Warn("Failed to create select sql.")

@@ -1,11 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import Pagination from "../shared/table/Pagination";
-import Table, {
-  ActionCell,
-  DateCell,
-  SelectColumnFilter,
-  StatusPill,
-} from "../shared/table/Table";
+import Table from "../shared/table/Table";
+import { ActionCell, DateCell, StatusPill } from "../shared/table/TableCell";
 import api from "../axios/api";
 import ActionDialog from "../shared/dialog/ActionDialog";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
@@ -13,6 +9,7 @@ import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 const ManageUser = () => {
   const [deleteWarningDialogOpen, setDeleteWarningDialogOpen] = useState(false);
   const [toDeleteUserId, setToDeleteUserId] = useState();
+  const [refreshPage, doRefreshPage] = useState(0);
   const history = useHistory();
 
   const columns = useMemo(
@@ -63,34 +60,40 @@ const ManageUser = () => {
     ],
     []
   );
+
   const [pageData, setPageData] = useState({
     isLoading: false,
     rowData: [],
     totalUsers: 0,
+    searchStr: "",
   });
 
   useEffect(() => {
     fetchData(false);
   }, []);
 
-  const fetchData = async (isNext) => {
+  const fetchData = async (isNext, reload, searchStr) => {
     var cursor = "";
-    if (pageData.rowData && pageData.rowData.length > 0) {
+    if (!reload && pageData.rowData && pageData.rowData.length > 0) {
       if (isNext) {
         cursor = pageData.rowData[pageData.rowData.length - 1].user_id;
       } else {
         cursor = pageData.rowData[0].user_id;
       }
     }
+
+    const newSearchStr = reload ? searchStr : pageData.searchStr;
+
     setPageData((prevState) => ({
       ...prevState,
       rowData: [],
       isLoading: true,
       totalUsers: 0,
+      searchStr: newSearchStr,
     }));
 
     const res = await api.get(
-      `/protected/user/list?limit=10&cursor=${cursor}&isNext=${isNext}`
+      `/protected/user/list?limit=10&cursor=${cursor}&isNext=${isNext}&searchStr=${newSearchStr}`
     );
     if (res.data.Success) {
       const data = res.data.Data;
@@ -101,12 +104,18 @@ const ManageUser = () => {
         }));
         return;
       }
-      setPageData({
+      setPageData((prevState) => ({
+        ...prevState,
         isLoading: false,
         rowData: data.users,
         totalUsers: data.total_users,
-      });
+      }));
     }
+  };
+
+  const handleSearch = (value) => {
+    fetchData(false, true, value);
+    doRefreshPage((prev) => prev + 1);
   };
 
   const handleDeleteUser = async (userId) => {
@@ -132,17 +141,20 @@ const ManageUser = () => {
         columns={columns}
         data={pageData.rowData}
         isLoading={pageData.isLoading}
+        totalCount={pageData.totalUsers}
+        onSearch={handleSearch}
       />
       <Pagination
         totalRows={pageData.totalUsers}
         pageChangeHandler={fetchData}
         rowsPerPage={10}
+        refreshPage={refreshPage}
       />
       <ActionDialog
         isOpen={deleteWarningDialogOpen}
         setIsOpen={setDeleteWarningDialogOpen}
-        title="Delete Issue Confirmation"
-        content="Please confirm that the deleted issue will not able to be recovered."
+        title="Delete User Confirmation"
+        content="Please confirm that the deleted user will not able to be recovered."
         buttonText="Delete Anyway"
         buttonStatus="fail"
         buttonAction={() => handleDeleteUser(toDeleteUserId)}

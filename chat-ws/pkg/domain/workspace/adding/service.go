@@ -3,6 +3,7 @@ package adding
 import (
 	"context"
 	"errors"
+	"strconv"
 	"strings"
 	"time"
 
@@ -26,6 +27,12 @@ func NewService(log *zap.Logger, r Repository) *service {
 	return &service{
 		log: log,
 		r:   r,
+	}
+}
+
+func (s *service) SeedWorkspaces() {
+	for i := 1; i <= 25; i++ {
+		s.CreateWorkspace(context.Background(), "workspace"+strconv.Itoa(i), "U000011")
 	}
 }
 

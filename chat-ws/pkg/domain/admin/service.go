@@ -2,7 +2,9 @@ package admin
 
 import (
 	"context"
+	"encoding/base64"
 	"errors"
+	"fmt"
 	"strings"
 	"time"
 
@@ -12,9 +14,12 @@ import (
 
 type Service interface {
 	GetUser(ctx context.Context, userId string) (User, error)
-	GetPaginationUsers(ctx context.Context, limit uint64, cursor string, isNext bool) (PaginationUsersResp, error)
+	GetPaginationUsers(ctx context.Context, param PaginationUsersParam) (PaginationUsersResp, error)
 	UpdateUser(ctx context.Context, param UpdateUserParam) error
 	DeleteUser(ctx context.Context, userId string) error
+
+	GetWorkspace(ctx context.Context, workspaceId string) (Workspace, error)
+	GetPaginationWorkspaces(ctx context.Context, param PaginationWorkspacesParam) (PaginationWorkspacesResp, error)
 }
 
 type service struct {
@@ -33,12 +38,12 @@ func (s *service) GetUser(ctx context.Context, userId string) (User, error) {
 	return s.r.GetUser(ctx, userId)
 }
 
-func (s *service) GetPaginationUsers(ctx context.Context, limit uint64, cursor string, isNext bool) (PaginationUsersResp, error) {
-	users, err := s.r.GetUsersByCursor(ctx, limit, cursor, isNext)
+func (s *service) GetPaginationUsers(ctx context.Context, param PaginationUsersParam) (PaginationUsersResp, error) {
+	users, err := s.r.GetUsersByCursor(ctx, param)
 	if err != nil {
 		return PaginationUsersResp{}, err
 	}
-	count, err := s.r.GetUsersCount(ctx)
+	count, err := s.r.GetUsersCount(ctx, param.SearchStr)
 	if err != nil {
 		return PaginationUsersResp{}, err
 	}
@@ -65,10 +70,6 @@ func (s *service) UpdateUser(ctx context.Context, params UpdateUserParam) error 
 	return nil
 }
 
-func (s *service) DeleteUser(ctx context.Context, userId string) error {
-	return s.r.DeleteUser(ctx, userId)
-}
-
 func (us *service) verigyUserFieldError(err error) error {
 	fetchField := strings.Split(err.Error(), ".")
 	field := fetchField[len(fetchField)-1]
@@ -83,4 +84,64 @@ func (us *service) verigyUserFieldError(err error) error {
 	default:
 		return err
 	}
+}
+
+func (s *service) DeleteUser(ctx context.Context, userId string) error {
+	return s.r.DeleteUser(ctx, userId)
+}
+
+func (s *service) GetWorkspace(ctx context.Context, workspaceId string) (Workspace, error) {
+	return s.r.GetWorkspace(ctx, workspaceId)
+}
+
+func (s *service) GetPaginationWorkspaces(ctx context.Context, param PaginationWorkspacesParam) (PaginationWorkspacesResp, error) {
+	if param.Cursor != "" {
+		time, uuid, err := decodeCursor(param.Cursor)
+		if err != nil {
+			return PaginationWorkspacesResp{}, err
+		}
+		param.CreatedTime = time
+		param.Id = uuid
+	}
+	workspaces, err := s.r.GetWorkspacesByCursor(ctx, param)
+	if err != nil {
+		return PaginationWorkspacesResp{}, err
+	}
+	for i, w := range workspaces {
+		w.Cursor = encodeCursor(w.CreatedDate, w.Id)
+		workspaces[i] = w
+	}
+	count, err := s.r.GetWorkspacesCount(ctx, param.SearchStr)
+	if err != nil {
+		return PaginationWorkspacesResp{}, err
+	}
+	return PaginationWorkspacesResp{
+		Workspaces:      workspaces,
+		TotalWorkspaces: count,
+	}, nil
+}
+
+func decodeCursor(encodedCursor string) (res time.Time, uuid string, err error) {
+	byt, err := base64.StdEncoding.DecodeString(encodedCursor)
+	if err != nil {
+		return
+	}
+
+	arrStr := strings.Split(string(byt), ",")
+	if len(arrStr) != 2 {
+		err = errors.New("cursor is invalid")
+		return
+	}
+
+	res, err = time.Parse(time.RFC3339Nano, arrStr[0])
+	if err != nil {
+		return
+	}
+	uuid = arrStr[1]
+	return
+}
+
+func encodeCursor(t time.Time, uuid string) string {
+	key := fmt.Sprintf("%s,%s", t.Format(time.RFC3339Nano), uuid)
+	return base64.StdEncoding.EncodeToString([]byte(key))
 }
