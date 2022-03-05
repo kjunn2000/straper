@@ -23,6 +23,7 @@ func (server *Server) SetUpWorkspaceRouter(mr *mux.Router, as adding.Service, ls
 	wr.HandleFunc("/delete/{workspace_id}", server.DeleteWorkspace(ls, ds, cs, false)).Methods("POST")
 	wr.HandleFunc("/leave/{workspace_id}", server.LeaveWorkspace(ds)).Methods("POST")
 	wr.Use(middleware.TokenVerifier(server.tokenMaker))
+	wr.Use(middleware.UpdateLastSeen(server.statusLogger))
 }
 
 type AddWorkspaceParam struct {

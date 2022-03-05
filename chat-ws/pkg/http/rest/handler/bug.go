@@ -25,6 +25,7 @@ func (server *Server) SetUpBugRouter(mr *mux.Router, bs bug.Service) {
 	br.HandleFunc("/attachment/delete/{fid}", server.DeleteIssueAttachment(bs)).Methods("POST")
 	br.HandleFunc("/attachment/download/{fid}", server.DownloadAttachment(bs)).Methods("GET")
 	br.Use(middleware.TokenVerifier(server.tokenMaker))
+	br.Use(middleware.UpdateLastSeen(server.statusLogger))
 }
 
 func (server *Server) CreateIssue(bs bug.Service) func(http.ResponseWriter, *http.Request) {

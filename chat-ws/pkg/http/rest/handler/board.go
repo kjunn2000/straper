@@ -15,6 +15,7 @@ func (server *Server) SetUpBoardRouter(mr *mux.Router, bs board.Service) {
 	br.HandleFunc("/{workspace_id}", server.GetBoardData(bs)).Methods("GET")
 	br.HandleFunc("/card/comments/{card_id}", server.GetCardComments(bs)).Methods("GET")
 	br.Use(middleware.TokenVerifier(server.tokenMaker))
+	br.Use(middleware.UpdateLastSeen(server.statusLogger))
 }
 
 func (server *Server) GetBoardData(bs board.Service) func(http.ResponseWriter, *http.Request) {

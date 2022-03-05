@@ -73,7 +73,7 @@ function TaskBoard() {
 
   return (
     <SubPage>
-      <span className="text-white font-bold text-center">
+      <span className="text-gray-500 font-bold text-center">
         {board.board_name}
       </span>
       <DragList />

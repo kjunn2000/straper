@@ -31,6 +31,7 @@ func (server *Server) SetUpAccountRouter(mr *mux.Router, as account.Service) {
 	ar.HandleFunc("/reset-password/create", server.ResetPasswordRequest(as)).Methods("POST")
 	ar.HandleFunc("/password/update", server.UpdatePassword(as)).Methods("POST")
 	pr.Use(middleware.TokenVerifier(server.tokenMaker))
+	pr.Use(middleware.UpdateLastSeen(server.statusLogger))
 }
 
 func (server *Server) Register(as account.Service, validate *validator.Validate) func(http.ResponseWriter, *http.Request) {

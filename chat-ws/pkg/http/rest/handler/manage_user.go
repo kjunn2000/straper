@@ -18,6 +18,7 @@ func (server *Server) SetUpManageUserRouter(mr *mux.Router, as admin.Service) {
 	r.HandleFunc("/update", server.UpdateUser(as)).Methods("POST")
 	r.HandleFunc("/delete/{user_id}", server.DeleteUser(as)).Methods("POST")
 	r.Use(middleware.TokenVerifier(server.tokenMaker))
+	r.Use(middleware.UpdateLastSeen(server.statusLogger))
 }
 
 func (server *Server) GetUser(as admin.Service) func(http.ResponseWriter, *http.Request) {

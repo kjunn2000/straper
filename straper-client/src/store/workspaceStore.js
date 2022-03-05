@@ -153,20 +153,6 @@ const useWorkspaceStore = create((set) => ({
       currAccountList: accountList,
     }));
   },
-
-  // updateLastAccess: (workspaceId, channelId) => {
-  //   set((state) => {
-  //     state.workspaces.map((workspace) => {
-  //       if (workspace.workspace_id == workspaceId) {
-  //         workspace.channel_list.map((channel) => {
-  //           if (channel.channel_id == channelId) {
-  //             channel.last_accessed = new Date().toString();
-  //           }
-  //         });
-  //       }
-  //     });
-  //   });
-  // },
 }));
 
 export default useWorkspaceStore;

@@ -25,6 +25,7 @@ func (server *Server) SetUpManageWorkspaceRouter(mr *mux.Router, as admin.Servic
 	r.HandleFunc("/channel/update", server.UpdateChannel(es)).Methods("POST")
 	r.HandleFunc("/channel/delete/{channel_id}", server.DeleteChannel(ls, ds, cs, true)).Methods("POST")
 	r.Use(middleware.TokenVerifier(server.tokenMaker))
+	r.Use(middleware.UpdateLastSeen(server.statusLogger))
 }
 
 func (server *Server) GetWorkspace(as admin.Service) func(http.ResponseWriter, *http.Request) {

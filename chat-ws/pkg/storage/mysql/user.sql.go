@@ -412,6 +412,22 @@ func (q *Queries) UpdateUserCredential(ctx context.Context, param admin.UpdateCr
 	return nil
 }
 
+func (q *Queries) UpdateLastSeen(ctx context.Context, credentialId string) error {
+	sql, args, err := sq.Update("user_access_info").
+		Set("last_seen", time.Now()).
+		Where(sq.Eq{"credential_id": credentialId}).ToSql()
+	if err != nil {
+		q.log.Warn("Failed to create update last seen query.")
+		return err
+	}
+	_, err = q.db.Exec(sql, args...)
+	if err != nil {
+		q.log.Warn("Failed to update last seen to db.", zap.Error(err))
+		return err
+	}
+	return nil
+}
+
 func (q *Queries) DeleteUserDetail(ctx context.Context, userId string) error {
 	sql, arg, err := sq.Delete("user_detail").Where(sq.Eq{"user_id": userId}).ToSql()
 	if err != nil {

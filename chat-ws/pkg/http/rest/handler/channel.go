@@ -25,6 +25,7 @@ func (server *Server) SetUpChannelRouter(mr *mux.Router, as adding.Service, ls l
 	cr.HandleFunc("/leave/{channel_id}", server.LeaveChannel(ds)).Methods("POST")
 	cr.HandleFunc("/{channel_id}/messages", server.GetChannelMessages(cs)).Methods("GET")
 	cr.Use(middleware.TokenVerifier(server.tokenMaker))
+	cr.Use(middleware.UpdateLastSeen(server.statusLogger))
 }
 
 type CreateChannelRequest struct {

@@ -142,4 +142,7 @@ type Querier interface {
 	DeleteIssueAttachment(ctx context.Context, fid string) error
 	GetEpicListByWorkspaceId(ctx context.Context, workspaceId string) ([]bug.EpicLinkOption, error)
 	GetAssigneeListByWorkspaceId(ctx context.Context, workspaceId string) ([]bug.Assignee, error)
+
+	// status
+	UpdateLastSeen(ctx context.Context, credentialId string) error
 }
