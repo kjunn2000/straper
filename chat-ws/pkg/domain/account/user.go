@@ -14,10 +14,11 @@ type UserDetail struct {
 }
 
 type UserInfo struct {
-	UserId   string `json:"user_id" db:"user_id"`
-	Username string `json:"username" db:"username"`
-	Email    string `json:"email" db:"email" validate:"email"`
-	PhoneNo  string `json:"phone_no" db:"phone_no"`
+	UserId   string    `json:"user_id" db:"user_id"`
+	Username string    `json:"username" db:"username"`
+	Email    string    `json:"email" db:"email" validate:"email"`
+	PhoneNo  string    `json:"phone_no" db:"phone_no"`
+	LastSeen time.Time `json:"last_seen" db:"last_seen"`
 }
 
 type UserCredential struct {
