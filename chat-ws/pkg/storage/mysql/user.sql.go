@@ -140,9 +140,11 @@ func (q *Queries) GetUserDetailByEmail(ctx context.Context, email string) (accou
 
 func (q *Queries) GetUserInfoListByWorkspaceId(ctx context.Context, workspaceId string) ([]account.UserInfo, error) {
 	var userList []account.UserInfo
-	sta, arg, err := sq.Select("wu.user_id", "username", "email", "phone_no").
-		From("user_detail").
-		InnerJoin("workspace_user wu on user_detail.user_id = wu.user_id").
+	sta, arg, err := sq.Select("wu.user_id", "ud.username", "ud.email", "ud.phone_no", "uai.last_seen").
+		From("user_detail ud").
+		InnerJoin("workspace_user wu on ud.user_id = wu.user_id").
+		InnerJoin("user_credential uc on ud.user_id = uc.user_id").
+		InnerJoin("user_access_info uai on uc.credential_id = uai.credential_id").
 		Where(sq.Eq{"workspace_id": workspaceId}).
 		ToSql()
 	if err != nil {
@@ -407,6 +409,22 @@ func (q *Queries) UpdateUserCredential(ctx context.Context, param admin.UpdateCr
 	_, err = q.db.Exec(sql, args...)
 	if err != nil {
 		q.log.Warn("Failed to update credential to db.", zap.Error(err))
+		return err
+	}
+	return nil
+}
+
+func (q *Queries) UpdateLastSeen(ctx context.Context, credentialId string) error {
+	sql, args, err := sq.Update("user_access_info").
+		Set("last_seen", time.Now()).
+		Where(sq.Eq{"credential_id": credentialId}).ToSql()
+	if err != nil {
+		q.log.Warn("Failed to create update last seen query.")
+		return err
+	}
+	_, err = q.db.Exec(sql, args...)
+	if err != nil {
+		q.log.Warn("Failed to update last seen to db.", zap.Error(err))
 		return err
 	}
 	return nil

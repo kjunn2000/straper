@@ -6,6 +6,7 @@ import { isEmpty } from "../service/object";
 import DragList from "../components/board/DragList";
 import { connect, isSocketOpen } from "../service/websocket";
 import SubPage from "../components/border/SubPage";
+import { fetchWorkspaceAccountList } from "../service/workspace";
 
 function TaskBoard() {
   const currWorkspace = useWorkspaceStore((state) => state.currWorkspace);
@@ -19,7 +20,7 @@ function TaskBoard() {
 
   useEffect(() => {
     getBoardData();
-    getWorkspaceUsersInfo();
+    fetchWorkspaceAccountList(currWorkspace.workspace_id);
     if (!isSocketOpen()) {
       connect();
     }
@@ -54,26 +55,9 @@ function TaskBoard() {
     });
   };
 
-  const getWorkspaceUsersInfo = () => {
-    api
-      .get(`/protected/account/list/${currWorkspace.workspace_id}`)
-      .then((res) => {
-        if (res.data.Success) {
-          const data = res.data.Data;
-          if (!isEmpty(data)) {
-            const userListMap = data.reduce((map, obj) => {
-              map[obj.user_id] = obj;
-              return map;
-            }, {});
-            setCurrAccountList(userListMap);
-          }
-        }
-      });
-  };
-
   return (
     <SubPage>
-      <span className="text-white font-bold text-center">
+      <span className="text-gray-500 font-bold text-center">
         {board.board_name}
       </span>
       <DragList />

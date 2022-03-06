@@ -64,12 +64,14 @@ func (as *service) Login(ctx context.Context, req LoginRequest, role string) (Lo
 		return LoginResponse{}, errors.New("invalid.account.status")
 	}
 
-	accessToken, err := as.tokenMaker.CreateToken(u.UserId, u.Username, as.config.AccessTokenDuration)
+	accessToken, err := as.tokenMaker.CreateToken(u.UserId, u.Username,
+		u.CredentialId, as.config.AccessTokenDuration)
 	if err != nil {
 		return LoginResponse{}, err
 	}
 
-	refreshToken, err := as.tokenMaker.CreateToken(u.UserId, u.Username, as.config.RefreshTokenDuration)
+	refreshToken, err := as.tokenMaker.CreateToken(u.UserId, u.Username,
+		u.CredentialId, as.config.RefreshTokenDuration)
 	if err != nil {
 		return LoginResponse{}, err
 	}
@@ -95,7 +97,8 @@ func (as *service) RefreshToken(ctx context.Context, refreshToken string) (strin
 		return "", err
 	}
 
-	accessToken, err := as.tokenMaker.CreateToken(payload.UserId, payload.Username, as.config.AccessTokenDuration)
+	accessToken, err := as.tokenMaker.CreateToken(payload.UserId, payload.Username,
+		payload.CredentialId, as.config.AccessTokenDuration)
 	if err != nil {
 		return "", err
 	}

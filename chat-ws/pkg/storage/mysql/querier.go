@@ -16,7 +16,21 @@ import (
 )
 
 type Querier interface {
-	// user
+	UserQueries
+	EmailTokenQueries
+	ResetPasswordQueries
+	WorkspaceQueries
+	ChannelQueries
+	MessageQueries
+	WebsocketQueries
+	BoardQueries
+	TaskListQueries
+	CardQueries
+	BugQueries
+	LogQueries
+}
+
+type UserQueries interface {
 	CreateUserDetail(ctx context.Context, params CreateUserDetailParam) error
 	CreateUserCredential(ctx context.Context, params CreateUserCredentialParam) error
 	CreateUserAccessInfo(ctx context.Context, params CreateUserAccessInfo) error
@@ -28,44 +42,46 @@ type Querier interface {
 	GetUserDetailByEmail(ctx context.Context, email string) (account.UserDetail, error)
 	GetUserCredentialByUsername(ctx context.Context, username string) (auth.User, error)
 	GetUserCredentialByUserId(ctx context.Context, userId string) (auth.User, error)
-	// admin_user
-	GetUser(ctx context.Context, userId string) (admin.User, error)
-	GetUsersByCursor(ctx context.Context, param admin.PaginationUsersParam) ([]admin.User, error)
-	GetUsersCount(ctx context.Context, searchStr string) (int, error)
-
 	UpdateUser(ctx context.Context, params account.UpdateUserParam) error
 	UpdateAccountStatus(ctx context.Context, userId, status string) error
 	UpdateAccountPassword(ctx context.Context, userId, password string) error
-
 	DeleteUser(ctx context.Context, userId string) error
 
-	// verify_email
+	// admin
+	GetUser(ctx context.Context, userId string) (admin.User, error)
+	GetUsersByCursor(ctx context.Context, param admin.PaginationUsersParam) ([]admin.User, error)
+	GetUsersCount(ctx context.Context, searchStr string) (int, error)
+}
+
+type EmailTokenQueries interface {
 	CreateVerifyEmailToken(ctx context.Context, token account.VerifyEmailToken) error
 	GetVerifyEmailToken(ctx context.Context, userId string) (account.VerifyEmailToken, error)
 	DeleteVerifyEmailToken(ctx context.Context, tokenId string) error
+}
 
-	// reset_passwd
+type ResetPasswordQueries interface {
 	CreateResetPasswordToken(ctx context.Context, params account.ResetPasswordToken) error
 	GetResetPasswordToken(ctx context.Context, tokenId string) (account.ResetPasswordToken, error)
 	GetResetPasswordTokenByUserId(ctx context.Context, userId string) (account.ResetPasswordToken, error)
 	DeleteResetPasswordToken(ctx context.Context, tokenId string) error
+}
 
-	// workspace
+type WorkspaceQueries interface {
 	CreateWorkspace(ctx context.Context, w adding.Workspace) error
 	AddUserToWorkspace(ctx context.Context, workspaceId string, userIdList []string) error
 	GetWorkspaceByWorkspaceId(ctx context.Context, workspaceId string) (listing.Workspace, error)
 	GetWorkspacesByUserId(ctx context.Context, userId string) ([]listing.Workspace, error)
-
-	// admin_workspace
-	GetWorkspace(ctx context.Context, workspaceId string) (admin.Workspace, error)
-	GetWorkspacesByCursor(ctx context.Context, param admin.PaginationWorkspacesParam) ([]admin.WorkspaceSummary, error)
-	GetWorkspacesCount(ctx context.Context, searchStr string) (int, error)
-
 	UpdateWorkspace(ctx context.Context, workspace editing.Workspace) error
 	DeleteWorkspace(ctx context.Context, id string) error
 	RemoveUserFromWorkspace(ctx context.Context, workspaceId, userId string) error
 
-	// channel
+	// admin
+	GetWorkspace(ctx context.Context, workspaceId string) (admin.Workspace, error)
+	GetWorkspacesByCursor(ctx context.Context, param admin.PaginationWorkspacesParam) ([]admin.WorkspaceSummary, error)
+	GetWorkspacesCount(ctx context.Context, searchStr string) (int, error)
+}
+
+type ChannelQueries interface {
 	CreateChannel(ctx context.Context, channel adding.Channel) error
 	AddUserToChannel(ctx context.Context, channelId string, userIdList []string) error
 	GetChannelByChannelId(ctx context.Context, channelId string) (listing.Channel, error)
@@ -77,8 +93,9 @@ type Querier interface {
 	UpdateChannel(ctx context.Context, channel editing.Channel) error
 	DeleteChannel(ctx context.Context, channelId string) error
 	RemoveUserFromChannel(ctx context.Context, channelId string, userId string) error
+}
 
-	// message
+type MessageQueries interface {
 	CreateMessage(ctx context.Context, message *chatting.Message) error
 	GetChannelMessages(ctx context.Context, channelId string, limit, offset uint64) ([]chatting.Message, error)
 	GetAllChannelMessages(ctx context.Context, channelId string) ([]chatting.Message, error)
@@ -86,24 +103,28 @@ type Querier interface {
 	EditMessage(ctx context.Context, params chatting.EditChatMessageParams) error
 	DeleteMessage(ctx context.Context, messageId string) error
 	UpdateChannelAccessTime(ctx context.Context, channelId string, userId string) error
+}
 
-	// websocket
+type WebsocketQueries interface {
 	GetUserListByChannelId(ctx context.Context, channelId string) ([]websocket.UserData, error)
 	GetUserListByWorkspaceId(ctx context.Context, workspaceId string) ([]websocket.UserData, error)
+}
 
-	// board
+type BoardQueries interface {
 	CreateBoard(ctx context.Context, board board.TaskBoard) error
 	GetTaskBoardByWorkspaceId(ctx context.Context, workspaceId string) (board.TaskBoard, error)
 	UpdateTaskBoard(ctx context.Context, board board.TaskBoard) error
+}
 
-	// task list
+type TaskListQueries interface {
 	CreateTaskList(ctx context.Context, taskList board.TaskList) error
 	GetTaskListsByBoardId(ctx context.Context, boardId string) ([]board.TaskList, error)
 	UpdateTaskList(ctx context.Context, taskList board.UpdateListParams) error
 	UpdateTaskListOrder(ctx context.Context, listId string, orderIndex int) error
 	DeleteTaskList(ctx context.Context, listId string) error
+}
 
-	// card
+type CardQueries interface {
 	CreateCard(ctx context.Context, card board.Card) error
 	GetCardListByListId(ctx context.Context, listId string) ([]board.Card, error)
 	UpdateCard(ctx context.Context, params board.UpdateCardParams) error
@@ -129,8 +150,9 @@ type Querier interface {
 	GetFileCommentsByListId(ctx context.Context, listId string) ([]board.CardComment, error)
 
 	GetFidsByWorkspaceId(ctx context.Context, workspaceId string) ([]string, error)
+}
 
-	// bug
+type BugQueries interface {
 	CreateIssue(ctx context.Context, issue bug.Issue) error
 	GetIssuesByWorkspaceId(ctx context.Context, workspaceId string, limit, offset uint64) ([]bug.Issue, error)
 	GetIssueByIssueId(ctx context.Context, issueId string) (bug.Issue, error)
@@ -142,4 +164,8 @@ type Querier interface {
 	DeleteIssueAttachment(ctx context.Context, fid string) error
 	GetEpicListByWorkspaceId(ctx context.Context, workspaceId string) ([]bug.EpicLinkOption, error)
 	GetAssigneeListByWorkspaceId(ctx context.Context, workspaceId string) ([]bug.Assignee, error)
+}
+
+type LogQueries interface {
+	UpdateLastSeen(ctx context.Context, credentialId string) error
 }

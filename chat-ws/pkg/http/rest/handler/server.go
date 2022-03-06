@@ -17,6 +17,7 @@ import (
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/board"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/bug"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/chatting"
+	"github.com/kjunn2000/straper/chat-ws/pkg/domain/dblog"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/websocket"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/adding"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/deleting"
@@ -36,6 +37,7 @@ type Server struct {
 	store           mysql.Store
 	httpServer      *http.Server
 	tokenMaker      auth.Maker
+	statusLogger    dblog.StatusLogger
 	redisClient     rdb.RedisClient
 	seaweedfsClient chatting.SeaweedfsClient
 }
@@ -46,6 +48,8 @@ func NewServer(log *zap.Logger, config configs.Config, store mysql.Store) (*Serv
 	if err != nil {
 		log.Warn("Unable to create token maker.", zap.Error(err))
 	}
+
+	statusLogger := dblog.NewStatusLogger(log, store)
 
 	rc := redis.NewClient(&redis.Options{
 		Addr:     "localhost:6379",
@@ -74,6 +78,7 @@ func NewServer(log *zap.Logger, config configs.Config, store mysql.Store) (*Serv
 		config:          config,
 		store:           store,
 		tokenMaker:      tokenMaker,
+		statusLogger:    statusLogger,
 		redisClient:     &redisClient,
 		seaweedfsClient: &seaweedClient,
 	}
