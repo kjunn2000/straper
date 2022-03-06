@@ -16,14 +16,28 @@ import UserList from "../components/sideBar/UserList";
 function Workspace() {
   const currWorkspace = useWorkspaceStore((state) => state.currWorkspace);
   const currChannel = useWorkspaceStore((state) => state.currChannel);
+  const addIntervalId = useWorkspaceStore((state) => state.addIntervalId);
+  const clearIntervalIds = useWorkspaceStore((state) => state.clearIntervalIds);
 
   useEffect(() => {
     fetchWorkspaceData().then((data) => redirectToLatestWorkspace(data));
     if (!isSocketOpen()) {
       connect();
     }
-    fetchWorkspaceAccountList(currWorkspace.workspace_id);
   }, []);
+
+  useEffect(() => {
+    if (!currWorkspace || !currWorkspace.workspace_id) {
+      return;
+    }
+    clearIntervalIds();
+    fetchWorkspaceAccountList(currWorkspace.workspace_id);
+    addIntervalId(
+      setInterval(() => {
+        fetchWorkspaceAccountList(currWorkspace.workspace_id);
+      }, 60000)
+    );
+  }, [currWorkspace.workspace_id]);
 
   const emptyComponent = (Image, text) => (
     <div className="flex flex-col items-center p-5 text-white">

@@ -10,6 +10,7 @@ export const logOut = (timeout) => {
   window.localStorage.clear();
   useAuthStore.getState()?.clearAccessToken();
   useIdentityStore.getState()?.clearIdentity();
+  useWorkspaceStore.getState()?.clearIntervalIds();
   useWorkspaceStore.getState()?.clearWorkspaceState();
   useIssueStore.getState()?.clearIssues();
   const url = "/login" + (timeout ? "/timeout" : "");

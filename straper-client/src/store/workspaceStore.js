@@ -8,6 +8,7 @@ const useWorkspaceStore = create((set) => ({
   currAccountList: getLocalStorage("currAccountList") || {},
   selectedChannelIds:
     new Map(getLocalStorage("selectedChannelIds")) || new Map(),
+  intervalIds: getLocalStorage("intervalIds") || [],
   setWorkspaces: (workspaces) => {
     set((state) => {
       setLocalStorage("workspaces", workspaces);
@@ -23,6 +24,7 @@ const useWorkspaceStore = create((set) => ({
   },
   deleteWorkspace: (workspaceId) => {
     set((state) => {
+      state.clearIntervalIds();
       const newWorkspaces = state.workspaces.filter(
         (workspace) => workspace.workspace_id !== workspaceId
       );
@@ -139,12 +141,14 @@ const useWorkspaceStore = create((set) => ({
       currWorkspace: {},
       currChannel: {},
       selectedChannelIds: new Map(),
+      intervalIds: [],
     }));
     setLocalStorage("workspaces", []);
     setLocalStorage("currWorkspace", {});
     setLocalStorage("currChannel", {});
     setLocalStorage("selectedChannelIds", []);
     setLocalStorage("currAccountList", {});
+    setLocalStorage("intervalIds", []);
   },
 
   setCurrAccountList: (accountList) => {
@@ -152,6 +156,25 @@ const useWorkspaceStore = create((set) => ({
     set((state) => ({
       currAccountList: accountList,
     }));
+  },
+
+  addIntervalId: (id) => {
+    set((state) => {
+      if (!state.intervalIds) {
+        state.intervalIds = [];
+      }
+      const newIntervalIds = [...state.intervalIds, id];
+      setLocalStorage("intervalIds", newIntervalIds);
+      return { intervalIds: newIntervalIds };
+    });
+  },
+
+  clearIntervalIds: () => {
+    set((state) => {
+      state.intervalIds.forEach((id) => clearInterval(id));
+      setLocalStorage("intervalIds", []);
+      return { intervalIds: [] };
+    });
   },
 }));
 

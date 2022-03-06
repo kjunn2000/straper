@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"net/http"
 
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/auth"
@@ -20,7 +19,6 @@ func UpdateLastSeen(sl dblog.StatusLogger) func(http.Handler) http.Handler {
 			if !ok || payload == nil {
 				next.ServeHTTP(w, r)
 			}
-			fmt.Println("update user access info ...." + payload.Username)
 			sl.UpdateLastSeen(r.Context(), payload.CredentialId)
 			next.ServeHTTP(w, r)
 		})

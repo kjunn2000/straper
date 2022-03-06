@@ -54,6 +54,7 @@ const UserList = () => {
     <AccountPopOver
       user={user}
       currStatus={parseMinuteDiff(user.last_seen_minute)}
+      key={user.user_id}
     >
       <div
         className="group flex text-gray-400 text-lg items-center 
