@@ -1,19 +1,19 @@
 CREATE TABLE `user_detail` (
-  `user_id` VARCHAR(255) PRIMARY KEY,
-  `username` VARCHAR(255) UNIQUE NOT NULL,
-  `email` VARCHAR(255) UNIQUE NOT NULL,
-  `phone_no` VARCHAR(255) UNIQUE NOT NULL,
-  `created_date` DATETIME NOT NULL DEFAULT (now()),
+  `user_id` VARCHAR(50) PRIMARY KEY,
+  `username` VARCHAR(50) UNIQUE NOT NULL,
+  `email` VARCHAR(50) UNIQUE NOT NULL,
+  `phone_no` VARCHAR(11) UNIQUE NOT NULL,
+  `created_date` DATETIME NOT NULL,
   `updated_date` DATETIME NOT NULL
 );
 
 CREATE TABLE `user_credential` (
   `credential_id` CHAR(36) PRIMARY KEY,
-  `user_id` VARCHAR(255) NOT NULL,
+  `user_id` VARCHAR(50) NOT NULL,
   `password` VARCHAR(255) NOT NULL,
-  `role` VARCHAR(255) NOT NULL,
-  `status` VARCHAR(255) NOT NULL,
-  `created_date` DATETIME NOT NULL DEFAULT (now()),
+  `role` VARCHAR(5) NOT NULL,
+  `status` VARCHAR(9) NOT NULL,
+  `created_date` DATETIME NOT NULL,
   `updated_date` DATETIME NOT NULL
 );
 
@@ -24,28 +24,28 @@ CREATE TABLE `user_access_info` (
 
 CREATE TABLE `verify_email_token` (
   `token_id` CHAR(36) PRIMARY KEY,
-  `user_id` VARCHAR(255) NOT NULL,
-  `created_date` DATETIME NOT NULL DEFAULT (now())
+  `user_id` VARCHAR(50) NOT NULL,
+  `created_date` DATETIME NOT NULL
 );
 
 CREATE TABLE `reset_password_token` (
   `token_id` CHAR(36) PRIMARY KEY,
-  `user_id` VARCHAR(255) NOT NULL,
-  `created_date` DATETIME NOT NULL DEFAULT (now())
+  `user_id` VARCHAR(50) NOT NULL,
+  `created_date` DATETIME NOT NULL 
 );
 
 CREATE TABLE `workspace` (
   `workspace_id` CHAR(36) PRIMARY KEY,
   `workspace_name` VARCHAR(255) NOT NULL,
-  `creator_id` VARCHAR(255) NOT NULL,
-  `created_date` DATETIME NOT NULL DEFAULT (now())
+  `creator_id` VARCHAR(50) NOT NULL,
+  `created_date` DATETIME NOT NULL 
 );
 
 CREATE INDEX `idx_workspace_pagination` ON `workspace` (`created_date`, `workspace_id`);
 
 CREATE TABLE `workspace_user` (
   `workspace_id` CHAR(36),
-  `user_id` VARCHAR(255),
+  `user_id` VARCHAR(50),
   PRIMARY KEY (`workspace_id`, `user_id`)
 );
 
@@ -53,27 +53,26 @@ CREATE TABLE `channel` (
   `channel_id` CHAR(36) PRIMARY KEY,
   `channel_name` VARCHAR(255) NOT NULL,
   `workspace_id` CHAR(36) NOT NULL,
-  `creator_id` VARCHAR(255) NOT NULL,
+  `creator_id` VARCHAR(50) NOT NULL,
   `is_default` BOOLEAN NOT NULL,
-  `created_date` DATETIME NOT NULL DEFAULT (now())
+  `created_date` DATETIME NOT NULL
 );
 
 CREATE TABLE `channel_user` (
   `channel_id` CHAR(36),
-  `user_id` VARCHAR(255),
-  `last_accessed` DATETIME NOT NULL DEFAULT (now()),
+  `user_id` VARCHAR(50),
   PRIMARY KEY (`channel_id`, `user_id`)
 );
 
 CREATE TABLE `message` (
   `message_id` CHAR(36) PRIMARY KEY,
-  `type` VARCHAR(36) NOT NULL,
+  `type` VARCHAR(7) NOT NULL,
   `channel_id` CHAR(36) NOT NULL,
-  `creator_id` CHAR(36) NOT NULL,
+  `creator_id` CHAR(50) NOT NULL,
   `content` LONGTEXT NOT NULL,
   `file_name` VARCHAR(255),
   `file_type` VARCHAR(255),
-  `created_date` DATETIME NOT NULL DEFAULT (now())
+  `created_date` DATETIME NOT NULL
 );
 
 CREATE TABLE `task_board` (
@@ -95,8 +94,8 @@ CREATE TABLE `card` (
   `priority` VARCHAR(6) NOT NULL,
   `list_id` CHAR(36) NOT NULL,
   `description` LONGTEXT NOT NULL,
-  `creator_id` VARCHAR(255) NOT NULL,
-  `created_date` DATETIME NOT NULL DEFAULT (now()),
+  `creator_id` VARCHAR(50) NOT NULL,
+  `created_date` DATETIME NOT NULL,
   `due_date` DATETIME NOT NULL,
   `order_index` INT NOT NULL,
   `issue_link` CHAR(36) NULL
@@ -104,7 +103,7 @@ CREATE TABLE `card` (
 
 CREATE TABLE `card_user` (
   `card_id` CHAR(36),
-  `user_id` VARCHAR(255),
+  `user_id` VARCHAR(50),
   PRIMARY KEY (`card_id`, `user_id`)
 );
 
@@ -117,13 +116,13 @@ CREATE TABLE `checklist_item` (
 
 CREATE TABLE `card_comment` (
   `comment_id` CHAR(36) PRIMARY KEY,
-  `type` VARCHAR(36) NOT NULL,
+  `type` VARCHAR(7) NOT NULL,
   `card_id` CHAR(36) NOT NULL,
-  `creator_id` VARCHAR(255) NOT NULL,
+  `creator_id` VARCHAR(50) NOT NULL,
   `content` LONGTEXT NOT NULL,
   `file_name` VARCHAR(255),
   `file_type` VARCHAR(255),
-  `created_date` DATETIME NOT NULL DEFAULT (now())
+  `created_date` DATETIME NOT NULL 
 );
 
 CREATE TABLE `issue` (
@@ -140,12 +139,12 @@ CREATE TABLE `issue` (
   `workaround` LONGTEXT,
   `serverity` VARCHAR(8),
   `label` VARCHAR(50),
-  `assignee` CHAR(36),
-  `reporter` CHAR(36) NOT NULL,
+  `assignee` VARCHAR(50),
+  `reporter` VARCHAR(50) NOT NULL,
   `due_time` DATETIME,
   `status` VARCHAR(20) NOT NULL,
   `workspace_id` CHAR(36) NOT NULL,
-  `created_date` DATETIME NOT NULL DEFAULT (now())
+  `created_date` DATETIME NOT NULL 
 );
 
 CREATE TABLE `issue_attachment`(
@@ -161,9 +160,9 @@ ALTER TABLE `user_access_info` ADD FOREIGN KEY (`credential_id`) REFERENCES `use
 
 ALTER TABLE `workspace` ADD FOREIGN KEY (`creator_id`) REFERENCES `user_detail` (`user_id`) ON DELETE CASCADE;
 
-ALTER TABLE `verify_email_token` ADD FOREIGN KEY (`user_id`) REFERENCES `user_credential` (`user_id`) ON DELETE CASCADE;
+ALTER TABLE `verify_email_token` ADD FOREIGN KEY (`user_id`) REFERENCES `user_detail` (`user_id`) ON DELETE CASCADE;
 
-ALTER TABLE `reset_password_token` ADD FOREIGN KEY (`user_id`) REFERENCES `user_credential` (`user_id`) ON DELETE CASCADE;
+ALTER TABLE `reset_password_token` ADD FOREIGN KEY (`user_id`) REFERENCES `user_detail` (`user_id`) ON DELETE CASCADE;
 
 ALTER TABLE `workspace_user` ADD FOREIGN KEY (`workspace_id`) REFERENCES `workspace` (`workspace_id`) ON DELETE CASCADE;
 

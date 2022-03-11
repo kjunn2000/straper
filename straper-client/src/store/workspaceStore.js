@@ -142,6 +142,7 @@ const useWorkspaceStore = create((set) => ({
       currChannel: {},
       selectedChannelIds: new Map(),
       intervalIds: [],
+      currAccountList: {},
     }));
     setLocalStorage("workspaces", []);
     setLocalStorage("currWorkspace", {});

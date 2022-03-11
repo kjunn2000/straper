@@ -22,9 +22,6 @@ const ChatRoom = () => {
   const messagesRef = useRef(null);
   const messagesEndRef = useRef(null);
 
-  const [seenMsgs, setSeenMsgs] = useState([]);
-  const [unSeenMsgs, setUnSeenMsgs] = useState([]);
-
   useEffect(() => {
     setOffset(0);
     setIsTop(false);
@@ -50,19 +47,10 @@ const ChatRoom = () => {
           return;
         } else if (firstTime) {
           clearMessages();
-          setSeenMsgs([]);
-          setUnSeenMsgs([]);
         }
         pushMessages(fetchedData);
-        splitSeenMsgs(fetchedData);
         setOffset((offset) => offset + 25);
       });
-  };
-
-  const splitSeenMsgs = (msgs) => {
-    var date = new Date(currChannel.last_accessed);
-    setSeenMsgs(msgs.filter((msg) => new Date(msg.created_date) < date));
-    setUnSeenMsgs(msgs.filter((msg) => new Date(msg.created_date) >= date));
   };
 
   const handleScroll = () => {

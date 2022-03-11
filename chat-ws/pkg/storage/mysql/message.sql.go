@@ -2,7 +2,6 @@ package mysql
 
 import (
 	"context"
-	"time"
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/chatting"
@@ -103,25 +102,6 @@ func (q *Queries) DeleteMessage(ctx context.Context, messageId string) error {
 	_, err = q.db.Exec(sql, args...)
 	if err != nil {
 		q.log.Info("Failed to delete chat message.", zap.Error(err))
-		return err
-	}
-	return nil
-}
-
-func (q *Queries) UpdateChannelAccessTime(ctx context.Context, channelId string, userId string) error {
-	sql, args, err := sq.Update("channel_user").
-		Set("last_accessed", time.Now()).
-		Where(sq.And{
-			sq.Eq{"channel_id": channelId},
-			sq.Eq{"user_id": userId},
-		}).ToSql()
-	if err != nil {
-		q.log.Info("Failed to create update last accessed sql.", zap.Error(err))
-		return err
-	}
-	_, err = q.db.Exec(sql, args...)
-	if err != nil {
-		q.log.Info("Failed to update last accessed.", zap.Error(err))
 		return err
 	}
 	return nil

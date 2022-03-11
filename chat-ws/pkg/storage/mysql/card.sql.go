@@ -97,7 +97,7 @@ func (q *Queries) UpdateCardOrder(ctx context.Context, cardId string, orderIndex
 	return nil
 }
 
-func (q *Queries) UpdateCardIssueLink(ctx context.Context, cardId, issueLink string) error {
+func (q *Queries) UpdateCardIssueLink(ctx context.Context, cardId string, issueLink board.NullString) error {
 	sql, args, err := sq.Update("card").
 		Set("issue_link", issueLink).
 		Where(sq.Eq{"card_id": cardId}).ToSql()

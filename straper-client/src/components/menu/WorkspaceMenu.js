@@ -107,7 +107,7 @@ export default function WorkspaceMenu() {
         >
           <Menu.Items className="absolute left-0 w-56 m-5 p-2 origin-top-right bg-black divide-y divide-gray-100 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
             <div className="px-1 py-1">
-              <MenuItem content="Workspace settings" icon={FiSettings} />
+              {/* <MenuItem content="Workspace settings" icon={FiSettings} /> */}
               <MenuItem
                 content="Invitation link"
                 icon={AiOutlineLink}

@@ -102,7 +102,6 @@ type MessageQueries interface {
 	GetAllChannelMessagesByWorkspaceId(ctx context.Context, workspaceId string) ([]chatting.Message, error)
 	EditMessage(ctx context.Context, params chatting.EditChatMessageParams) error
 	DeleteMessage(ctx context.Context, messageId string) error
-	UpdateChannelAccessTime(ctx context.Context, channelId string, userId string) error
 }
 
 type WebsocketQueries interface {
@@ -130,7 +129,7 @@ type CardQueries interface {
 	UpdateCard(ctx context.Context, params board.UpdateCardParams) error
 	UpdateCardDueDate(ctx context.Context, params board.UpdateCardDueDateParams) error
 	UpdateCardOrder(ctx context.Context, cardId string, orderIndex int, listId string, updateListId bool) error
-	UpdateCardIssueLink(ctx context.Context, cardId, issueLink string) error
+	UpdateCardIssueLink(ctx context.Context, cardId string, issueLink board.NullString) error
 	DeleteCard(ctx context.Context, cardId string) error
 
 	GetUserFromCard(ctx context.Context, cardId string) ([]string, error)

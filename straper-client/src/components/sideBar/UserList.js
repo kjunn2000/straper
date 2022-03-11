@@ -4,6 +4,7 @@ import useWorkspaceStore from "../../store/workspaceStore";
 import { iconStyle } from "../../utils/style/icon";
 import { AiOutlineCheckCircle } from "react-icons/ai";
 import AccountPopOver from "./AccountPopOver";
+import { isObjectEmpty } from "../../service/object";
 
 const UserList = () => {
   const currAccountList = useWorkspaceStore((state) => state.currAccountList);
@@ -11,9 +12,13 @@ const UserList = () => {
     activeList: [],
     offlineList: [],
   });
+  const [show, setShow] = useState(true);
   const identity = useIdentityStore((state) => state.identity);
 
   useEffect(() => {
+    console.log(currAccountList);
+    console.log(isObjectEmpty(currAccountList));
+    setShow(!isObjectEmpty(currAccountList));
     const currTime = new Date();
     const parsedAccountList = Object.values(currAccountList).map((val) => {
       const lastSeen = new Date(val.last_seen);
@@ -84,24 +89,28 @@ const UserList = () => {
     `https://avatars.dicebear.com/api/bottts/${seed}.svg`;
 
   return (
-    <div className="flex flex-col space-y-3 p-3 overflow-y-auto h-full">
-      <div>
-        <div className="text-gray-400 font-semibold text-sm">
-          ONLINE - {accountList.activeList.length}
+    <>
+      {show && (
+        <div className="flex flex-col space-y-3 p-3 overflow-y-auto h-full">
+          <div>
+            <div className="text-gray-400 font-semibold text-sm">
+              ONLINE - {accountList.activeList.length}
+            </div>
+            <div className="flex flex-col space-y-2 py-3">
+              {accountList.activeList.map((user) => userRow(user))}
+            </div>
+          </div>
+          <div>
+            <div className="text-gray-400 font-semibold text-sm">
+              OFFLINE - {accountList.offlineList.length}
+            </div>
+            <div className="flex flex-col space-y-2 py-3">
+              {accountList.offlineList.map((user) => userRow(user))}
+            </div>
+          </div>
         </div>
-        <div className="flex flex-col space-y-2 py-3">
-          {accountList.activeList.map((user) => userRow(user))}
-        </div>
-      </div>
-      <div>
-        <div className="text-gray-400 font-semibold text-sm">
-          OFFLINE - {accountList.offlineList.length}
-        </div>
-        <div className="flex flex-col space-y-2 py-3">
-          {accountList.offlineList.map((user) => userRow(user))}
-        </div>
-      </div>
-    </div>
+      )}
+    </>
   );
 };
 

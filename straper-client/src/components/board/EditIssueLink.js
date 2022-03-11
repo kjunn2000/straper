@@ -30,7 +30,7 @@ const EditIssueLink = ({ card }) => {
       value: issue.issue_id,
       label: issue.summary,
     }));
-    options.push({ value: "", label: "No" });
+    options.push({ value: undefined, label: "No" });
     return options;
   };
 

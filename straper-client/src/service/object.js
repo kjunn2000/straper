@@ -5,6 +5,14 @@ export const isEmpty = (obj) => {
   return true;
 };
 
+export const isObjectEmpty = (obj) => {
+  return (
+    obj &&
+    Object.keys(obj).length === 0 &&
+    Object.getPrototypeOf(obj) === Object.prototype
+  );
+};
+
 export function removeEmptyFields(data) {
   Object.keys(data).forEach((key) => {
     if (data[key] === "" || data[key] == null) {

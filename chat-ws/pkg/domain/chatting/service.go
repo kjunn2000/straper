@@ -164,9 +164,6 @@ func (s *service) GetChannelMessages(ctx context.Context, channelId string, user
 			msgs[i].UserDetail = userDetail
 		}
 	}
-	if err = s.store.UpdateChannelAccessTime(ctx, channelId, userId); err != nil {
-		return []Message{}, err
-	}
 	return msgs, nil
 }
 

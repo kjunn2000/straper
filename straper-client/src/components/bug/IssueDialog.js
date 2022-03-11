@@ -12,7 +12,7 @@ import { removeEmptyFields } from "../../service/object";
 export default function IssueDialog({ isOpen, closeDialog, issue, setIssue }) {
   const cancelButtonRef = useRef();
   const [errMsg, setErrMsg] = useState("");
-  const [dueDate, setDueDate] = useState();
+  const [dueDate, setDueDate] = useState(new Date());
   const [epicLinkOptions, setEpicLinkOptions] = useState([]);
   const [assigneeOptions, setAssigneeOptions] = useState([]);
   const [editMode, setEditMode] = useState(issue != null);
@@ -85,7 +85,7 @@ export default function IssueDialog({ isOpen, closeDialog, issue, setIssue }) {
   const onClose = () => {
     if (!editMode) {
       reset();
-      setDueDate();
+      setDueDate(new Date());
       clearErrors();
     }
     closeDialog();
