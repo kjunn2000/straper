@@ -22,6 +22,22 @@ const useWorkspaceStore = create((set) => ({
       return { workspaces: newWorkspaces };
     });
   },
+  updateWorkspace: ({ workspace_id, workspace_name }) => {
+    set((state) => {
+      const newWorkspace = state.currWorkspace;
+      newWorkspace.workspace_name = workspace_name;
+      const newWorkspaces = state.workspaces.map((workspace) => {
+        if (workspace.workspace_id !== workspace_id) {
+          return workspace;
+        }
+        workspace.workspace_name = workspace_name;
+        return workspace;
+      });
+      setLocalStorage("currWorkspace", newWorkspace);
+      setLocalStorage("workspaces", newWorkspaces);
+      return { currWorkspace: newWorkspace, workspaces: newWorkspaces };
+    });
+  },
   deleteWorkspace: (workspaceId) => {
     set((state) => {
       state.clearIntervalIds();
@@ -73,6 +89,37 @@ const useWorkspaceStore = create((set) => ({
       });
       setLocalStorage("workspaces", workspaces);
       return { workspaces: workspaces };
+    });
+  },
+  updateChannel: (channel_id, channel_name, workspace_id) => {
+    set((state) => {
+      const newChannel = state.currChannel;
+      newChannel.channel_name = channel_name;
+      var newWorkspace = {};
+
+      const newWorkspaces = state.workspaces.map((workspace) => {
+        if (workspace.workspace_id !== workspace_id) {
+          return workspace;
+        }
+        workspace.channel_list = workspace.channel_list.map((channel) => {
+          if (channel.channel_id !== channel_id) {
+            return channel;
+          }
+          channel.channel_name = channel_name;
+          return channel;
+        });
+        newWorkspace = workspace;
+        return workspace;
+      });
+
+      setLocalStorage("currChannel", newChannel);
+      setLocalStorage("currWorkspace", newWorkspace);
+      setLocalStorage("workspaces", newWorkspaces);
+      return {
+        currChannel: newChannel,
+        currWorkspace: newWorkspace,
+        workspaces: newWorkspaces,
+      };
     });
   },
   setCurrChannel: (channelId) => {

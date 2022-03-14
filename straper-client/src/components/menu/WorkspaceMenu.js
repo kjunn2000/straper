@@ -1,7 +1,7 @@
 import { Menu, Transition } from "@headlessui/react";
 import { Fragment, useEffect, useState } from "react";
 import { AiFillCaretDown, AiFillDelete, AiOutlineLink } from "react-icons/ai";
-import { FiSettings } from "react-icons/fi";
+import { MdDriveFileRenameOutline } from "react-icons/md";
 import useIdentityStore from "../../store/identityStore";
 import useWorkspaceStore from "../../store/workspaceStore";
 import api from "../../axios/api";
@@ -10,6 +10,7 @@ import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import { copyTextToClipboard } from "../../service/navigator";
 import ActionDialog from "../../shared/dialog/ActionDialog";
 import SimpleDialog from "../../shared/dialog/SimpleDialog";
+import EditWorkspaceDialog from "../workspace/EditWorkspaceDialog";
 
 export default function WorkspaceMenu() {
   const [isCreator, setIsCreator] = useState(false);
@@ -32,6 +33,7 @@ export default function WorkspaceMenu() {
   const [deleteWarningDialogOpen, setDeleteWarningDialogOpen] = useState(false);
   const [successCopyLinkDialogOpen, setSuccessCopyLinkDialogOpen] =
     useState(false);
+  const [editWorkspaceDialogOpen, setEditWorkspaceDialogOpen] = useState(false);
 
   const history = useHistory();
 
@@ -107,7 +109,13 @@ export default function WorkspaceMenu() {
         >
           <Menu.Items className="absolute left-0 w-56 m-5 p-2 origin-top-right bg-black divide-y divide-gray-100 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
             <div className="px-1 py-1">
-              {/* <MenuItem content="Workspace settings" icon={FiSettings} /> */}
+              <MenuItem
+                content="Edit Workspace"
+                icon={MdDriveFileRenameOutline}
+                click={() => {
+                  setEditWorkspaceDialogOpen(true);
+                }}
+              />
               <MenuItem
                 content="Invitation link"
                 icon={AiOutlineLink}
@@ -124,6 +132,11 @@ export default function WorkspaceMenu() {
           </Menu.Items>
         </Transition>
       </Menu>
+      <EditWorkspaceDialog
+        isOpen={editWorkspaceDialogOpen}
+        close={() => setEditWorkspaceDialogOpen(false)}
+        workspace={workspace}
+      />
       <ActionDialog
         isOpen={deleteWarningDialogOpen}
         setIsOpen={setDeleteWarningDialogOpen}

@@ -48,10 +48,10 @@ function Workspace() {
 
   return (
     <div className="flex" style={{ background: "rgb(54,57,63)" }}>
-      <div className="flex-none">
+      <div className="w-1/5">
         <Sidebar />
       </div>
-      <div className="flex-auto">
+      <div className="w-3/5">
         {isEmpty(currWorkspace) || isEmpty(currChannel) ? (
           emptyComponent(
             Welcome,
@@ -61,7 +61,7 @@ function Workspace() {
           <ChatRoom />
         )}
       </div>
-      <div className="flex-auto" style={darkGrayBg}>
+      <div className="w-1/5" style={darkGrayBg}>
         <UserList />
       </div>
     </div>

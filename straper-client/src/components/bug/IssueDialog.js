@@ -318,6 +318,7 @@ export default function IssueDialog({ isOpen, closeDialog, issue, setIssue }) {
                     {...register("assignee")}
                     className="w-2/3 p-2 rounded bg-gray-200 hover:cursor-pointer focus:outline-none"
                   >
+                    <option value={""}>No</option>
                     {assigneeOptions &&
                       assigneeOptions.map((option) => (
                         <option key={option.user_id} value={option.user_id}>

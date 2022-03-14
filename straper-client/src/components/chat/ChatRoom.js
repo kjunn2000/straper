@@ -7,14 +7,18 @@ import useMessageStore from "../../store/messageStore";
 import { useRef } from "react/cjs/react.development";
 import api from "../../axios/api";
 import { sendChatMsg } from "../../service/websocket";
+import { MdDriveFileRenameOutline } from "react-icons/md";
+import EditChannelDialog from "../workspace/EditChannelDialog";
 
 const ChatRoom = () => {
   const [offset, setOffset] = useState(0);
   const [isTop, setIsTop] = useState(false);
   const [currEditMsgId, setCurrEditMsgId] = useState("");
   const [editedMsg, setEditedMsg] = useState("");
+  const [editChannelDialogOpen, setEditChannelDialogOpen] = useState(false);
 
   const currChannel = useWorkspaceStore((state) => state.currChannel);
+
   const msgs = useMessageStore((state) => state.messages);
   const pushMessages = useMessageStore((state) => state.pushMessages);
   const clearMessages = useMessageStore((state) => state.clearMessages);
@@ -149,12 +153,18 @@ const ChatRoom = () => {
       style={{ background: "rgb(54,57,63)" }}
     >
       <div className="flex-1 p:2 sm:p-6 justify-between flex flex-col h-screen">
-        <div className="flex sm:items-center justify-between py-3 border-b-2 border-gray-500">
+        <div className="group flex sm:items-center justify-between py-1 border-b-2 border-gray-500">
           <div className="flex items-center space-x-4">
             <div className="flex flex-col leading-tight">
               <div className="text-xl flex items-center">
-                <span className="text-gray-300 mr-3">
+                <span className="text-gray-300 mr-3 flex items-center">
                   {currChannel.channel_name}
+                  <MdDriveFileRenameOutline
+                    className="opacity-0 group-hover:opacity-100 hover:cursor-pointer transition duration-150"
+                    onClick={() => {
+                      setEditChannelDialogOpen(true);
+                    }}
+                  />
                 </span>
               </div>
             </div>
@@ -180,6 +190,11 @@ const ChatRoom = () => {
           <ChatInput scrollToBottom={scrollToBottom} />
         </div>
       </div>
+      <EditChannelDialog
+        isOpen={editChannelDialogOpen}
+        close={() => setEditChannelDialogOpen(false)}
+        channel={currChannel}
+      />
     </div>
   );
 };

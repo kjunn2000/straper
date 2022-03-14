@@ -15,7 +15,7 @@ const Bug = () => {
   const columns = useMemo(
     () => [
       {
-        Header: "T",
+        Header: "Type",
         accessor: "type",
         Cell: TypeCell,
         Filter: SelectColumnFilter,
@@ -29,14 +29,14 @@ const Bug = () => {
       },
       {
         Header: "Assignee",
-        accessor: "assignee",
+        accessor: "assignee_name",
       },
       {
         Header: "Reporter",
-        accessor: "reporter",
+        accessor: "reporter_name",
       },
       {
-        Header: "P",
+        Header: "Priority",
         accessor: "backlog_priority",
       },
       {
@@ -45,7 +45,7 @@ const Bug = () => {
         Cell: StatusPill,
       },
       {
-        Header: "Due",
+        Header: "Due Time",
         accessor: "due_time",
         Cell: DateCell,
       },

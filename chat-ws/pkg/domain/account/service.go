@@ -55,7 +55,7 @@ func (us *service) SeedUserAccount() error {
 		param := CreateUserParam{
 			Username: "user" + index,
 			Password: "password" + index,
-			Email:    "testemail" + index,
+			Email:    "testemail" + index + "@gmail.com",
 			PhoneNo:  "010123123" + index,
 		}
 		us.Register(context.Background(), param)

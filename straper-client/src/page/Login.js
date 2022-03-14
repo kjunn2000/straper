@@ -43,6 +43,10 @@ const Login = () => {
       updateErrMsg("User not found.");
     } else if (res.data?.ErrorMessage === "invalid.account.status") {
       updateErrMsg("Invalid account status.");
+    } else if (res.data?.ErrorMessage === "invalid.user.role") {
+      updateErrMsg("Invalid user role.");
+    } else {
+      updateErrMsg("Something goes wrong please try again later.");
     }
   };
 

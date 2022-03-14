@@ -46,7 +46,7 @@ const IssueDetail = () => {
   const RowField = ({ title, value }) => (
     <div className="flex justify-between w-3/4">
       <span className="text-gray-500 font-semibold">{title}:</span>
-      <span>{value}</span>
+      <span>{value ? value : "-"}</span>
     </div>
   );
 
