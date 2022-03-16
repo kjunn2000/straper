@@ -108,10 +108,12 @@ function FileDropZone({ issueId, attachments, getIssueData }) {
     attachments &&
     attachments.map((file) => (
       <div
-        className="group bg-gray-100 rounded p-2 text-semibold text-sm italic flex justify-between"
+        className="group hover:bg-gray-200 transition duration-150 rounded p-2 text-semibold text-sm italic flex justify-between"
         key={file.fid}
       >
-        <span>{file.file_name}</span>
+        <span className="text-slate-400 group-hover:text-slate-700">
+          {file.file_name}
+        </span>
         <div className="flex">
           <span
             className="opacity-0 group-hover:opacity-100 cursor-pointer transition duration-150"

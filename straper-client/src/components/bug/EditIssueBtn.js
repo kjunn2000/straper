@@ -8,7 +8,7 @@ const EditIssueBtn = ({ issue, setIssue }) => {
   return (
     <div>
       <button
-        className="bg-gray-100 hover:bg-gray-200 flex items-center rounded px-2 py-1"
+        className="bg-green-600 hover:bg-green-400 flex items-center rounded px-2 py-1"
         onClick={() => setEditIssueDialogOpen(true)}
       >
         <AiFillEdit size={20} />

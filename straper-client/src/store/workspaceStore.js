@@ -93,7 +93,7 @@ const useWorkspaceStore = create((set) => ({
   },
   updateChannel: (channel_id, channel_name, workspace_id) => {
     set((state) => {
-      const newChannel = state.currChannel;
+      const newChannel = { ...state.currChannel };
       newChannel.channel_name = channel_name;
       var newWorkspace = {};
 

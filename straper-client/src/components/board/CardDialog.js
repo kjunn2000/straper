@@ -262,7 +262,7 @@ const CardDialog = ({ open, closeModal, card }) => {
                     </div>
                     <div>
                       <div className="flex py-3 space-x-3">
-                        <span className="font-semibold ">Issue Link</span>
+                        <span className="font-semibold ">ISSUE LINK</span>
                         <EditIssueLink card={card} />
                       </div>
                       {card.issue_link && (

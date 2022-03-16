@@ -8,6 +8,7 @@ import api from "../../axios/api";
 import useIdentityStore from "../../store/identityStore";
 import useIssueStore from "../../store/issueStore";
 import { removeEmptyFields } from "../../service/object";
+import { setAssigneeReporterName } from "../../service/bug";
 
 export default function IssueDialog({ isOpen, closeDialog, issue, setIssue }) {
   const cancelButtonRef = useRef();
@@ -18,6 +19,7 @@ export default function IssueDialog({ isOpen, closeDialog, issue, setIssue }) {
   const [editMode, setEditMode] = useState(issue != null);
 
   const currWorkspace = useWorkpaceStore((state) => state.currWorkspace);
+  const currAccountList = useWorkpaceStore((state) => state.currAccountList);
   const addIssue = useIssueStore((state) => state.addIssue);
   const updateIssue = useIssueStore((state) => state.updateIssue);
   const setStateAssigneeOptions = useIssueStore(
@@ -100,6 +102,7 @@ export default function IssueDialog({ isOpen, closeDialog, issue, setIssue }) {
     removeEmptyFields(data);
     const res = await api.post("/protected/issue/create", data);
     if (res.data.Success) {
+      setAssigneeReporterName(res.data.Data, currAccountList);
       addIssue(res.data.Data);
       onClose();
     }

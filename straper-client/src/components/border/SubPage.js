@@ -7,10 +7,7 @@ function SubPage({ children }) {
 
   return (
     <div className="w-full h-screen grid grid-cols-10">
-      <div
-        className="p-3 bg-gray-200"
-        // style={darkGrayBg}
-      >
+      <div className="p-3 bg-gray-200" style={darkGrayBg}>
         <FaWindowClose
           size="40"
           className="text-indigo-500 cursor-pointer"
@@ -19,7 +16,7 @@ function SubPage({ children }) {
       </div>
       <div
         className="col-span-9 flex flex-col p-5"
-        // style={{ background: "rgb(54,57,63)" }}
+        style={{ background: "rgb(54,57,63)" }}
       >
         {children}
       </div>

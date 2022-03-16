@@ -65,7 +65,9 @@ const Bug = () => {
     <SubPage>
       <div className="overflow-x-auto">
         <div className="flex justify-between">
-          <span className="font-semibold font-size-xl text-xl">Issues</span>
+          <span className="font-semibold font-size-xl text-xl text-white">
+            Issues
+          </span>
           <button
             className="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded"
             onClick={() => {

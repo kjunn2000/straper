@@ -53,7 +53,7 @@ const IssueDetail = () => {
   return (
     <SubPage>
       {issue && (
-        <div className="flex flex-col space-y-5">
+        <div className="flex flex-col space-y-5 text-white">
           <div className="flex p-2 space-x-3">
             <IssueIcon value={issue.type} size={50} />
             <div className="flex flex-col">

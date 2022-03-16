@@ -38,7 +38,7 @@ function GlobalFilter({
 
   return (
     <label className="flex gap-x-2 items-baseline">
-      <span className="text-gray-700">Search: </span>
+      <span className="text-gray-300">Search: </span>
       <input
         type="text"
         className="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 p-1"
@@ -71,7 +71,7 @@ export function SelectColumnFilter({
   // Render a multi-select box
   return (
     <label className="flex gap-x-2 items-baseline">
-      <span className="text-gray-700">{render("Header")}: </span>
+      <span className="text-gray-300">{render("Header")}: </span>
       <select
         className="rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 p-1"
         name={id}
@@ -100,7 +100,7 @@ export function StatusPill({ value }) {
       className={classNames(
         "px-3 py-1 uppercase leading-wide font-bold text-xs rounded-full shadow-sm",
         status === "ACTIVE" ? "bg-green-100 text-green-800" : null,
-        status === "REVIEWING" ? "bg-yellow-100 text-yellow-800" : null,
+        status === "INACTIVE" ? "bg-yellow-100 text-yellow-800" : null,
         status === "CLOSED" ? "bg-red-100 text-red-800" : null
       )}
     >
@@ -113,7 +113,7 @@ export function SummaryCell({ value, column, row }) {
   return (
     <Link
       to={"/issue/" + row.original[column.idAccessor]}
-      className="text-indigo-500 self-center cursor-pointer hover:text-indigo-300 hover:underline transition duration-150"
+      className="text-indigo-300 self-center cursor-pointer hover:text-indigo-300 hover:underline transition duration-150"
     >
       {value}
     </Link>
@@ -125,7 +125,7 @@ export function TypeCell({ value }) {
 }
 
 export function DateCell({ value }) {
-  return <div>{convertToDateString(value)}</div>;
+  return <div className="text-gray-300">{convertToDateString(value)}</div>;
 }
 
 function Table({ columns, data }) {
@@ -185,12 +185,9 @@ function Table({ columns, data }) {
       <div className="mt-4 flex flex-col">
         <div className="-my-2 overflow-x-auto -mx-4 sm:-mx-6 lg:-mx-8">
           <div className="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
-            <div className="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
-              <table
-                {...getTableProps()}
-                className="min-w-full divide-y divide-gray-200"
-              >
-                <thead className="bg-gray-50">
+            <div className="shadow overflow-hidden border-b border-gray-900 sm:rounded-lg">
+              <table {...getTableProps()} className="min-w-full ">
+                <thead className="bg-slate-900">
                   {headerGroups.map((headerGroup) => (
                     <tr {...headerGroup.getHeaderGroupProps()}>
                       {headerGroup.headers.map((column) => (
@@ -198,7 +195,7 @@ function Table({ columns, data }) {
                         // we can add them into the header props
                         <th
                           scope="col"
-                          className="group px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                          className="group px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider"
                           {...column.getHeaderProps(
                             column.getSortByToggleProps()
                           )}
@@ -209,12 +206,12 @@ function Table({ columns, data }) {
                             <span>
                               {column.isSorted ? (
                                 column.isSortedDesc ? (
-                                  <SortDownIcon className="w-4 h-4 text-gray-400" />
+                                  <SortDownIcon className="w-4 h-4 text-gray-300" />
                                 ) : (
-                                  <SortUpIcon className="w-4 h-4 text-gray-400" />
+                                  <SortUpIcon className="w-4 h-4 text-gray-300" />
                                 )
                               ) : (
-                                <SortIcon className="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100" />
+                                <SortIcon className="w-4 h-4 text-gray-300 opacity-0 group-hover:opacity-100" />
                               )}
                             </span>
                           </div>
@@ -225,7 +222,7 @@ function Table({ columns, data }) {
                 </thead>
                 <tbody
                   {...getTableBodyProps()}
-                  className="bg-white divide-y divide-gray-200"
+                  className="bg-slate-900 divide-y divide-slate-800"
                 >
                   {page.map((row, i) => {
                     // new
@@ -240,7 +237,7 @@ function Table({ columns, data }) {
                               role="cell"
                             >
                               {cell.column.Cell.name === "defaultRenderer" ? (
-                                <div className="text-sm text-gray-500">
+                                <div className="text-sm text-slate-400">
                                   {cell.render("Cell")}
                                 </div>
                               ) : (
@@ -270,8 +267,8 @@ function Table({ columns, data }) {
         </div>
         <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
           <div className="flex gap-x-2 items-baseline">
-            <span className="text-sm text-gray-700">
-              Page <span className="font-medium">{state.pageIndex + 1}</span> of{" "}
+            <span className="text-sm text-gray-300">
+              PAGE <span className="font-medium">{state.pageIndex + 1}</span> OF{" "}
               <span className="font-medium">{pageOptions.length}</span>
             </span>
             <label>

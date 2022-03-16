@@ -20,6 +20,7 @@ function WorkspaceSidebar() {
 
   const identity = useIdentityStore((state) => state.identity);
   const currWorkspace = useWorkspaceStore((state) => state.currWorkspace);
+  const currChannel = useWorkspaceStore((state) => state.currChannel);
   const setCurrWorkspace = useWorkspaceStore((state) => state.setCurrWorkspace);
   const setCurrChannel = useWorkspaceStore((state) => state.setCurrChannel);
   const setSelectedChannelIds = useWorkspaceStore(
@@ -47,12 +48,16 @@ function WorkspaceSidebar() {
     useState(false);
 
   const changeChannel = (channelId) => {
+    if (channelId === currChannel.channel_id) {
+      return;
+    }
     setCurrChannel(channelId);
     setSelectedChannelIds(currWorkspace.workspace_id, channelId);
     history.push(`/channel/${currWorkspace.workspace_id}/${channelId}`);
   };
 
-  const onDeleteChannel = (channelId, type) => {
+  const onDeleteChannel = (e, channelId, type) => {
+    e.stopPropagation();
     if (currWorkspace.channel_list.length === 1) {
       setFailDeleteDialogOpen(true);
       return;
@@ -142,7 +147,8 @@ function WorkspaceSidebar() {
     );
   };
 
-  const copyLinkToClipboard = (channelId) => {
+  const copyLinkToClipboard = (e, channelId) => {
+    e.stopPropagation();
     copyTextToClipboard(channelId);
     setSuccessCopyLinkDialogOpen(true);
   };
@@ -151,7 +157,7 @@ function WorkspaceSidebar() {
     currWorkspace?.channel_list &&
     currWorkspace.channel_list.map((channel) => (
       <div
-        className="group flex justify-between text-white text-sm font-medium p-3 text-gray-400 hover:bg-gray-700 rounded hover:text-white"
+        className="group flex hover:cursor-pointer justify-between text-white text-sm font-medium p-3 text-gray-400 hover:bg-gray-700 rounded hover:text-white"
         key={channel?.channel_id}
         onClick={() => changeChannel(channel.channel_id)}
       >
@@ -159,7 +165,7 @@ function WorkspaceSidebar() {
         <div className="flex">
           <span
             className="opacity-0 group-hover:opacity-100 cursor-pointer"
-            onClick={() => copyLinkToClipboard(channel.channel_id)}
+            onClick={(e) => copyLinkToClipboard(e, channel.channel_id)}
           >
             <AiOutlineLink style={iconStyle} />
           </span>
@@ -167,14 +173,16 @@ function WorkspaceSidebar() {
             (identity.user_id === channel.creator_id ? (
               <span
                 className="opacity-0 group-hover:opacity-100 cursor-pointer pl-3"
-                onClick={() => onDeleteChannel(channel.channel_id, "delete")}
+                onClick={(e) =>
+                  onDeleteChannel(e, channel.channel_id, "delete")
+                }
               >
                 <AiFillDelete style={iconStyle} />
               </span>
             ) : (
               <span
                 className="opacity-0 group-hover:opacity-100 cursor-pointer pl-3"
-                onClick={() => onDeleteChannel(channel.channel_id, "leave")}
+                onClick={(e) => onDeleteChannel(e, channel.channel_id, "leave")}
               >
                 <BsDoorOpen style={iconStyle} />
               </span>
@@ -184,7 +192,7 @@ function WorkspaceSidebar() {
     ));
 
   return (
-    <div className="h-screen" style={darkGrayBg}>
+    <div className="flex flex-col justify-between w-full" style={darkGrayBg}>
       {currWorkspace.workspace_id ? (
         <div className="flex flex-col">
           <WorkspaceMenu />
@@ -265,10 +273,9 @@ function WorkspaceSidebar() {
       ) : (
         <div className="flex flex-col"></div>
       )}
-      <div className="text-white fixed bottom-0">
+      <div className="text-white w-full">
         <AccountStatus />
       </div>
-      ;
     </div>
   );
 }
