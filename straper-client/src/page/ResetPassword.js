@@ -91,7 +91,7 @@ const ResetPassword = () => {
             })}
           />
           {errors?.password && (
-            <div className="text-red-500">Password is too weak</div>
+            <div className="text-red-500">Password is too weak.</div>
           )}
         </div>
         <div className="self-center">

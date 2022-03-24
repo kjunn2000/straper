@@ -110,7 +110,10 @@ const AccountInfo = () => {
             defaultValue={identity.username}
             {...register("username", {
               required: "Username is required.",
-              minLength: { value: 4, message: "Username at least 4 digits." },
+              minLength: {
+                value: 4,
+                message: "Username at least 4 chars.",
+              },
             })}
           />
           <ErrorMessage errors={errors} name="username" as="p" />
