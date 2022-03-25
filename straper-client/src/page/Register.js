@@ -82,7 +82,7 @@ const Register = () => {
   };
 
   return (
-    <div className="bg-gradient-to-r from-purple-600 to-gray-900 w-full h-screen flex justify-center content-center">
+    <div className="bg-gradient-to-r from-purple-600 to-gray-900 w-full min-h-screen flex justify-center content-center">
       <form
         className="bg-gray-700 rounded-lg text-white flex flex-col space-y-5 w-72 md:w-96 h-auto max-h-full justify-center self-center py-5"
         onSubmit={handleSubmit(onRegister)}
@@ -151,7 +151,6 @@ const Register = () => {
             password={watchPassword}
             className="pt-3"
           />
-          {console.log(errors.password)}
           {errors?.password && errors?.password.type === "required" ? (
             <div className="text-red-500">Password is required.</div>
           ) : errors?.password && errors?.password.type === "validate" ? (
