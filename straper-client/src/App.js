@@ -21,7 +21,7 @@ import IssueDetail from "./page/IssueDetail";
 
 function App() {
   return (
-    <div className="App h-screen">
+    <div className="App min-h-screen">
       <Router>
         <Switch>
           <UserAuthGuard

@@ -2,7 +2,7 @@ import ChatRoom from "../components/chat/ChatRoom";
 import Sidebar from "../components/sideBar/Sidebar";
 import useWorkspaceStore from "../store/workspaceStore";
 import { ReactComponent as Welcome } from "../asset/img/welcome.svg";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import {
   fetchWorkspaceAccountList,
   fetchWorkspaceData,
@@ -12,12 +12,17 @@ import { isEmpty } from "../service/object";
 import { connect, isSocketOpen } from "../service/websocket";
 import { darkGrayBg } from "../utils/style/color";
 import UserList from "../components/sideBar/UserList";
+import { MdOutlineWork } from "react-icons/md";
+import { FaUsers } from "react-icons/fa";
+import { AiFillCloseCircle } from "react-icons/ai";
 
 function Workspace() {
   const currWorkspace = useWorkspaceStore((state) => state.currWorkspace);
   const currChannel = useWorkspaceStore((state) => state.currChannel);
   const addIntervalId = useWorkspaceStore((state) => state.addIntervalId);
   const clearIntervalIds = useWorkspaceStore((state) => state.clearIntervalIds);
+  const workspaceSideBar = useRef();
+  const usersSideBar = useRef();
 
   useEffect(() => {
     fetchWorkspaceData().then((data) => redirectToLatestWorkspace(data));
@@ -46,12 +51,58 @@ function Workspace() {
     </div>
   );
 
+  const toggleWorkspaceSideBar = () => {
+    if (usersSideBar.current.style.display === "flex") {
+      toggleUsersSideBar();
+    }
+    const display = workspaceSideBar.current.style.display === "" ? "flex" : "";
+    workspaceSideBar.current.style.display = display;
+  };
+
+  const toggleUsersSideBar = () => {
+    if (workspaceSideBar.current.style.display === "flex") {
+      toggleWorkspaceSideBar();
+    }
+    const display = usersSideBar.current.style.display === "" ? "flex" : "";
+    usersSideBar.current.style.display = display;
+  };
+
   return (
-    <div className="flex" style={{ background: "rgb(54,57,63)" }}>
-      <div className="w-1/5">
+    <div
+      className="relative min-h-screen lg:flex"
+      style={{ background: "rgb(54,57,63)" }}
+    >
+      {/* Mobile View */}
+      <div
+        className="sticky top-0 text-gray-100 flex justify-between lg:hidden"
+        style={{ background: "rgb(32,34,37)" }}
+      >
+        <a className="block p-4 text-white font-bold skew-x-3 skew-y-3">
+          STRAPER
+        </a>
+        <div>
+          <button
+            className="mobile-menu-button p-4 focus:outline-none focus:bg-gray-700 hover:bg-indigo-600 transition duration-150"
+            onClick={() => toggleWorkspaceSideBar()}
+          >
+            <MdOutlineWork size={20} />
+          </button>
+          <button
+            className="mobile-menu-button p-4 focus:outline-none focus:bg-gray-700 hover:bg-indigo-600 transition duration-150"
+            onClick={() => toggleUsersSideBar()}
+          >
+            <FaUsers size={20} />
+          </button>
+        </div>
+      </div>
+
+      <div
+        className="w-1/5 absolute lg:relative inset-y-0 left-0 hidden lg:flex z-10"
+        ref={workspaceSideBar}
+      >
         <Sidebar />
       </div>
-      <div className="w-3/5">
+      <div className="w-full lg:w-3/5">
         {isEmpty(currWorkspace) || isEmpty(currChannel) ? (
           emptyComponent(
             Welcome,
@@ -61,7 +112,18 @@ function Workspace() {
           <ChatRoom />
         )}
       </div>
-      <div className="w-1/5" style={darkGrayBg}>
+      <div
+        className="w-2/5 lg:w-1/5 absolute lg:relative inset-y-0 right-0 hidden flex-col lg:flex z-10"
+        style={darkGrayBg}
+        ref={usersSideBar}
+      >
+        <div className="lg:hidden flex justify-end p-2">
+          <AiFillCloseCircle
+            size={30}
+            className="text-indigo-300"
+            onClick={() => toggleUsersSideBar()}
+          />
+        </div>
         <UserList />
       </div>
     </div>

@@ -79,28 +79,26 @@ function WorkspaceNavigator() {
   };
 
   return (
-    <div>
-      <div
-        className="flex flex-col h-screen p-3"
-        style={{ background: "rgb(32,34,37)" }}
-      >
-        {workspaces &&
-          workspaces.map((workspace) => (
-            <SidebarIcon
-              key={workspace.workspace_id}
-              content={workspace.workspace_name}
-              click={() => changeWorkspace(workspace.workspace_id)}
-              bgColor="bg-gray-500"
-              hoverBgColor="hover:bg-indigo-500"
-            />
-          ))}
-        <SidebarIcon
-          content="+"
-          click={() => setAddWorkspaceDialogOpen(true)}
-          bgColor="bg-indigo-500"
-          hoverBgColor="hover:bg-indigo-800"
-        />
-      </div>
+    <div
+      className="flex flex-col min-h-screen p-3"
+      style={{ background: "rgb(32,34,37)" }}
+    >
+      {workspaces &&
+        workspaces.map((workspace) => (
+          <SidebarIcon
+            key={workspace.workspace_id}
+            content={workspace.workspace_name}
+            click={() => changeWorkspace(workspace.workspace_id)}
+            bgColor="bg-gray-500"
+            hoverBgColor="hover:bg-indigo-500"
+          />
+        ))}
+      <SidebarIcon
+        content="+"
+        click={() => setAddWorkspaceDialogOpen(true)}
+        bgColor="bg-indigo-500"
+        hoverBgColor="hover:bg-indigo-800"
+      />
       <AddDialog
         isOpen={isAddWorkspaceDialogOpen}
         close={() => setAddWorkspaceDialogOpen(false)}

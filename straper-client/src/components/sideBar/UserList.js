@@ -16,8 +16,6 @@ const UserList = () => {
   const identity = useIdentityStore((state) => state.identity);
 
   useEffect(() => {
-    console.log(currAccountList);
-    console.log(isObjectEmpty(currAccountList));
     setShow(!isObjectEmpty(currAccountList));
     const currTime = new Date();
     const parsedAccountList = Object.values(currAccountList).map((val) => {

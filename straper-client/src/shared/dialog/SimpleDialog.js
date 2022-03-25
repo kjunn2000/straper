@@ -10,7 +10,6 @@ export default function SimpleDialog({
   buttonAction,
   buttonStatus,
 }) {
-
   const cancelButtonRef = useRef();
 
   function closeModal() {
@@ -24,7 +23,7 @@ export default function SimpleDialog({
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog
         as="div"
-        className="fixed inset-0 z-10 overflow-y-auto"
+        className="fixed inset-0 z-20 overflow-y-auto"
         onClose={closeModal}
         initialFocus={cancelButtonRef}
       >
