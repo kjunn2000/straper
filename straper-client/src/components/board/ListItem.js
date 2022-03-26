@@ -13,7 +13,7 @@ const ListItem = ({ item, index }) => {
             snapshot={snapshot}
             {...provided.draggableProps}
             {...provided.dragHandleProps}
-            className="w-64"
+            className="w-full"
           >
             <Card card={item} />
           </DragItem>

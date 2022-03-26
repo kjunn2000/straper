@@ -49,8 +49,9 @@ const DraggableElement = ({ element, index }) => {
             snapshot={snapshot}
             {...provided.draggableProps}
             {...provided.dragHandleProps}
+            className="max-h-screen p-2"
           >
-            <div className="rounded-md m-2 bg-gray-600">
+            <div className="rounded-md bg-gray-600">
               <div className="group flex justify-between text-sm font-medium p-3 bg-gray-700 rounded text-white">
                 <span className="font-semibold">
                   <input
