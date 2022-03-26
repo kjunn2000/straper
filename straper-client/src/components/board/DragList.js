@@ -63,7 +63,7 @@ function DragList() {
   return !board.board_id ? (
     <svg className="animate-spin h-5 w-5 mr-3 ..." viewBox="0 0 24 24"></svg>
   ) : (
-    <DragDropContextContainer className="flex max-w-full">
+    <DragDropContextContainer className="flex max-w-full justify-center">
       <DragDropContext onDragEnd={onDragEnd}>
         <div className="flex max-w-full">
           <Droppable

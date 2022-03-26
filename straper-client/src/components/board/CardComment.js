@@ -92,55 +92,60 @@ const CardComment = ({ cardId }) => {
   return (
     <div className="flex flex-col space-y-5">
       <CommentInput cardId={cardId} />
-      <div
-        className="h-80 overflow-auto"
-        ref={commentsRef}
-        onScroll={handleScroll}
-      >
-        <div ref={commentsStartRef} />
-        {comments &&
-          comments.map((msg) =>
-            msg.comment_id !== currEditMsgId ? (
-              <Message
-                key={msg.comment_id}
-                msg={msg}
-                editMsg={() => setCurrEditMsgId(msg.comment_id)}
-                deleteMsg={() =>
-                  handleDeleteComment(msg.comment_id, msg.type, msg.content)
-                }
-              />
-            ) : (
-              <div
-                className="flex flex-col items-end justify-end"
-                key={msg.comment_id}
-              >
-                <input
-                  defaultValue={msg.content}
-                  className="p-1 rounded focus:outline-none"
-                  onChange={(e) => setEditedMsg(e.target.value)}
+      {comments && comments.length > 0 && (
+        <div
+          className="h-80 overflow-auto"
+          ref={commentsRef}
+          onScroll={handleScroll}
+        >
+          <div ref={commentsStartRef} />
+          {comments &&
+            comments.map((msg) =>
+              msg.comment_id !== currEditMsgId ? (
+                <Message
+                  key={msg.comment_id}
+                  msg={msg}
+                  editMsg={() => setCurrEditMsgId(msg.comment_id)}
+                  deleteMsg={() =>
+                    handleDeleteComment(msg.comment_id, msg.type, msg.content)
+                  }
                 />
-                <div className="inline-flex rounded-md shadow-sm" role="group">
-                  <button
-                    type="button"
-                    className="py-2 px-4 text-sm font-medium text-gray-900 rounded-l hover:bg-green-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-green-700 focus:text-w dark:bg-green-700 dark:border-gray-600 dark:text-white dark:hover:text-white dark:hover:bg-green-600 dark:focus:ring-blue-500 dark:focus:text-white"
-                    onClick={() =>
-                      handleEditComment(msg.comment_id, msg.content)
-                    }
+              ) : (
+                <div
+                  className="flex flex-col items-end justify-end"
+                  key={msg.comment_id}
+                >
+                  <input
+                    defaultValue={msg.content}
+                    className="p-1 rounded focus:outline-none"
+                    onChange={(e) => setEditedMsg(e.target.value)}
+                  />
+                  <div
+                    className="inline-flex rounded-md shadow-sm"
+                    role="group"
                   >
-                    Save
-                  </button>
-                  <button
-                    type="button"
-                    className="py-2 px-4 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-green-700 focus:text-blue-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-blue-500 dark:focus:text-white"
-                    onClick={() => setCurrEditMsgId("")}
-                  >
-                    Cancel
-                  </button>
+                    <button
+                      type="button"
+                      className="py-2 px-4 text-sm font-medium text-gray-900 rounded-l hover:bg-green-100 hover:text-blue-700 focus:ring-2 focus:ring-green-700 focus:text-w dark:bg-green-700 dark:border-gray-600 dark:text-white dark:hover:text-white dark:hover:bg-green-600 dark:focus:ring-blue-500 dark:focus:text-white"
+                      onClick={() =>
+                        handleEditComment(msg.comment_id, msg.content)
+                      }
+                    >
+                      Save
+                    </button>
+                    <button
+                      type="button"
+                      className="py-2 px-4 text-sm font-medium text-gray-900 hover:bg-gray-100 hover:text-blue-700 focus:ring-2 focus:ring-green-700 focus:text-blue-700 dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-blue-500 dark:focus:text-white"
+                      onClick={() => setCurrEditMsgId("")}
+                    >
+                      Cancel
+                    </button>
+                  </div>
                 </div>
-              </div>
-            )
-          )}
-      </div>
+              )
+            )}
+        </div>
+      )}
     </div>
   );
 };

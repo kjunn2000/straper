@@ -9,8 +9,14 @@ import {
 import { sendBoardMsg } from "../../service/websocket";
 import useBoardStore from "../../store/boardStore";
 import { useForm } from "react-hook-form";
-import { BsCardChecklist, BsFillChatDotsFill } from "react-icons/bs";
-import { AiFillDelete, AiOutlineClose } from "react-icons/ai";
+import {
+  BsCardChecklist,
+  BsFillChatDotsFill,
+  BsCalendarDate,
+  BsPeople,
+} from "react-icons/bs";
+import { AiFillDelete, AiOutlineClose, AiFillBug } from "react-icons/ai";
+import { FiMoreHorizontal } from "react-icons/fi";
 import CardComment from "./CardComment";
 import ActionDialog from "../../shared/dialog/ActionDialog";
 import DatePicker from "react-datepicker";
@@ -60,7 +66,7 @@ const CardDialog = ({ open, closeModal, card }) => {
 
   const moreActionBtn = (text, action, Icon, bg) => (
     <button
-      className={`w-full text-white rounded shadow-lg ${bg}`}
+      className={`w-48 md:w-full text-white rounded shadow-lg ${bg}`}
       onClick={() => action()}
     >
       <div className="flex space-x-3 p-2">
@@ -89,6 +95,13 @@ const CardDialog = ({ open, closeModal, card }) => {
     };
     sendBoardMsg("BOARD_CARD_REMOVE_MEMBER", board.workspace_id, payload);
   };
+
+  const header = (title, Icon) => (
+    <div className="flex py-3 space-x-3 items-center">
+      <Icon size={20} className="text-gray-500" />
+      <span className="font-semibold text-lg">{title}</span>
+    </div>
+  );
 
   return (
     <>
@@ -130,22 +143,22 @@ const CardDialog = ({ open, closeModal, card }) => {
               <div className="inline-block p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-gray-300 shadow-xl rounded-2xl ">
                 <div className="w-full flex justify-end hover:cursor-pointer">
                   <AiOutlineClose
-                    size={30}
+                    size={20}
                     onClick={() => close()}
                     className="text-gray-500"
                   />
                 </div>
                 <div
                   ref={initialFocus}
-                  className="grid grid-cols-5 gap-x-8 gap-y-4"
+                  className="grid md:grid-cols-5 md:gap-x-8 md:gap-y-4"
                 >
-                  <div className="col-span-4">
+                  <div className="md:col-span-3 lg:col-span-4">
                     <form
                       onSubmit={handleSubmit(onSave)}
                       className="rounded-lg flex flex-col space-y-5 justify-center self-center"
                     >
-                      <div className="flex space-x-2">
-                        <MdOutlineTitle size={30} className="text-gray-500" />
+                      <div className="flex space-x-2 items-center">
+                        <MdOutlineTitle size={20} className="text-gray-500" />
                         <input
                           className="p-1 rounded-lg bg-gray-200 text-xl font-bold"
                           defaultValue={card.title}
@@ -153,15 +166,7 @@ const CardDialog = ({ open, closeModal, card }) => {
                         />
                       </div>
                       <div className="flex flex-col">
-                        <div className="flex py-3 space-x-3">
-                          <MdOutlineDescription
-                            size={30}
-                            className="text-gray-500"
-                          />
-                          <span className="font-semibold text-lg">
-                            DESCRIPTION
-                          </span>
-                        </div>
+                        {header("DESCRIPTION", MdOutlineDescription)}
                         <textarea
                           className="p-1 rounded-lg bg-gray-200"
                           defaultValue={card.description}
@@ -169,12 +174,7 @@ const CardDialog = ({ open, closeModal, card }) => {
                         />
                       </div>
                       <div className="grid grid-cols-5 gap-x-8 gap-y-4">
-                        <div className="col-span-3 flex self-center py-3 space-x-3">
-                          <MdLowPriority size={30} className="text-gray-500" />
-                          <span className="font-semibold text-lg">
-                            PRIORITY
-                          </span>
-                        </div>
+                        {header("PRIORITY", MdLowPriority)}
                         <select
                           defaultValue={card.priority}
                           {...register("priority")}
@@ -200,24 +200,10 @@ const CardDialog = ({ open, closeModal, card }) => {
                       listId={card.list_id}
                       cardId={card.card_id}
                     />
-                    <div>
-                      <div className="flex self-center py-3 space-x-3">
-                        <BsFillChatDotsFill
-                          size={30}
-                          className="text-gray-500"
-                        />
-                        <span className="font-semibold text-lg">
-                          ADD COMMENTS
-                        </span>
-                      </div>
-                      <CardComment cardId={card.card_id} />
-                    </div>
                   </div>
-                  <div className="col-span-1">
+                  <div className="md:col-span-2 lg:col-span-1">
                     <div>
-                      <div className="flex py-3 space-x-3">
-                        <span className="font-semibold ">DUE DATE</span>
-                      </div>
+                      {header("DUE DATE", BsCalendarDate)}
                       <DatePicker
                         selected={dueDate}
                         onChange={(date) => handleDueDateUpdate(date)}
@@ -225,8 +211,8 @@ const CardDialog = ({ open, closeModal, card }) => {
                       />
                     </div>
                     <div>
-                      <div className="flex py-3 space-x-3">
-                        <span className="font-semibold ">MEMBER</span>
+                      <div className="flex items-center py-3 space-x-3">
+                        {header("MEMBER", BsPeople)}
                         <AddMember card={card} />
                       </div>
                       <div>
@@ -261,8 +247,8 @@ const CardDialog = ({ open, closeModal, card }) => {
                       </div>
                     </div>
                     <div>
-                      <div className="flex py-3 space-x-3">
-                        <span className="font-semibold ">ISSUE LINK</span>
+                      <div className="flex items-center py-3 space-x-3">
+                        {header("ISSUE LINK", AiFillBug)}
                         <EditIssueLink card={card} />
                       </div>
                       {card.issue_link && (
@@ -278,10 +264,10 @@ const CardDialog = ({ open, closeModal, card }) => {
                       )}
                     </div>
                     <div className="flex flex-col space-y-2">
-                      <div className="font-semibold py-3">MORE ACTION</div>
+                      {header("MORE", FiMoreHorizontal)}
                       <div className="flex flex-col space-y-5">
                         {moreActionBtn(
-                          "CHECKLIST",
+                          isChecklistOpen ? "HIDE CHECKLIST" : "SHOW CHECKLIST",
                           () => {
                             setIsChecklistOpen((state) => !state);
                           },
@@ -301,6 +287,10 @@ const CardDialog = ({ open, closeModal, card }) => {
                       </div>
                     </div>
                   </div>
+                </div>
+                <div>
+                  {header("ADD COMMENTS", BsFillChatDotsFill)}
+                  <CardComment cardId={card.card_id} />
                 </div>
               </div>
             </Transition.Child>

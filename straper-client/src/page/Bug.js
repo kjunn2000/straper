@@ -63,11 +63,11 @@ const Bug = () => {
 
   return (
     <SubPage>
-      <div>
-        <div className="flex justify-between">
-          <span className="font-semibold font-size-xl text-xl text-white">
-            Issues
-          </span>
+      <div className="pt-5">
+        <div className="font-semibold font-size-xl text-xl text-white">
+          Issues
+        </div>
+        <div className="flex justify-end">
           <button
             className="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded"
             onClick={() => {

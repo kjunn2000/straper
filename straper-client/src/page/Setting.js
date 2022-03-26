@@ -8,6 +8,7 @@ import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import { logOut } from "../service/logout";
 import ActionDialog from "../shared/dialog/ActionDialog";
 import { FiSettings } from "react-icons/fi";
+import { useMediaQuery } from "react-responsive";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -24,6 +25,7 @@ function Setting() {
     useState(false);
 
   const settingSideBar = useRef();
+  const isMobile = useMediaQuery({ query: `(max-width: 1024px)` });
 
   const handleLogOut = () => {
     setConfirmLogoutDialogOpen(true);
@@ -36,7 +38,7 @@ function Setting() {
 
   return (
     <div className="w-full min-h-screen" style={darkGrayBg}>
-      <Tab.Group>
+      <Tab.Group onChange={() => isMobile && toggleSettingSideBar()}>
         <div className="flex flex-col lg:flex-row lg:flex w-full h-full">
           {/* Mobile View */}
           <div

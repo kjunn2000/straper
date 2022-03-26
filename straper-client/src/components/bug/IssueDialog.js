@@ -178,7 +178,7 @@ export default function IssueDialog({ isOpen, closeDialog, issue, setIssue }) {
                 onSubmit={handleSubmit((data) => {
                   editMode ? editIssue(data) : createIssue(data);
                 })}
-                className="rounded-lg flex-col space-y-5 w-96 h-auto self-center py-5"
+                className="rounded-lg flex-col space-y-5 w-80 md:w-96 h-auto self-center py-5"
               >
                 <div>
                   <Title text="Issue Type" required={true} />

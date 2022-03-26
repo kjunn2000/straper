@@ -47,15 +47,15 @@ const AddMember = ({ card }) => {
   };
 
   return (
-    <Popover className="relative">
+    <Popover className="relative z-40">
       <Popover.Button>
         <BsPlusLg />
       </Popover.Button>
 
-      <Popover.Panel className="absolute w-screen max-w-sm px-4 mt-3 transform -translate-x-1/2 left-1/2 sm:px-0 lg:max-w-3xl">
+      <Popover.Panel className="absolute w-screen max-w-xs px-4 mt-3 transform -translate-x-1/2 left-1/2 sm:px-0 md:max-w-xl lg:max-w-3xl">
         {({ close }) => (
           <form
-            className="bg-white rounded-xl flex flex-col space-y-1 w-96 h-auto justify-center self-center py-5 px-3"
+            className="bg-white rounded-xl flex flex-col space-y-1 w-72 md:w-96 h-auto justify-center self-center py-5 px-3"
             onSubmit={(e) => handleAddMember(e, close)}
           >
             <div className="self-center w-full">

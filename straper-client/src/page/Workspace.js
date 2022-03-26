@@ -73,29 +73,20 @@ function Workspace() {
       style={{ background: "rgb(54,57,63)" }}
     >
       {/* Mobile View */}
-      <div
-        className="sticky top-0 text-gray-100 flex justify-between lg:hidden"
-        style={{ background: "rgb(32,34,37)" }}
-      >
-        <a className="block p-4 text-white font-bold skew-x-3 skew-y-3">
-          STRAPER
-        </a>
-        <div>
-          <button
-            className="mobile-menu-button p-4 focus:outline-none focus:bg-gray-700 hover:bg-indigo-600 transition duration-150"
-            onClick={() => toggleWorkspaceSideBar()}
-          >
-            <MdOutlineWork size={20} />
-          </button>
-          <button
-            className="mobile-menu-button p-4 focus:outline-none focus:bg-gray-700 hover:bg-indigo-600 transition duration-150"
-            onClick={() => toggleUsersSideBar()}
-          >
-            <FaUsers size={20} />
-          </button>
-        </div>
+      <div className="absolute top-2 right-2 text-gray-100 flex space-x-3 lg:hidden">
+        <button
+          className="mobile-menu-button p-4 focus:outline-none bg-slate-800 focus:bg-gray-700 hover:bg-indigo-600 transition duration-150 rounded-full"
+          onClick={() => toggleWorkspaceSideBar()}
+        >
+          <MdOutlineWork size={20} />
+        </button>
+        <button
+          className="mobile-menu-button p-4 focus:outline-none bg-slate-800 focus:bg-gray-700 hover:bg-indigo-600 transition duration-150 rounded-full"
+          onClick={() => toggleUsersSideBar()}
+        >
+          <FaUsers size={20} />
+        </button>
       </div>
-
       <div
         className="w-1/5 absolute lg:relative inset-y-0 left-0 hidden lg:flex z-10"
         ref={workspaceSideBar}

@@ -11,16 +11,10 @@ function SubPage({ children }) {
   return (
     <div className="w-full min-h-screen flex flex-col lg:flex-row">
       {/* Mobile View */}
-      <div
-        className="sticky w-full top-0 text-gray-100 flex justify-between lg:hidden"
-        style={{ background: "rgb(32,34,37)" }}
-      >
-        <a className="block p-4 text-white font-bold skew-x-3 skew-y-3">
-          STRAPER
-        </a>
+      <div className="absolute w-full top-2 right-2 text-gray-100 flex justify-end lg:hidden">
         <div>
           <button
-            className="mobile-menu-button p-4 focus:outline-none focus:bg-gray-700 hover:bg-indigo-600 transition duration-150"
+            className="mobile-menu-button p-4 focus:outline-none bg-slate-800 focus:bg-gray-700 hover:bg-indigo-600 transition duration-150 rounded-full"
             onClick={() => history.push("/channel")}
           >
             <AiFillHome size={20} />
