@@ -90,9 +90,9 @@ const AccountInfo = () => {
       : "");
 
   return (
-    <div className="bg-gradient-to-r from-purple-600 to-gray-900 w-full h-screen flex justify-center content-center">
+    <div className="bg-gradient-to-r from-purple-600 to-gray-900 w-full min-h-screen flex justify-center content-center">
       <form
-        className="bg-gray-700 rounded-lg text-white flex flex-col space-y-5 w-96 h-auto justify-center self-center py-5"
+        className="bg-gray-700 rounded-lg text-white flex flex-col space-y-5 w-72 md:w-96 h-auto justify-center self-center py-5"
         onSubmit={handleSubmit(onUpdate)}
       >
         <div className="self-center">
