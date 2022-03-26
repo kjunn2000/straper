@@ -63,7 +63,7 @@ const Bug = () => {
 
   return (
     <SubPage>
-      <div className="overflow-x-auto">
+      <div>
         <div className="flex justify-between">
           <span className="font-semibold font-size-xl text-xl text-white">
             Issues
