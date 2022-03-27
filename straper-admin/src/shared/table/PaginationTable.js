@@ -50,7 +50,7 @@ function PaginationTable({ columns, data }) {
 
   return (
     <>
-      <div className="sm:flex sm:gap-x-2">
+      <div className="sm:flex sm:gap-x-2 pb-5">
         <GlobalFilter
           preGlobalFilteredRows={preGlobalFilteredRows}
           globalFilter={state.globalFilter}
@@ -68,7 +68,7 @@ function PaginationTable({ columns, data }) {
       </div>
       <div className="mt-4 flex flex-col">
         <div className="-my-2 overflow-x-auto -mx-4 sm:-mx-6 lg:-mx-8">
-          <div className="py-2 align-middle inline-block w-full sm:px-6 lg:px-8">
+          <div className="py-2 align-middle inline-block w-full px-6 lg:px-8">
             <div className="shadow overflow-x-auto border-b border-gray-200 sm:rounded-lg">
               <table
                 {...getTableProps()}

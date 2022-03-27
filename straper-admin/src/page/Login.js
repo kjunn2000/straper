@@ -76,60 +76,62 @@ const Login = () => {
   };
 
   return (
-    <div className="w-full h-screen flex justify-center content-center">
-      <div className="bg-gradient-to-r from-purple-800 to-indigo-900 w-full h-full"></div>
-      <form
-        onSubmit={handleSubmit(onLogin)}
-        className="bg-gray-700 text-white flex flex-col space-y-5 justify-center self-center w-full h-full"
-      >
-        <div className="self-center">
-          <div className="text-xl font-medium text-center">
-            STRAPER ADMIN PORTAL
+    <div className="w-full min-h-screen flex justify-center content-center">
+      <div className="w-1/2 hidden lg:flex bg-gradient-to-r from-purple-800 to-indigo-900"></div>
+      <div className="w-full lg:w-1/2 bg-gray-700 flex justify-center items-center">
+        <form
+          onSubmit={handleSubmit(onLogin)}
+          className="text-white flex flex-col space-y-5 justify-center self-center"
+        >
+          <div className="self-center">
+            <div className="text-xl font-medium text-center">
+              STRAPER ADMIN PORTAL
+            </div>
+            <div className="self-center text-gray-500 text-center">
+              Please enter your credential
+            </div>
           </div>
-          <div className="self-center text-gray-500 text-center">
-            Please enter your credential
+          <div className="self-center">
+            <div>Username</div>
+            <input
+              className="bg-gray-800 p-2 rounded-lg"
+              {...register("username", {
+                required: "Username is required.",
+                minLength: { value: 4, message: "Username at leat 4 digits." },
+              })}
+            />
+            <ErrorMessage
+              errors={errors}
+              name="username"
+              as="p"
+              className="text-red-600"
+            />
           </div>
-        </div>
-        <div className="self-center">
-          <div>Username</div>
-          <input
-            className="bg-gray-800 p-2 rounded-lg"
-            {...register("username", {
-              required: "Username is required.",
-              minLength: { value: 4, message: "Username at leat 4 digits." },
-            })}
-          />
-          <ErrorMessage
-            errors={errors}
-            name="username"
-            as="p"
-            className="text-red-600"
-          />
-        </div>
-        <div className="self-center">
-          <div>Password</div>
-          <input
-            type="password"
-            className="bg-gray-800 p-2 rounded-lg"
-            {...register("password", {
-              required: "Password is required.",
-            })}
-          />
-          <ErrorMessage
-            errors={errors}
-            name="password"
-            as="p"
-            className="text-red-600"
-          />
-        </div>
+          <div className="self-center">
+            <div>Password</div>
+            <input
+              type="password"
+              className="bg-gray-800 p-2 rounded-lg"
+              {...register("password", {
+                required: "Password is required.",
+              })}
+            />
+            <ErrorMessage
+              errors={errors}
+              name="password"
+              as="p"
+              className="text-red-600"
+            />
+          </div>
 
-        {errMsg !== "" && (
-          <div className="text-red-600 self-center">{errMsg}</div>
-        )}
-        <button type="submit" className="bg-indigo-400 self-center w-48 p-1">
-          LOG IN
-        </button>
-      </form>
+          {errMsg !== "" && (
+            <div className="text-red-600 self-center">{errMsg}</div>
+          )}
+          <button type="submit" className="bg-indigo-400 self-center w-48 p-1">
+            LOG IN
+          </button>
+        </form>
+      </div>
       <SimpleDialog
         isOpen={showTimeoutDialog}
         setIsOpen={setShowTimeoutDialog}

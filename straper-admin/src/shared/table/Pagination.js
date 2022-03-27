@@ -42,7 +42,7 @@ const Pagination = ({
   return (
     <>
       {noOfPages > 1 ? (
-        <div className="p-5 flex items-center justify-between">
+        <div className="p-5 pb-20 md:pb-5 flex items-center justify-between">
           <div className="flex-1 flex justify-between sm:hidden">
             <Button onClick={onPrevPage} disabled={!canGoBack}>
               Previous

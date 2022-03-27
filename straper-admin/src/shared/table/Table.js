@@ -60,7 +60,7 @@ function Table({ columns, data, isLoading, totalCount, onSearch }) {
           )}
           <div className="mt-4 flex flex-col">
             <div className="-my-2 overflow-x-auto">
-              <div className="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
+              <div className="py-2 align-middle inline-block min-w-full px-6 lg:px-8">
                 <div className="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
                   <table
                     {...getTableProps()}
