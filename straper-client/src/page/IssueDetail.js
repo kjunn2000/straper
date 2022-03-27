@@ -44,9 +44,13 @@ const IssueDetail = () => {
   ];
 
   const RowField = ({ title, value }) => (
-    <div className="flex justify-between w-3/4">
-      <span className="text-gray-500 font-semibold">{title}:</span>
-      <span>{value ? value : "-"}</span>
+    <div className="flex space-x-5">
+      <div>
+        <div className="font-semibold text-gray-500">{title}:</div>
+      </div>
+      <div>
+        <div>{value || "-"}</div>
+      </div>
     </div>
   );
 
@@ -70,8 +74,8 @@ const IssueDetail = () => {
             <EditIssueBtn issue={issue} setIssue={setIssue} />
             <DeleteIssueBtn issueId={issue.issue_id} />
           </div>
-          <div className="grid grid-cols-4 p-1">
-            <div className="col-span-3 flex flex-col space-y-5 p-3">
+          <div className="grid grid-cols-3 p-1">
+            <div className="col-span-3 md:col-span-2 flex flex-col space-y-5 p-3">
               <div>
                 <div className="font-bold">Details</div>
                 <div className="flex space-x-5">
@@ -89,42 +93,8 @@ const IssueDetail = () => {
                   </div>
                 </div>
               </div>
-              <div className="group">
-                <div>
-                  <span className="font-bold">Description</span>
-                </div>
-                <div className="p-3 bg-gray-100 rounded break-all">
-                  {issue.description || "-"}
-                </div>
-              </div>
-              <div>
-                <div className="font-bold">Attachments</div>
-                <FileDropZone
-                  issueId={issue.issue_id}
-                  attachments={issue.attachments}
-                  getIssueData={getIssueData}
-                />
-              </div>
-              <div>
-                <div className="font-bold">Acceptance Criteria</div>
-                <div className="p-3 bg-gray-100 rounded break-all">
-                  {issue.acceptance_criteria || "-"}
-                </div>
-              </div>
-              <div>
-                <div className="font-bold">Replicate Step</div>
-                <div className="p-3 bg-gray-100 rounded break-all">
-                  {issue.replicate_step || "-"}
-                </div>
-              </div>
-              <div>
-                <div className="font-bold">Workaround</div>
-                <div className="p-3 bg-gray-100 rounded break-all">
-                  {issue.workaround || "-"}
-                </div>
-              </div>
             </div>
-            <div className="col-span-1 flex flex-col space-y-5">
+            <div className="col-span-3 md:col-span-1 flex flex-col space-y-5 p-3">
               <div>
                 <div className="font-bold">People</div>
                 <div className="flex flex-col">
@@ -142,7 +112,7 @@ const IssueDetail = () => {
                 <div className="font-bold">Dates</div>
                 <div className="flex flex-col">
                   <RowField
-                    title="Created"
+                    title="Created At"
                     value={convertToDateString(issue.created_date)}
                   />
                   <RowField
@@ -162,6 +132,42 @@ const IssueDetail = () => {
                   </Link>
                 </div>
               )}
+            </div>
+          </div>
+          <div className="w-full md:w-2/3 p-3">
+            <div className="group">
+              <div>
+                <span className="font-bold">Description</span>
+              </div>
+              <div className="p-3 bg-gray-100 rounded break-all">
+                {issue.description || "-"}
+              </div>
+            </div>
+            <div>
+              <div className="font-bold">Attachments</div>
+              <FileDropZone
+                issueId={issue.issue_id}
+                attachments={issue.attachments}
+                getIssueData={getIssueData}
+              />
+            </div>
+            <div>
+              <div className="font-bold">Acceptance Criteria</div>
+              <div className="p-3 bg-gray-100 rounded break-all">
+                {issue.acceptance_criteria || "-"}
+              </div>
+            </div>
+            <div>
+              <div className="font-bold">Replicate Step</div>
+              <div className="p-3 bg-gray-100 rounded break-all">
+                {issue.replicate_step || "-"}
+              </div>
+            </div>
+            <div>
+              <div className="font-bold">Workaround</div>
+              <div className="p-3 bg-gray-100 rounded break-all">
+                {issue.workaround || "-"}
+              </div>
             </div>
           </div>
         </div>

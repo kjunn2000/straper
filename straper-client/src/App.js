@@ -18,10 +18,11 @@ import TaskBoard from "./page/TaskBoard";
 import LogOutNotice from "./page/LogOutNotice";
 import Bug from "./page/Bug";
 import IssueDetail from "./page/IssueDetail";
+import Home from "./page/Home";
 
 function App() {
   return (
-    <div className="App">
+    <div className="App min-h-screen">
       <Router>
         <Switch>
           <UserAuthGuard
@@ -47,9 +48,7 @@ function App() {
           <Route path="/account/password/update">
             <ResetPassword />
           </Route>
-          <Route path="/">
-            <Redirect to="/login" />
-          </Route>
+          <NoAuthGuard path="/" component={Home} />
         </Switch>
       </Router>
     </div>

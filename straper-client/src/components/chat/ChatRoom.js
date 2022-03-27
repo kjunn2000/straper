@@ -68,7 +68,7 @@ const ChatRoom = () => {
       <span className="pb-5 text-white font-semibold">
         START THE CONVERSATION
       </span>
-      <Text className="w-auto h-80 max-w-full max-h-full" />
+      <Text className="w-auto h-60 lg:h-80 max-w-full max-h-full" />
     </div>
   );
 
@@ -152,7 +152,7 @@ const ChatRoom = () => {
       className="text-white w-full h-full font-medium overflow-auto"
       style={{ background: "rgb(54,57,63)" }}
     >
-      <div className="flex-1 p:2 sm:p-6 justify-between flex flex-col h-screen">
+      <div className="flex-1 p-2 sm:p-6 justify-between flex flex-col h-screen">
         <div className="group flex sm:items-center justify-between py-1 border-b-2 border-gray-500">
           <div className="flex items-center space-x-4">
             <div className="flex flex-col leading-tight">

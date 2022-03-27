@@ -1,5 +1,5 @@
 .navbar {
-  @apply hidden md:flex flex-row items-center justify-between px-8 h-16 rounded-b-3xl bg-white;
+  @apply hidden md:flex flex-row items-center justify-between px-8 h-16 rounded-b-3xl bg-white z-30;
 }
 
 .logo {
@@ -19,5 +19,5 @@
 }
 
 .actions {
-  @apply bg-white hover:bg-gray-50 border-2 border-gray-900 text-sm text-gray-900 py-3 px-5 rounded-lg font-medium tracking-wide leading-none;
+  @apply bg-white hover:bg-gray-50 border-2 border-gray-900 text-sm text-gray-900 py-3 px-5 rounded-lg font-medium tracking-wide leading-none hover:bg-indigo-500 hover:text-white transition duration-150 hover:border-indigo-300;
 }

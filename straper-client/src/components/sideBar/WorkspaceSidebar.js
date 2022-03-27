@@ -192,7 +192,10 @@ function WorkspaceSidebar() {
     ));
 
   return (
-    <div className="flex flex-col justify-between w-full" style={darkGrayBg}>
+    <div
+      className="flex flex-col justify-between w-full min-h-screen"
+      style={darkGrayBg}
+    >
       {currWorkspace.workspace_id ? (
         <div className="flex flex-col">
           <WorkspaceMenu />

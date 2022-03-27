@@ -5,6 +5,7 @@ import DraggableElement from "./DraggableElement.js";
 import useBoardStore from "../../store/boardStore.js";
 import AddComponent from "./AddComponent.js";
 import { sendBoardMsg } from "../../service/websocket.js";
+import { useMediaQuery } from "react-responsive";
 
 const DragDropContextContainer = styled.div`
   padding: 20px;
@@ -17,6 +18,7 @@ function DragList() {
   const board = useBoardStore((state) => state.board);
   const orderTaskList = useBoardStore((state) => state.orderTaskList);
   const orderCard = useBoardStore((state) => state.orderCard);
+  const isMobile = useMediaQuery({ query: `(max-width: 640px)` });
 
   const onDragEnd = ({ source, destination, type }) => {
     if (!destination) return;
@@ -61,19 +63,19 @@ function DragList() {
   return !board.board_id ? (
     <svg className="animate-spin h-5 w-5 mr-3 ..." viewBox="0 0 24 24"></svg>
   ) : (
-    <DragDropContextContainer className="flex">
+    <DragDropContextContainer className="flex max-w-full justify-center">
       <DragDropContext onDragEnd={onDragEnd}>
-        <div className="flex">
+        <div className="flex max-w-full">
           <Droppable
             droppableId={board.board_id}
-            direction="horizontal"
+            direction={isMobile ? "vertical" : "horizontal"}
             type="COLUMN"
           >
             {(provided) => (
               <div
                 {...provided.droppableProps}
                 ref={provided.innerRef}
-                className="flex"
+                className="flex flex-col md:flex-row overflow-x-auto max-w-full"
               >
                 {taskListsOrder.map((taskListId, i) => (
                   <DraggableElement

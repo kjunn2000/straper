@@ -63,10 +63,10 @@ const Login = () => {
   };
 
   return (
-    <div className="bg-gradient-to-r from-purple-600 to-gray-900 w-full h-screen flex justify-center content-center">
+    <div className="bg-gradient-to-r from-purple-600 to-gray-900 w-full min-h-screen flex justify-center content-center">
       <form
         onSubmit={handleSubmit(onLogin)}
-        className="bg-gray-700 rounded-lg text-white flex flex-col space-y-5 w-96 h-auto justify-center self-center py-5"
+        className="w-72 md:w-96 h-auto bg-gray-700 rounded-lg text-white flex flex-col space-y-5 justify-center self-center py-5"
       >
         <div className="self-center">
           <div className="text-xl font-medium text-center">WELCOME BACK</div>
@@ -80,7 +80,10 @@ const Login = () => {
             className="bg-gray-800 p-2 rounded-lg"
             {...register("username", {
               required: "Username is required.",
-              minLength: { value: 4, message: "Username at leat 4 digits." },
+              minLength: {
+                value: 4,
+                message: "Username at least 4 chars.",
+              },
             })}
           />
           <ErrorMessage errors={errors} name="username" as="p" />

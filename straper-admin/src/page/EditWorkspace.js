@@ -128,9 +128,9 @@ const EditWorkspace = () => {
   return (
     <>
       {workspace && (
-        <div className="flex p-5">
+        <div className="flex flex-col lg:flex-row p-5">
           <form
-            className="w-1/3 h-auto rounded-lg flex flex-col space-y-5 p-5 bg-white"
+            className="w-2/3 lg:w-1/3 h-auto rounded-lg flex flex-col space-y-5 p-5 bg-white"
             onSubmit={handleSubmit(onUpdate)}
           >
             <div>
@@ -198,7 +198,7 @@ const EditWorkspace = () => {
               CONFIRM UPDATE
             </button>
           </form>
-          <div className="w-2/3 p-3">
+          <div className="lg:w-2/3 pt-8 pb-16 md:pb-8 lg:p-3">
             <Tabs
               userData={workspace.user_list}
               channelData={workspace.channel_list}

@@ -135,7 +135,7 @@ export default function IssueDialog({ isOpen, closeDialog, issue, setIssue }) {
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog
         as="div"
-        className="fixed inset-0 z-10 overflow-y-auto"
+        className="fixed inset-0 z-20 overflow-y-auto"
         onClose={() => onClose()}
         initialFocus={cancelButtonRef}
       >
@@ -178,7 +178,7 @@ export default function IssueDialog({ isOpen, closeDialog, issue, setIssue }) {
                 onSubmit={handleSubmit((data) => {
                   editMode ? editIssue(data) : createIssue(data);
                 })}
-                className="rounded-lg flex-col space-y-5 w-96 h-auto self-center py-5"
+                className="rounded-lg flex-col space-y-5 w-80 md:w-96 h-auto self-center py-5"
               >
                 <div>
                   <Title text="Issue Type" required={true} />

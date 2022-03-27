@@ -69,9 +69,9 @@ const ResetPassword = () => {
   };
 
   return (
-    <div className="bg-gradient-to-r from-purple-600 to-gray-900 w-full h-screen flex justify-center content-center">
+    <div className="bg-gradient-to-r from-purple-600 to-gray-900 w-full min-h-screen flex justify-center content-center">
       <form
-        className="bg-gray-700 rounded-lg text-white flex flex-col space-y-5 w-96 h-auto justify-center self-center py-5"
+        className="bg-gray-700 rounded-lg text-white flex flex-col space-y-5 w-72 md:w-96 h-auto justify-center self-center py-5"
         onSubmit={handleSubmit(onReset)}
       >
         <div className="self-center">
@@ -90,8 +90,12 @@ const ResetPassword = () => {
               validate: () => isPasswordValid(),
             })}
           />
-          {errors?.password && (
-            <div className="text-red-500">Password is too weak</div>
+          {errors?.password && errors?.password.type === "required" ? (
+            <div className="text-red-500">Password is required.</div>
+          ) : errors?.password && errors?.password.type === "validate" ? (
+            <div className="text-red-500">Password is too weak.</div>
+          ) : (
+            <></>
           )}
         </div>
         <div className="self-center">
@@ -104,8 +108,14 @@ const ResetPassword = () => {
               validate: () => isPasswordMatch(),
             })}
           />
-          {errors?.confirmedPassword && (
-            <div className="text-red-500">Password not match</div>
+          {errors?.confirmedPassword &&
+          errors?.confirmedPassword.type === "required" ? (
+            <div className="text-red-500">Password is required.</div>
+          ) : errors?.confirmedPassword &&
+            errors?.confirmedPassword.type === "validate" ? (
+            <div className="text-red-500">Password not match.</div>
+          ) : (
+            <></>
           )}
         </div>
         <PasswordStrengthBar

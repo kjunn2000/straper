@@ -77,13 +77,14 @@ const Register = () => {
   };
 
   const isPasswordValid = () => {
+    console.log(errors.password);
     return passwordStrength.current.state.score >= 3;
   };
 
   return (
-    <div className="bg-gradient-to-r from-purple-600 to-gray-900 w-full h-screen flex justify-center content-center">
+    <div className="bg-gradient-to-r from-purple-600 to-gray-900 w-full min-h-screen flex justify-center content-center">
       <form
-        className="bg-gray-700 rounded-lg text-white flex flex-col space-y-5 w-96 h-auto justify-center self-center py-5"
+        className="bg-gray-700 rounded-lg text-white flex flex-col space-y-5 w-72 md:w-96 h-auto max-h-full justify-center self-center py-5"
         onSubmit={handleSubmit(onRegister)}
       >
         <div className="self-center">
@@ -98,7 +99,10 @@ const Register = () => {
             className="bg-gray-800 p-2 rounded-lg"
             {...register("username", {
               required: "Username is required.",
-              minLength: { value: 4, message: "Username at least 4 digits." },
+              minLength: {
+                value: 4,
+                message: "Username at least 4 chars.",
+              },
             })}
           />
           <ErrorMessage errors={errors} name="username" as="p" />
@@ -147,8 +151,12 @@ const Register = () => {
             password={watchPassword}
             className="pt-3"
           />
-          {errors?.password && (
-            <div className="text-red-500">Password is too weak</div>
+          {errors?.password && errors?.password.type === "required" ? (
+            <div className="text-red-500">Password is required.</div>
+          ) : errors?.password && errors?.password.type === "validate" ? (
+            <div className="text-red-500">Password is too weak.</div>
+          ) : (
+            <></>
           )}
         </div>
         <button type="submit" className="bg-indigo-400 self-center w-48 p-1">
