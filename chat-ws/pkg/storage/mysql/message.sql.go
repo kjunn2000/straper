@@ -59,10 +59,21 @@ func (q *Queries) GetAllChannelMessagesByWorkspaceId(ctx context.Context, worksp
 	return msgs, nil
 }
 
-func (q *Queries) GetChannelMessages(ctx context.Context, channelId string, limit, offset uint64) ([]chatting.Message, error) {
+func (q *Queries) GetChannelMessages(ctx context.Context, channelId string, param chatting.PaginationMessagesParam) ([]chatting.Message, error) {
 	msgs := make([]chatting.Message, 0)
-	sql, arg, err := sq.Select("message_id", "type", "channel_id", "creator_id", "content", "file_name", "file_type", "created_date").
-		From("message").Where(sq.Eq{"channel_id": channelId}).OrderBy("created_date desc").Limit(limit).Offset(offset).ToSql()
+	sb := sq.Select("message_id", "type", "channel_id", "creator_id", "content", "file_name", "file_type", "created_date").
+		From("message").Where(sq.Eq{"channel_id": channelId}).OrderBy("created_date desc")
+	if param.Cursor == "" {
+		sb = sb.OrderBy("created_date desc", "message_id")
+	} else {
+		sb = sb.Where(sq.Or{
+			sq.And{
+				sq.Eq{"created_date": param.CreatedTime},
+				sq.Gt{"message_id": param.Id}},
+			sq.Lt{"created_date": param.CreatedTime}}).
+			OrderBy("created_date desc", "message_id")
+	}
+	sql, arg, err := sb.Limit(uint64(25)).ToSql()
 	if err != nil {
 		q.log.Warn("Failed to create select sql.")
 		return []chatting.Message{}, err

@@ -18,6 +18,7 @@ import (
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/bug"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/chatting"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/dblog"
+	"github.com/kjunn2000/straper/chat-ws/pkg/domain/pagination"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/websocket"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/adding"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/workspace/deleting"
@@ -102,13 +103,14 @@ func (server *Server) SetServerRoute() (*mux.Router, error) {
 
 	mr := mux.NewRouter().PathPrefix("/api/v1").Subrouter()
 
+	paginationService := pagination.Service{}
 	accountService := account.NewService(server.log, server.store, server.config)
 	// accountService.SeedUserAccount()
 	authService := auth.NewService(server.log, server.store, server.tokenMaker, server.config)
 	addingService := adding.NewService(server.log, server.store)
 	// addingService.SeedWorkspaces()
-	chattingService := chatting.NewService(server.log, server.store, server.seaweedfsClient)
-	boardService := board.NewService(server.log, server.store, server.seaweedfsClient)
+	chattingService := chatting.NewService(server.log, server.store, server.seaweedfsClient, paginationService)
+	boardService := board.NewService(server.log, server.store, server.seaweedfsClient, paginationService)
 	listingService := listing.NewService(server.log, server.store)
 	editingService := editing.NewService(server.log, server.store)
 	deletingService := deleting.NewService(server.log, server.store, server.seaweedfsClient)

@@ -27,12 +27,22 @@ func (q *Queries) CreateCardComment(ctx context.Context, comment *board.CardComm
 	return nil
 }
 
-func (q *Queries) GetCardComments(ctx context.Context, cardId string, limit, offset uint64) ([]board.CardComment, error) {
-	var cardComments []board.CardComment
-	sql, arg, err := sq.Select("comment_id", "type", "card_id", "creator_id", "content", "file_name",
+func (q *Queries) GetCardComments(ctx context.Context, cardId string, param board.PaginationCommentParam) ([]board.CardComment, error) {
+	cardComments := make([]board.CardComment, 0)
+	sb := sq.Select("comment_id", "type", "card_id", "creator_id", "content", "file_name",
 		"file_type", "created_date").
-		From("card_comment").Where(sq.Eq{"card_id": cardId}).
-		OrderBy("created_date desc").Limit(limit).Offset(offset).ToSql()
+		From("card_comment").Where(sq.Eq{"card_id": cardId})
+	if param.Cursor == "" {
+		sb = sb.OrderBy("created_date desc", "comment_id")
+	} else {
+		sb = sb.Where(sq.Or{
+			sq.And{
+				sq.Eq{"created_date": param.CreatedTime},
+				sq.Gt{"comment_id": param.Id}},
+			sq.Lt{"created_date": param.CreatedTime}}).
+			OrderBy("created_date desc", "comment_id")
+	}
+	sql, arg, err := sb.Limit(uint64(10)).ToSql()
 	if err != nil {
 		q.log.Warn("Failed to create select sql.")
 		return []board.CardComment{}, err

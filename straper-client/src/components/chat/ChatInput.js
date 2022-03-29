@@ -7,7 +7,7 @@ import { isEmpty } from "../../service/object";
 import { getAsByteArray } from "../../service/file";
 import UploadButton from "../../shared/button/UploadButton";
 
-const ChatInput = () => {
+const ChatInput = ({ scrollToBottom }) => {
   const currChannel = useWorkspaceStore((state) => state.currChannel);
   const identity = useIdentityStore((state) => state.identity);
 
@@ -44,6 +44,7 @@ const ChatInput = () => {
     }
     sendChatMsg("CHAT_ADD_MESSAGE", currChannel.channel_id, payload);
     inputRef.current.value = "";
+    scrollToBottom();
   };
 
   return (

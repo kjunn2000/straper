@@ -6,7 +6,7 @@ import useBoardStore from "../../store/boardStore";
 import { IoSendSharp } from "react-icons/io5";
 import UploadButton from "../../shared/button/UploadButton";
 
-const CommentInput = ({ cardId }) => {
+const CommentInput = ({ cardId, scrollToTop }) => {
   const inputRef = useRef(null);
   const identity = useIdentityStore((state) => state.identity);
   const board = useBoardStore((state) => state.board);
@@ -40,6 +40,7 @@ const CommentInput = ({ cardId }) => {
     }
     sendBoardMsg("BOARD_CARD_ADD_COMMENT", board.workspace_id, payload);
     inputRef.current.value = "";
+    scrollToTop();
   };
 
   return (

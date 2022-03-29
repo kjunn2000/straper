@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"io"
+	"time"
 
 	ws "github.com/kjunn2000/straper/chat-ws/pkg/domain/websocket"
 	"go.uber.org/zap"
@@ -14,7 +15,7 @@ type Service interface {
 	HandleBroadcast(ctx context.Context, msg *ws.Message, publishPubSub func(context.Context, *ws.Message) error) error
 	GetTaskBoardData(ctx context.Context, workspaceId string) (TaskBoardDataResponse, error)
 	GetBroadcastUserListByMessageType(ctx context.Context, msg *ws.Message) ([]ws.UserData, error)
-	GetCardComments(ctx context.Context, cardId string, limit, offset uint64) ([]CardComment, error)
+	GetCardComments(ctx context.Context, cardId string, param PaginationCommentParam) ([]CardComment, error)
 }
 
 type SeaweedfsClient interface {
@@ -23,17 +24,24 @@ type SeaweedfsClient interface {
 	DeleteFile(ctx context.Context, fid string) error
 }
 
+type PaginationService interface {
+	DecodeCursor(encodedCursor string) (res time.Time, uuid string, err error)
+	EncodeCursor(t time.Time, uuid string) string
+}
+
 type service struct {
 	log   *zap.Logger
 	store Repository
 	sc    SeaweedfsClient
+	ps    PaginationService
 }
 
-func NewService(log *zap.Logger, store Repository, sc SeaweedfsClient) *service {
+func NewService(log *zap.Logger, store Repository, sc SeaweedfsClient, ps PaginationService) *service {
 	return &service{
 		log:   log,
 		store: store,
 		sc:    sc,
+		ps:    ps,
 	}
 }
 
@@ -184,8 +192,16 @@ func (s *service) GetBroadcastUserListByMessageType(ctx context.Context, msg *ws
 	return s.store.GetUserListByWorkspaceId(ctx, msg.WorkspaceId)
 }
 
-func (s *service) GetCardComments(ctx context.Context, cardId string, limit, offset uint64) ([]CardComment, error) {
-	msgs, err := s.store.GetCardComments(ctx, cardId, limit, offset)
+func (s *service) GetCardComments(ctx context.Context, cardId string, param PaginationCommentParam) ([]CardComment, error) {
+	if param.Cursor != "" {
+		time, uuid, err := s.ps.DecodeCursor(param.Cursor)
+		if err != nil {
+			return []CardComment{}, err
+		}
+		param.CreatedTime = time
+		param.Id = uuid
+	}
+	msgs, err := s.store.GetCardComments(ctx, cardId, param)
 	if err == sql.ErrNoRows {
 		return []CardComment{}, errors.New("no.card.comment.available")
 	} else if err != nil {
@@ -206,6 +222,7 @@ func (s *service) GetCardComments(ctx context.Context, cardId string, limit, off
 		} else {
 			msgs[i].UserDetail = userDetail
 		}
+		msgs[i].Cursor = s.ps.EncodeCursor(msg.CreatedDate, msg.CommentId)
 	}
 	return msgs, nil
 }

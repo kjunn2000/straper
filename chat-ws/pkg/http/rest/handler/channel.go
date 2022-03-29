@@ -3,7 +3,6 @@ package handler
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
 
 	"github.com/gorilla/mux"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/chatting"
@@ -168,22 +167,10 @@ func (server *Server) GetChannelMessages(cs chatting.Service) func(w http.Respon
 			rest.AddResponseToResponseWritter(w, nil, "channel.id.not.found")
 			return
 		}
-		limit, err := strconv.ParseUint(r.URL.Query().Get("limit"), 10, 64)
-		if err != nil {
-			rest.AddResponseToResponseWritter(w, nil, "invalid.limit")
-			return
+		param := chatting.PaginationMessagesParam{
+			Cursor: r.URL.Query().Get("cursor"),
 		}
-		offset, err := strconv.ParseUint(r.URL.Query().Get("offset"), 10, 64)
-		if err != nil {
-			rest.AddResponseToResponseWritter(w, nil, "invalid.offset")
-			return
-		}
-		userId, err := server.getUserIdFromToken(r)
-		if err != nil {
-			rest.AddResponseToResponseWritter(w, nil, err.Error())
-			return
-		}
-		msgs, err := cs.GetChannelMessages(r.Context(), channelId, userId, limit, offset)
+		msgs, err := cs.GetChannelMessages(r.Context(), channelId, param)
 		if err != nil {
 			rest.AddResponseToResponseWritter(w, nil, err.Error())
 			return

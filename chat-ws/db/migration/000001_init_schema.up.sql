@@ -75,6 +75,8 @@ CREATE TABLE `message` (
   `created_date` DATETIME NOT NULL
 );
 
+CREATE INDEX `idx_message_pagination` ON `message` (`created_date`, `message_id`);
+
 CREATE TABLE `task_board` (
   `board_id` CHAR(36) PRIMARY KEY,
   `board_name` VARCHAR(255) NOT NULL,
@@ -124,6 +126,8 @@ CREATE TABLE `card_comment` (
   `file_type` VARCHAR(255),
   `created_date` DATETIME NOT NULL 
 );
+
+CREATE INDEX `idx_comment_pagination` ON `card_comment` (`created_date`, `comment_id`);
 
 CREATE TABLE `issue` (
   `issue_id` CHAR(36) PRIMARY KEY,

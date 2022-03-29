@@ -97,7 +97,7 @@ type ChannelQueries interface {
 
 type MessageQueries interface {
 	CreateMessage(ctx context.Context, message *chatting.Message) error
-	GetChannelMessages(ctx context.Context, channelId string, limit, offset uint64) ([]chatting.Message, error)
+	GetChannelMessages(ctx context.Context, channelId string, param chatting.PaginationMessagesParam) ([]chatting.Message, error)
 	GetAllChannelMessages(ctx context.Context, channelId string) ([]chatting.Message, error)
 	GetAllChannelMessagesByWorkspaceId(ctx context.Context, workspaceId string) ([]chatting.Message, error)
 	EditMessage(ctx context.Context, params chatting.EditChatMessageParams) error
@@ -142,7 +142,7 @@ type CardQueries interface {
 	DeleteChecklistItem(ctx context.Context, itemId string) error
 
 	CreateCardComment(ctx context.Context, comment *board.CardComment) error
-	GetCardComments(ctx context.Context, cardId string, limit, offset uint64) ([]board.CardComment, error)
+	GetCardComments(ctx context.Context, cardId string, param board.PaginationCommentParam) ([]board.CardComment, error)
 	EditCardComment(ctx context.Context, params board.CardEditCommentParams) error
 	DeleteCardComment(ctx context.Context, commentId string) error
 	GetFileCommentsByCardId(ctx context.Context, cardId string) ([]board.CardComment, error)

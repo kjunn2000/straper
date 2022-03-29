@@ -2,7 +2,6 @@ package handler
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/gorilla/mux"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/board"
@@ -43,17 +42,10 @@ func (server *Server) GetCardComments(bs board.Service) func(w http.ResponseWrit
 			rest.AddResponseToResponseWritter(w, nil, "card.id.not.found")
 			return
 		}
-		limit, err := strconv.ParseUint(r.URL.Query().Get("limit"), 10, 64)
-		if err != nil {
-			rest.AddResponseToResponseWritter(w, nil, "invalid.limit")
-			return
+		param := board.PaginationCommentParam{
+			Cursor: r.URL.Query().Get("cursor"),
 		}
-		offset, err := strconv.ParseUint(r.URL.Query().Get("offset"), 10, 64)
-		if err != nil {
-			rest.AddResponseToResponseWritter(w, nil, "invalid.offset")
-			return
-		}
-		msgs, err := bs.GetCardComments(r.Context(), cardId, limit, offset)
+		msgs, err := bs.GetCardComments(r.Context(), cardId, param)
 		if err != nil {
 			rest.AddResponseToResponseWritter(w, nil, err.Error())
 			return

@@ -85,3 +85,9 @@ type CardDeleteCommentParams struct {
 	Type      string `json:"type"`
 	Fid       string `json:"fid"`
 }
+
+type PaginationCommentParam struct {
+	Cursor      string
+	CreatedTime time.Time
+	Id          string
+}

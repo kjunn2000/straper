@@ -11,7 +11,6 @@ import { MdDriveFileRenameOutline } from "react-icons/md";
 import EditChannelDialog from "../workspace/EditChannelDialog";
 
 const ChatRoom = () => {
-  const [offset, setOffset] = useState(0);
   const [isTop, setIsTop] = useState(false);
   const [currEditMsgId, setCurrEditMsgId] = useState("");
   const [editedMsg, setEditedMsg] = useState("");
@@ -27,39 +26,49 @@ const ChatRoom = () => {
   const messagesEndRef = useRef(null);
 
   useEffect(() => {
-    setOffset(0);
     setIsTop(false);
-    fetchMessages(true, 25, 0);
+    fetchMessages(true);
   }, [currChannel]);
 
-  useEffect(() => {
-    setTimeout(() => scrollToBottom(), 100);
-  }, [msgs]);
-
-  const fetchMessages = (firstTime, limit, offset) => {
+  const fetchMessages = (firstTime) => {
     if (isTop && !firstTime) {
       return;
+    } else if (firstTime) {
+      clearMessages();
     }
+    const cursor =
+      !firstTime && msgs && msgs.length > 0 ? msgs[msgs.length - 1].cursor : "";
     api
       .get(
-        `/protected/channel/${currChannel.channel_id}/messages?limit=${limit}&offset=${offset}`
+        `/protected/channel/${currChannel.channel_id}/messages?cursor=${cursor}`
       )
       .then((res) => {
         const fetchedData = res.data.Data;
-        if (fetchedData.length === 0 && !firstTime) {
+        if (!fetchedData || fetchedData.length === 0) {
           setIsTop(true);
           return;
-        } else if (firstTime) {
-          clearMessages();
         }
         pushMessages(fetchedData);
-        setOffset((offset) => offset + 25);
+        if (firstTime) {
+          scrollToBottom();
+        }
       });
+  };
+
+  const scrollToBottom = () => {
+    setTimeout(() => {
+      if (messagesEndRef.current) {
+        messagesEndRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "end",
+        });
+      }
+    }, 300);
   };
 
   const handleScroll = () => {
     if (messagesRef.current.scrollTop === 0) {
-      fetchMessages(false, 25, offset);
+      fetchMessages(false);
     }
   };
 
@@ -138,15 +147,6 @@ const ChatRoom = () => {
         )
       );
 
-  const scrollToBottom = () => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "end",
-      });
-    }
-  };
-
   return (
     <div
       className="text-white w-full h-full font-medium overflow-auto"
@@ -179,9 +179,6 @@ const ChatRoom = () => {
             ref={messagesRef}
             onScroll={handleScroll}
           >
-            {/* {loadMessages(seenMsgs)}
-            <div className="text-center text-gray-300">NEW MESSAGES</div>
-            {loadMessages(unSeenMsgs)} */}
             {loadMessages(msgs)}
             <div ref={messagesEndRef} />
           </div>

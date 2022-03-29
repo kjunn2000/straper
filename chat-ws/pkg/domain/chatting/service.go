@@ -21,7 +21,7 @@ var (
 )
 
 type Service interface {
-	GetChannelMessages(ctx context.Context, channelId string, userId string, limit, offset uint64) ([]Message, error)
+	GetChannelMessages(ctx context.Context, channelId string, param PaginationMessagesParam) ([]Message, error)
 	HandleBroadcast(ctx context.Context, msg *ws.Message, publishPubSub func(context.Context, *ws.Message) error) error
 	GetBroadcastUserListByMessageType(ctx context.Context, msg *ws.Message) ([]ws.UserData, error)
 	DeleteSeaweedfsMessagesByChannelId(ctx context.Context, channelId string) error
@@ -39,17 +39,24 @@ type SeaweedfsClient interface {
 	DeleteFile(ctx context.Context, fid string) error
 }
 
+type PaginationService interface {
+	DecodeCursor(encodedCursor string) (res time.Time, uuid string, err error)
+	EncodeCursor(t time.Time, uuid string) string
+}
+
 type service struct {
 	log   *zap.Logger
 	store Repository
 	sc    SeaweedfsClient
+	ps    PaginationService
 }
 
-func NewService(log *zap.Logger, store Repository, sc SeaweedfsClient) *service {
+func NewService(log *zap.Logger, store Repository, sc SeaweedfsClient, ps PaginationService) *service {
 	return &service{
 		log:   log,
 		store: store,
 		sc:    sc,
+		ps:    ps,
 	}
 }
 
@@ -141,8 +148,16 @@ func (s *service) GetBroadcastUserListByMessageType(ctx context.Context, msg *ws
 	return s.store.GetUserListByChannelId(ctx, msg.ChannelId)
 }
 
-func (s *service) GetChannelMessages(ctx context.Context, channelId string, userId string, limit, offset uint64) ([]Message, error) {
-	msgs, err := s.store.GetChannelMessages(ctx, channelId, limit, offset)
+func (s *service) GetChannelMessages(ctx context.Context, channelId string, param PaginationMessagesParam) ([]Message, error) {
+	if param.Cursor != "" {
+		time, uuid, err := s.ps.DecodeCursor(param.Cursor)
+		if err != nil {
+			return []Message{}, err
+		}
+		param.CreatedTime = time
+		param.Id = uuid
+	}
+	msgs, err := s.store.GetChannelMessages(ctx, channelId, param)
 	if err == sql.ErrNoRows {
 		return []Message{}, errors.New("invalid.channel.id")
 	} else if err != nil {
@@ -163,6 +178,7 @@ func (s *service) GetChannelMessages(ctx context.Context, channelId string, user
 		} else {
 			msgs[i].UserDetail = userDetail
 		}
+		msgs[i].Cursor = s.ps.EncodeCursor(msg.CreatedDate, msg.MessageId)
 	}
 	return msgs, nil
 }

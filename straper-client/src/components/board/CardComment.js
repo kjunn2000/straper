@@ -7,7 +7,6 @@ import Message from "../chat/Message";
 import CommentInput from "./CommentInput";
 
 const CardComment = ({ cardId }) => {
-  const [offset, setOffset] = useState(0);
   const [isBottom, setIsBottom] = useState(false);
   const [currEditMsgId, setCurrEditMsgId] = useState("");
   const [editedMsg, setEditedMsg] = useState("");
@@ -20,55 +19,56 @@ const CardComment = ({ cardId }) => {
   const clearComments = useCommentStore((state) => state.clearComments);
   const pushComments = useCommentStore((state) => state.pushComments);
 
-  useEffect(async () => {
-    setOffset(0);
+  useEffect(() => {
     setIsBottom(false);
-    await fetchComments(true, 10, 0);
-    scrollToTop();
+    fetchComments(true);
   }, []);
 
-  const scrollToTop = () => {
-    if (commentsStartRef.current) {
-      commentsStartRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-    }
-  };
-
-  const fetchComments = async (firstTime, limit, offset) => {
+  const fetchComments = (firstTime) => {
     if (isBottom && !firstTime) {
       return;
     } else if (firstTime) {
       clearComments();
     }
+    const cursor =
+      !firstTime && comments && comments.length > 0
+        ? comments[comments.length - 1].cursor
+        : "";
     api
-      .get(
-        `/protected/board/card/comments/${cardId}?limit=${limit}&offset=${offset}`
-      )
+      .get(`/protected/board/card/comments/${cardId}?cursor=${cursor}`)
       .then((res) => {
         const fetchedData = res.data.Data;
-        if (!fetchedData && !firstTime) {
+        if (!fetchedData || fetchedData.length === 0) {
           setIsBottom(true);
           return;
-        } else if (fetchedData) {
-          pushComments(fetchedData);
-          setOffset((offset) => offset + 10);
         }
+        pushComments(fetchedData);
       });
+  };
+
+  const scrollToTop = () => {
+    setTimeout(() => {
+      if (commentsStartRef.current) {
+        commentsStartRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }
+    }, 300);
   };
 
   const handleScroll = () => {
     if (
-      commentsRef.current.scrollTop + commentsRef.current.offsetHeight ===
-      commentsRef.current.scrollHeight
+      commentsRef.current.scrollHeight -
+        Math.ceil(commentsRef.current.scrollTop) ===
+      commentsRef.current.clientHeight
     ) {
-      fetchComments(false, 10, offset);
+      fetchComments(false);
     }
   };
 
   const handleEditComment = (msgId, oriContent) => {
-    if (oriContent === editedMsg) {
+    if (oriContent === editedMsg || editedMsg === "") {
       return;
     }
     const payload = {
@@ -91,7 +91,7 @@ const CardComment = ({ cardId }) => {
 
   return (
     <div className="flex flex-col space-y-5">
-      <CommentInput cardId={cardId} />
+      <CommentInput cardId={cardId} scrollToTop={scrollToTop} />
       {comments && comments.length > 0 && (
         <div
           className="h-80 overflow-auto"

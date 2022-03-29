@@ -67,4 +67,5 @@ type CardComment struct {
 	FileType    string     `json:"file_type" db:"file_type"`
 	FileBytes   []byte     `json:"file_bytes"`
 	CreatedDate time.Time  `json:"created_date" db:"created_date"`
+	Cursor      string     `json:"cursor"`
 }

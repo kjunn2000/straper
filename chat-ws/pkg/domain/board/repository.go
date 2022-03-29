@@ -34,7 +34,7 @@ type Repository interface {
 	DeleteChecklistItem(ctx context.Context, itemId string) error
 
 	CreateCardComment(ctx context.Context, comment *CardComment) error
-	GetCardComments(ctx context.Context, cardId string, limit, offset uint64) ([]CardComment, error)
+	GetCardComments(ctx context.Context, cardId string, param PaginationCommentParam) ([]CardComment, error)
 	EditCardComment(ctx context.Context, params CardEditCommentParams) error
 	DeleteCardComment(ctx context.Context, commentId string) error
 	GetFileCommentsByCardId(ctx context.Context, cardId string) ([]CardComment, error)
