@@ -39,7 +39,7 @@ const UserTable = ({ userData, creatorId, handleRemoveUser }) => {
         },
         deleteAction: (userId) => {
           if (userId === creatorId) {
-            setDialogErrMsg("Cannot remove the creator of channel.");
+            setDialogErrMsg("Cannot remove the creator of workspace.");
             setShowFailDialog(true);
             return;
           }

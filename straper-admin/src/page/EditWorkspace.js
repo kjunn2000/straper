@@ -158,7 +158,7 @@ const EditWorkspace = () => {
                   required: "Workspace name is required.",
                   minLength: {
                     value: 4,
-                    message: "Workspace name should be at least 4 digits.",
+                    message: "Workspace name at least 4 chars.",
                   },
                 })}
               />

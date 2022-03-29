@@ -103,8 +103,7 @@ const EditChannelDialog = ({ isOpen, close, handleUpdateChannel, channel }) => {
                           required: "Channel name is required.",
                           minLength: {
                             value: 4,
-                            message:
-                              "Channel name should be at least 4 digits.",
+                            message: "Channel name at least 4 chars.",
                           },
                         })}
                       />

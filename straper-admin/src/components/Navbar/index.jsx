@@ -31,7 +31,7 @@ const Navbar = ({ navigationData, currentRoute, setCurrentRoute }) => {
         ))}
       </ul>
       <button className={styles.actions} onClick={() => logOut(false)}>
-        Leave
+        LOG OUT
       </button>
     </nav>
   ) : (

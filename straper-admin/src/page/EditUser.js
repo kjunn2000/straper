@@ -143,7 +143,7 @@ const EditUser = () => {
                   required: "Username is required.",
                   minLength: {
                     value: 4,
-                    message: "Username at least 4 digits.",
+                    message: "Username at least 4 chars.",
                   },
                 })}
               />
