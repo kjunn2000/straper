@@ -6,7 +6,7 @@ import (
 
 type Repository interface {
 	CreateIssue(ctx context.Context, issue Issue) error
-	GetIssuesByWorkspaceId(ctx context.Context, workspaceId string, limit, offset uint64) ([]Issue, error)
+	GetIssuesByWorkspaceId(ctx context.Context, workspaceId string) ([]Issue, error)
 	GetIssueByIssueId(ctx context.Context, issueId string) (Issue, error)
 	UpdateIssue(ctx context.Context, issue Issue) error
 	CreateIssueAttachment(ctx context.Context, a Attachment) error

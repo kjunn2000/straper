@@ -2,9 +2,7 @@ package admin
 
 import (
 	"context"
-	"encoding/base64"
 	"errors"
-	"fmt"
 	"strings"
 	"time"
 
@@ -22,15 +20,22 @@ type Service interface {
 	GetPaginationWorkspaces(ctx context.Context, param PaginationWorkspacesParam) (PaginationWorkspacesResp, error)
 }
 
+type PaginationService interface {
+	DecodeCursor(encodedCursor string) (res time.Time, uuid string, err error)
+	EncodeCursor(t time.Time, uuid string) string
+}
+
 type service struct {
 	log *zap.Logger
 	r   Repository
+	ps  PaginationService
 }
 
-func NewService(log *zap.Logger, r Repository) *service {
+func NewService(log *zap.Logger, r Repository, ps PaginationService) *service {
 	return &service{
 		log: log,
 		r:   r,
+		ps:  ps,
 	}
 }
 
@@ -96,7 +101,7 @@ func (s *service) GetWorkspace(ctx context.Context, workspaceId string) (Workspa
 
 func (s *service) GetPaginationWorkspaces(ctx context.Context, param PaginationWorkspacesParam) (PaginationWorkspacesResp, error) {
 	if param.Cursor != "" {
-		time, uuid, err := decodeCursor(param.Cursor)
+		time, uuid, err := s.ps.DecodeCursor(param.Cursor)
 		if err != nil {
 			return PaginationWorkspacesResp{}, err
 		}
@@ -108,7 +113,7 @@ func (s *service) GetPaginationWorkspaces(ctx context.Context, param PaginationW
 		return PaginationWorkspacesResp{}, err
 	}
 	for i, w := range workspaces {
-		w.Cursor = encodeCursor(w.CreatedDate, w.Id)
+		w.Cursor = s.ps.EncodeCursor(w.CreatedDate, w.Id)
 		workspaces[i] = w
 	}
 	count, err := s.r.GetWorkspacesCount(ctx, param.SearchStr)
@@ -119,29 +124,4 @@ func (s *service) GetPaginationWorkspaces(ctx context.Context, param PaginationW
 		Workspaces:      workspaces,
 		TotalWorkspaces: count,
 	}, nil
-}
-
-func decodeCursor(encodedCursor string) (res time.Time, uuid string, err error) {
-	byt, err := base64.StdEncoding.DecodeString(encodedCursor)
-	if err != nil {
-		return
-	}
-
-	arrStr := strings.Split(string(byt), ",")
-	if len(arrStr) != 2 {
-		err = errors.New("cursor is invalid")
-		return
-	}
-
-	res, err = time.Parse(time.RFC3339Nano, arrStr[0])
-	if err != nil {
-		return
-	}
-	uuid = arrStr[1]
-	return
-}
-
-func encodeCursor(t time.Time, uuid string) string {
-	key := fmt.Sprintf("%s,%s", t.Format(time.RFC3339Nano), uuid)
-	return base64.StdEncoding.EncodeToString([]byte(key))
 }

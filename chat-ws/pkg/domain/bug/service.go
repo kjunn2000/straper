@@ -13,7 +13,7 @@ import (
 type Service interface {
 	CreateIssue(ctx context.Context, issue Issue) (Issue, error)
 	AddIssueAttachments(ctx context.Context, issueId string, fileTypes []string, files []*multipart.FileHeader) ([]Attachment, error)
-	GetIssuesByWorkspaceId(ctx context.Context, workspaceId string, limit, offset uint64) ([]Issue, error)
+	GetIssuesByWorkspaceId(ctx context.Context, workspaceId string) ([]Issue, error)
 	UpdateIssue(ctx context.Context, issue Issue) (Issue, error)
 	DeleteIssue(ctx context.Context, issueId string) error
 	DeleteIssueAttachment(ctx context.Context, fid string) error
@@ -74,8 +74,8 @@ func (s *service) AddIssueAttachments(ctx context.Context, issueId string, fileT
 	return attachments, nil
 }
 
-func (s *service) GetIssuesByWorkspaceId(ctx context.Context, workspaceId string, limit, offset uint64) ([]Issue, error) {
-	issues, err := s.store.GetIssuesByWorkspaceId(ctx, workspaceId, limit, offset)
+func (s *service) GetIssuesByWorkspaceId(ctx context.Context, workspaceId string) ([]Issue, error) {
+	issues, err := s.store.GetIssuesByWorkspaceId(ctx, workspaceId)
 	if err != nil {
 		return []Issue{}, err
 	}

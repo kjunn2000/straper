@@ -153,7 +153,7 @@ type CardQueries interface {
 
 type BugQueries interface {
 	CreateIssue(ctx context.Context, issue bug.Issue) error
-	GetIssuesByWorkspaceId(ctx context.Context, workspaceId string, limit, offset uint64) ([]bug.Issue, error)
+	GetIssuesByWorkspaceId(ctx context.Context, workspaceId string) ([]bug.Issue, error)
 	GetIssueByIssueId(ctx context.Context, issueId string) (bug.Issue, error)
 	GetAttachmentFidsByWorkspaceId(ctx context.Context, workspaceId string) ([]string, error)
 	UpdateIssue(ctx context.Context, issue bug.Issue) error

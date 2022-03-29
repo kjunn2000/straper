@@ -5,7 +5,7 @@ import api from "../axios/api";
 export const getIssueData = async () => {
   const currWorkspace = useWorkspaceStore.getState().currWorkspace;
   const res = await api.get(
-    `/protected/issue/list/${currWorkspace.workspace_id}?limit=100&offset=0`
+    `/protected/issue/list/${currWorkspace.workspace_id}`
   );
   if (res.data.Success && res.data.Data) {
     const currAccountList = useWorkspaceStore.getState().currAccountList;

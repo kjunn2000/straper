@@ -45,14 +45,14 @@ func (q *Queries) CreateIssue(ctx context.Context, issue bug.Issue) error {
 	return nil
 }
 
-func (q *Queries) GetIssuesByWorkspaceId(ctx context.Context, workspaceId string, limit, offset uint64) ([]bug.Issue, error) {
+func (q *Queries) GetIssuesByWorkspaceId(ctx context.Context, workspaceId string) ([]bug.Issue, error) {
 	var issues []bug.Issue
 	sql, arg, err := sq.Select("issue_id", "type", "backlog_priority", "summary", "description", "acceptance_criteria",
 		"epic_link", "story_point", "replicate_step", "environment", "workaround", "serverity",
 		"label", "assignee", "reporter", "due_time", "status", "workspace_id", "created_date").
 		From("issue").
 		Where(sq.Eq{"workspace_id": workspaceId}).
-		OrderBy("created_date desc").Limit(limit).Offset(offset).ToSql()
+		OrderBy("created_date desc").ToSql()
 	if err != nil {
 		q.log.Warn("Failed to create select sql.")
 		return []bug.Issue{}, err

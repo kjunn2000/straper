@@ -3,7 +3,6 @@ package handler
 import (
 	"encoding/json"
 	"net/http"
-	"strconv"
 
 	"github.com/gorilla/mux"
 	"github.com/kjunn2000/straper/chat-ws/pkg/domain/bug"
@@ -76,17 +75,7 @@ func (server *Server) GetIssues(bs bug.Service) func(w http.ResponseWriter, r *h
 			rest.AddResponseToResponseWritter(w, nil, "workspace.id.not.found")
 			return
 		}
-		limit, err := strconv.ParseUint(r.URL.Query().Get("limit"), 10, 64)
-		if err != nil {
-			rest.AddResponseToResponseWritter(w, nil, "invalid.limit")
-			return
-		}
-		offset, err := strconv.ParseUint(r.URL.Query().Get("offset"), 10, 64)
-		if err != nil {
-			rest.AddResponseToResponseWritter(w, nil, "invalid.offset")
-			return
-		}
-		issues, err := bs.GetIssuesByWorkspaceId(r.Context(), workspaceId, limit, offset)
+		issues, err := bs.GetIssuesByWorkspaceId(r.Context(), workspaceId)
 		if err != nil {
 			rest.AddResponseToResponseWritter(w, nil, err.Error())
 			return
