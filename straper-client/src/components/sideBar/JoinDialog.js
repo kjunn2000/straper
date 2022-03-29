@@ -92,7 +92,7 @@ const JoinDialog = ({ isOpen, close, toggleDialog, joinAction, type }) => {
                       {...register("workspace_id", {
                         required: {
                           value: true,
-                          message: "Workspace ID cannot be empty.",
+                          message: "Workspace id is required.",
                         },
                       })}
                     />
@@ -102,7 +102,7 @@ const JoinDialog = ({ isOpen, close, toggleDialog, joinAction, type }) => {
                       {...register("channel_id", {
                         required: {
                           value: true,
-                          message: "Channel ID cannot be empty.",
+                          message: "Channel ID is required.",
                         },
                       })}
                     />

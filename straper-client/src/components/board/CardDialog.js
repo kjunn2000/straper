@@ -26,10 +26,16 @@ import useWorkspaceStore from "../../store/workspaceStore";
 import Checklist from "./Checklist";
 import { Link } from "react-router-dom";
 import EditIssueLink from "./EditIssueLink";
+import { ErrorMessage } from "@hookform/error-message";
 
 const CardDialog = ({ open, closeModal, card }) => {
   let initialFocus = useRef(null);
-  const { register, handleSubmit, setValue } = useForm();
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm();
 
   const [dueDate, setDueDate] = useState(new Date(card.due_date));
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -162,8 +168,11 @@ const CardDialog = ({ open, closeModal, card }) => {
                         <input
                           className="p-1 rounded-lg bg-gray-200 text-xl font-bold"
                           defaultValue={card.title}
-                          {...register("title")}
+                          {...register("title", {
+                            required: "Title is required.",
+                          })}
                         />
+                        <ErrorMessage errors={errors} name="title" as="p" />
                       </div>
                       <div className="flex flex-col">
                         {header("DESCRIPTION", MdOutlineDescription)}

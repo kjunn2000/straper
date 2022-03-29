@@ -97,7 +97,7 @@ const AddDialog = ({ isOpen, close, toggleDialog, addAction, type }) => {
                         {...register("workspace_name", {
                           required: {
                             value: true,
-                            message: "Workspace name cannot be empty.",
+                            message: "Workspace name is required.",
                           },
                         })}
                       />
@@ -109,7 +109,7 @@ const AddDialog = ({ isOpen, close, toggleDialog, addAction, type }) => {
                         {...register("channel_name", {
                           required: {
                             value: true,
-                            message: "Channel name cannot be empty.",
+                            message: "Channel name is required.",
                           },
                         })}
                       />

@@ -14,9 +14,6 @@ function TaskBoard() {
   const setBoard = useBoardStore((state) => state.setBoard);
   const setTaskLists = useBoardStore((state) => state.setTaskLists);
   const setTaskListsOrder = useBoardStore((state) => state.setTaskListsOrder);
-  const setCurrAccountList = useWorkspaceStore(
-    (state) => state.setCurrAccountList
-  );
 
   useEffect(() => {
     getBoardData();

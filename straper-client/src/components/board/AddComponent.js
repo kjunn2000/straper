@@ -13,7 +13,11 @@ const AddComponent = ({ action, type, text }) => {
           <div className="flex justify-between text-gray-400 hover:text-white cursor-pointer text-sm">
             <button
               onClick={() => {
-                action(inputRef.current.value);
+                const value = inputRef.current.value;
+                if (!value || value === "") {
+                  return;
+                }
+                action(value);
                 setAddMode(false);
               }}
             >

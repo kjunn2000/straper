@@ -45,19 +45,15 @@ const Register = () => {
               break;
             }
             case "invalid.username.format": {
-              setDialogErrMsg(
-                "Phone number format incorrect. Please try again."
-              );
+              setDialogErrMsg("Invalid username format.");
               break;
             }
             case "invalid.email.format": {
-              setDialogErrMsg("Email format incorrect. Please try again.");
+              setDialogErrMsg("Invalid email format.");
               break;
             }
             case "invalid.phone.no.format": {
-              setDialogErrMsg(
-                "Phone number format incorrect. Please try again."
-              );
+              setDialogErrMsg("Invalid phone number format.");
               break;
             }
             case "password.too.weak": {
@@ -71,7 +67,7 @@ const Register = () => {
           setShowFailDialog(true);
         }
       })
-      .catch((err) => {
+      .catch(() => {
         setShowFailDialog(true);
       });
   };

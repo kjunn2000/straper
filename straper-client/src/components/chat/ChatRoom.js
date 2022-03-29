@@ -73,7 +73,7 @@ const ChatRoom = () => {
   );
 
   const handleEditMessage = (msgId, oriContent) => {
-    if (oriContent === editedMsg) {
+    if (oriContent === editedMsg || editedMsg === "") {
       return;
     }
     const payload = {

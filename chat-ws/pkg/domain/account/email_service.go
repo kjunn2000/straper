@@ -19,7 +19,7 @@ func (us *service) CreateAndSendVerifyEmailToken(ctx context.Context, user UserD
 	}
 	err = us.sendEmail(ctx, user,
 		"template/email/accountVerificationEmail.html",
-		"Straper Account Opening Verificataion", token.TokenId)
+		"Straper Account Verificataion", token.TokenId)
 	if err != nil {
 		return err
 	}
