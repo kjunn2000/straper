@@ -1,23 +1,20 @@
 <!-- template.html -->
 <!DOCTYPE html>
 <html>
-
-<body>
-	Dear {{.Username}}, 
-	<br/><br/>
-	Thank you for visiting Straper.
-	<br/><br/>
-	In order to proceeed with your account opening application, please verify your account by clicking the verification button at below.
-	<br/><br/>
-	<a href="http://localhost:3000/account/opening/verify/{{.TokenId}}">
-		<button style="color: white;background:slateblue">
-			Verify
-		</button>
-	</a>
-	<br/><br/>
-	 Best Regards,
-	<br/><br/>
-	<b>Straper Support Team</b>
-</body>
-
+  <body>
+    Dear {{.Username}},
+    <br /><br />
+    Thank you for visiting Straper.
+    <br /><br />
+    In order to verify your account, please click the verification button at
+    below.
+    <br /><br />
+    <a href="http://localhost:3000/account/opening/verify/{{.TokenId}}">
+      <button style="color: white; background: slateblue">Verify</button>
+    </a>
+    <br /><br />
+    Best Regards,
+    <br /><br />
+    <b>Straper Support Team</b>
+  </body>
 </html>

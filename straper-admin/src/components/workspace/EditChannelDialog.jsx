@@ -1,6 +1,6 @@
 import { Dialog, Transition } from "@headlessui/react";
 import { ErrorMessage } from "@hookform/error-message";
-import React, { useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { Fragment } from "react/cjs/react.production.min";
 
@@ -13,6 +13,12 @@ const EditChannelDialog = ({ isOpen, close, handleUpdateChannel, channel }) => {
   } = useForm();
 
   let editDialog = useRef(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      resetForm();
+    }
+  }, [isOpen]);
 
   const resetForm = () => {
     if (!channel) {

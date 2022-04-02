@@ -50,13 +50,15 @@ func randSeq(n int) string {
 }
 
 func (us *service) SeedUserAccount() error {
-	for i := 1; i <= 20; i++ {
+	usernames := []string{"Oliver", "Ivan", "Ava", "Josh", "John", "Harper", "Alexander", "Lucas", "Benjamin", "James",
+		"William", "Emma", "Olivia", "Noah", "Liam", "Chris", "Belinda", "Casper", "Justin", "KaiXuan"}
+	for i := 0; i < 20; i++ {
 		index := strconv.Itoa(i)
 		param := CreateUserParam{
-			Username: "user" + index,
-			Password: "password" + index,
-			Email:    "testemail" + index + "@gmail.com",
-			PhoneNo:  "010123123" + index,
+			Username: usernames[i],
+			Password: usernames[i] + "Password!",
+			Email:    usernames[i] + "@gmail.com",
+			PhoneNo:  "010123120" + index,
 		}
 		us.Register(context.Background(), param)
 	}

@@ -131,7 +131,7 @@ CREATE INDEX `idx_comment_pagination` ON `card_comment` (`created_date`, `commen
 
 CREATE TABLE `issue` (
   `issue_id` CHAR(36) PRIMARY KEY,
-  `type` VARCHAR(5) NOT NULL,
+  `type` VARCHAR(7) NOT NULL,
   `backlog_priority` VARCHAR(20),
   `summary` VARCHAR(255) NOT NULL,
   `description` LONGTEXT,

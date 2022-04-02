@@ -118,11 +118,13 @@ const ResetPassword = () => {
             <></>
           )}
         </div>
-        <PasswordStrengthBar
-          ref={passwordStrength}
-          password={watchPassword}
-          className="pt-3"
-        />
+        <div className="py-2 px-5">
+          <PasswordStrengthBar
+            ref={passwordStrength}
+            password={watchPassword}
+            className="pt-3"
+          />
+        </div>
         <button type="submit" className="bg-indigo-400 self-center w-48 p-1">
           CONFIRM RESET
         </button>

@@ -84,7 +84,10 @@ const Checklist = ({ show, cardId, listId, checklist }) => {
         <div className="flex flex-col space-y-3 p-2">
           <ProgressBar progressPercentage={percentage} />
           {checklist.map((item) => (
-            <div key={item.item_id} className="group w-2/5 grid grid-cols-6">
+            <div
+              key={item.item_id}
+              className="group w-2/5 grid grid-cols-6 place-items-center"
+            >
               <input
                 type="checkbox"
                 className="col-span-1 rounded hover:cursor-pointer"

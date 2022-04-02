@@ -139,7 +139,7 @@ const IssueDetail = () => {
               <div>
                 <span className="font-bold">Description</span>
               </div>
-              <div className="p-3 bg-gray-100 rounded break-all">
+              <div className="p-3 bg-gray-100 rounded break-all text-slate-600">
                 {issue.description || "-"}
               </div>
             </div>
@@ -153,19 +153,19 @@ const IssueDetail = () => {
             </div>
             <div>
               <div className="font-bold">Acceptance Criteria</div>
-              <div className="p-3 bg-gray-100 rounded break-all">
+              <div className="p-3 bg-gray-100 rounded break-all text-slate-600">
                 {issue.acceptance_criteria || "-"}
               </div>
             </div>
             <div>
               <div className="font-bold">Replicate Step</div>
-              <div className="p-3 bg-gray-100 rounded break-all">
+              <div className="p-3 bg-gray-100 rounded break-all text-slate-600">
                 {issue.replicate_step || "-"}
               </div>
             </div>
             <div>
               <div className="font-bold">Workaround</div>
-              <div className="p-3 bg-gray-100 rounded break-all">
+              <div className="p-3 bg-gray-100 rounded break-all text-slate-600">
                 {issue.workaround || "-"}
               </div>
             </div>
