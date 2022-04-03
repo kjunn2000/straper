@@ -7,7 +7,6 @@ const LogOutNotice = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       if (timeLeft === 0) {
-        console.log("Loggin out...");
         // logOut();
         return;
       }

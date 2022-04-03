@@ -8,7 +8,7 @@ import {
   fetchWorkspaceData,
   redirectToLatestWorkspace,
 } from "../service/workspace";
-import { isEmpty } from "../service/object";
+import { isEmpty, isObjectEmpty } from "../service/object";
 import { connect, isSocketOpen } from "../service/websocket";
 import { darkGrayBg } from "../utils/style/color";
 import UserList from "../components/sideBar/UserList";
@@ -25,6 +25,9 @@ function Workspace() {
   const usersSideBar = useRef();
 
   useEffect(() => {
+    if (!isObjectEmpty(currWorkspace) && !isObjectEmpty(currChannel)) {
+      return;
+    }
     fetchWorkspaceData().then((data) => redirectToLatestWorkspace(data));
     if (!isSocketOpen()) {
       connect();

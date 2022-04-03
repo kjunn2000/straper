@@ -3,6 +3,12 @@ import { getLocalStorage, setLocalStorage } from "./localStorage";
 
 const useMessageStore = create((set) => ({
   messages: getLocalStorage("messages") || [],
+  setMesssages: (messages) => {
+    set(() => {
+      setLocalStorage("messages", messages);
+      return { messages };
+    });
+  },
   pushMessages: (messages) => {
     set((state) => {
       const newMessages = [...state.messages, ...messages];

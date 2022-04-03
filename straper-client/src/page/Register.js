@@ -73,7 +73,6 @@ const Register = () => {
   };
 
   const isPasswordValid = () => {
-    console.log(errors.password);
     return passwordStrength.current.state.score >= 3;
   };
 

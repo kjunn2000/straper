@@ -58,11 +58,11 @@ const CardComment = ({ cardId }) => {
   };
 
   const handleScroll = () => {
-    if (
-      commentsRef.current.scrollHeight -
-        Math.ceil(commentsRef.current.scrollTop) ===
-      commentsRef.current.clientHeight
-    ) {
+    if (!commentsRef.current) {
+      return;
+    }
+    const { scrollTop, scrollHeight, clientHeight } = commentsRef.current;
+    if (scrollTop + clientHeight === scrollHeight) {
       fetchComments(false);
     }
   };

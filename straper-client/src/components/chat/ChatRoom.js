@@ -19,6 +19,7 @@ const ChatRoom = () => {
   const currChannel = useWorkspaceStore((state) => state.currChannel);
 
   const msgs = useMessageStore((state) => state.messages);
+  const setMessages = useMessageStore((state) => state.setMesssages);
   const pushMessages = useMessageStore((state) => state.pushMessages);
   const clearMessages = useMessageStore((state) => state.clearMessages);
 
@@ -30,7 +31,7 @@ const ChatRoom = () => {
     fetchMessages(true);
   }, [currChannel]);
 
-  const fetchMessages = (firstTime) => {
+  const fetchMessages = async (firstTime) => {
     if (isTop && !firstTime) {
       return;
     } else if (firstTime) {
@@ -38,21 +39,20 @@ const ChatRoom = () => {
     }
     const cursor =
       !firstTime && msgs && msgs.length > 0 ? msgs[msgs.length - 1].cursor : "";
-    api
-      .get(
-        `/protected/channel/${currChannel.channel_id}/messages?cursor=${cursor}`
-      )
-      .then((res) => {
-        const fetchedData = res.data.Data;
-        if (!fetchedData || fetchedData.length === 0) {
-          setIsTop(true);
-          return;
-        }
-        pushMessages(fetchedData);
-        if (firstTime) {
-          scrollToBottom();
-        }
-      });
+    const res = await api.get(
+      `/protected/channel/${currChannel.channel_id}/messages?cursor=${cursor}`
+    );
+    const fetchedData = res.data.Data;
+    if (!fetchedData || fetchedData.length === 0) {
+      setIsTop(true);
+      return;
+    }
+    if (firstTime) {
+      setMessages(fetchedData);
+      scrollToBottom();
+    } else {
+      pushMessages(fetchedData);
+    }
   };
 
   const scrollToBottom = () => {

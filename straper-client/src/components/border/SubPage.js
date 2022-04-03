@@ -3,10 +3,17 @@ import { useHistory } from "react-router-dom";
 import { darkGrayBg } from "../../utils/style/color";
 import { AiFillHome } from "react-icons/ai";
 import { useRef } from "react";
+import useWorkspaceStore from "../../store/workspaceStore";
 
 function SubPage({ children }) {
   const history = useHistory();
   const sideBar = useRef();
+  const workspace = useWorkspaceStore((state) => state.currWorkspace);
+  const channel = useWorkspaceStore((state) => state.currChannel);
+
+  const closeSubPage = () => {
+    history.push(`/channel/${workspace.workspace_id}/${channel.channel_id}`);
+  };
 
   return (
     <div className="w-full min-h-screen flex flex-col lg:flex-row">
@@ -15,7 +22,7 @@ function SubPage({ children }) {
         <div>
           <button
             className="mobile-menu-button p-4 focus:outline-none bg-slate-800 focus:bg-gray-700 hover:bg-indigo-600 transition duration-150 rounded-full"
-            onClick={() => history.push("/channel")}
+            onClick={() => closeSubPage()}
           >
             <AiFillHome size={20} />
           </button>
@@ -29,7 +36,7 @@ function SubPage({ children }) {
         <FaWindowClose
           size="40"
           className="text-indigo-500 cursor-pointer"
-          onClick={() => history.push("/channel")}
+          onClick={() => closeSubPage()}
         />
       </div>
       <div

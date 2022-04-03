@@ -18,9 +18,7 @@ const EditIssueLink = ({ card }) => {
   const [successEditOpen, setSuccessEditOpen] = useState(false);
 
   useEffect(() => {
-    console.log("calling use effect");
     if (!isSet) {
-      console.log("fetch data");
       getIssueData();
     }
     setOptions(convertToOptions(issues));
