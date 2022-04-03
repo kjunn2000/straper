@@ -73,7 +73,6 @@ func (us *service) Register(ctx context.Context, params CreateUserParam) error {
 	params.Password = hashedPassword
 	params.Role = RoleUser
 	params.Status = StatusVerifying
-	// params.Status = StatusActive
 	params.CreatedDate = time.Now()
 	err = us.ur.CreateUser(ctx, params)
 	if err != nil {

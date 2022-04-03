@@ -32,20 +32,20 @@ type PubSub interface {
 }
 
 type service struct {
-	log              *zap.Logger
-	wsServer         *WSServer
-	pubsub           PubSub
-	chattingService  HandlingService
-	broadcastService HandlingService
+	log             *zap.Logger
+	wsServer        *WSServer
+	pubsub          PubSub
+	chattingService HandlingService
+	boardService    HandlingService
 }
 
 func NewService(log *zap.Logger, pubsub PubSub, cs HandlingService, bs HandlingService) *service {
 	return &service{
-		log:              log,
-		wsServer:         NewWSServer(),
-		pubsub:           pubsub,
-		chattingService:  cs,
-		broadcastService: bs,
+		log:             log,
+		wsServer:        NewWSServer(),
+		pubsub:          pubsub,
+		chattingService: cs,
+		boardService:    bs,
 	}
 }
 
@@ -64,7 +64,7 @@ func (s *service) SetUpWSServer(ctx context.Context) error {
 						return err
 					}
 				} else {
-					if err := s.broadcastService.HandleBroadcast(ctx, msg, s.publishPubSub); err != nil {
+					if err := s.boardService.HandleBroadcast(ctx, msg, s.publishPubSub); err != nil {
 						return err
 					}
 				}
@@ -145,7 +145,7 @@ func (s *service) getBroadcastUserList(ctx context.Context, msg *Message) ([]Use
 	if strings.HasPrefix(msg.MessageType, "CHAT") {
 		return s.chattingService.GetBroadcastUserListByMessageType(ctx, msg)
 	} else if strings.HasPrefix(msg.MessageType, "BOARD") {
-		return s.broadcastService.GetBroadcastUserListByMessageType(ctx, msg)
+		return s.boardService.GetBroadcastUserListByMessageType(ctx, msg)
 	} else {
 		return []UserData{}, errors.New("invalid.message.type")
 	}

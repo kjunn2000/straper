@@ -59,7 +59,6 @@ func (s *service) GetPaginationUsers(ctx context.Context, param PaginationUsersP
 }
 
 func (s *service) UpdateUser(ctx context.Context, params UpdateUserParam) error {
-	params.UpdatedDate = time.Now()
 	if params.IsPasswdUpdate {
 		hashedBytePassword, err := bcrypt.GenerateFromPassword([]byte(params.Password), bcrypt.DefaultCost)
 		if err != nil {

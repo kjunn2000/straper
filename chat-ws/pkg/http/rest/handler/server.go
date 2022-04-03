@@ -125,7 +125,7 @@ func (server *Server) SetServerRoute() (*mux.Router, error) {
 	server.SetUpChannelRouter(mr, addingService, listingService, editingService, deletingService, chattingService)
 	server.SetUpBoardRouter(mr, boardService)
 	server.SetUpBugRouter(mr, bugService)
-	server.SetUpWebsocketRouter(mr, websocketService, chattingService, boardService)
+	server.SetUpWebsocketRouter(mr, websocketService)
 	server.SetUpManageUserRouter(mr, adminService)
 	server.SetUpManageWorkspaceRouter(mr, adminService, editingService, listingService, deletingService, chattingService)
 

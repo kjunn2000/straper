@@ -42,7 +42,9 @@ func (s *seaweedfsClient) SaveFile(ctx context.Context, reader io.Reader) (strin
 	if err != nil {
 		return "", err
 	}
+	// Production
 	// url := "http://" + weedMasterResponse.Url + "/" + weedMasterResponse.Fid
+
 	// Local
 	url := "http://" + "localhost:8080" + "/" + weedMasterResponse.Fid
 	if err := s.sendMultiPartRequest(reader, url); err != nil {

@@ -40,17 +40,13 @@ api.interceptors.response.use(
         const res = await api.get("/auth/refresh-token", {
           withCredentials: true,
         });
-
         if (res.data.Success) {
-          console.log("success refresh token");
           const accessToken = res.data.Data;
           useAuthStore.getState().setAccessToken(accessToken);
           return api(originalConfig);
         }
-        console.log("log out...");
         logOut(true);
       } catch (_error) {
-        console.log(_error);
         return Promise.reject(_error);
       }
     }

@@ -14,16 +14,13 @@ const connect = () => {
   socket = new WebSocket(
     `ws://localhost:9090/api/v1/protected/ws/${identity.user_id}`
   );
-  console.log("Connecting");
 
   socket.onopen = () => {
-    console.log("Successfully Connected");
+    // Successfully Connected
   };
 
   socket.onmessage = (msg) => {
-    console.log("Successfully receive message");
     const data = JSON.parse(msg.data);
-    console.log(data);
     if (data.type.startsWith("CHAT")) {
       handleWsChatMsg(data);
     } else {
@@ -32,12 +29,12 @@ const connect = () => {
   };
 
   socket.onclose = (event) => {
-    console.log("Socket Closed Connection: ", event);
+    // Socket Closed Connection
     socket.close();
   };
 
   socket.onerror = (error) => {
-    console.log("Socket Error: ", error);
+    // Socket Error
     socket.close();
   };
 };

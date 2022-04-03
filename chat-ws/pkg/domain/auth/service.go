@@ -51,9 +51,7 @@ func NewService(log *zap.Logger, ar Repository, tokenMaker Maker, config configs
 }
 
 func (as *service) Login(ctx context.Context, req LoginRequest, role string) (LoginResponse, error) {
-
 	u, err := as.ar.GetUserCredentialByUsername(ctx, req.Username)
-
 	if err == sql.ErrNoRows {
 		return LoginResponse{}, errors.New("user.not.found")
 	} else if err = as.comparePassword(u.Password, req.Password); err != nil {
@@ -63,19 +61,16 @@ func (as *service) Login(ctx context.Context, req LoginRequest, role string) (Lo
 	} else if u.Status != "ACTIVE" {
 		return LoginResponse{}, errors.New("invalid.account.status")
 	}
-
 	accessToken, err := as.tokenMaker.CreateToken(u.UserId, u.Username,
 		u.CredentialId, as.config.AccessTokenDuration)
 	if err != nil {
 		return LoginResponse{}, err
 	}
-
 	refreshToken, err := as.tokenMaker.CreateToken(u.UserId, u.Username,
 		u.CredentialId, as.config.RefreshTokenDuration)
 	if err != nil {
 		return LoginResponse{}, err
 	}
-
 	loginResponseUser := LoginResponseUser{
 		UserId:   u.UserId,
 		Username: u.Username,
@@ -83,7 +78,6 @@ func (as *service) Login(ctx context.Context, req LoginRequest, role string) (Lo
 		PhoneNo:  u.PhoneNo,
 		Role:     u.Role,
 	}
-
 	return LoginResponse{
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,
