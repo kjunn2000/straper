@@ -8,7 +8,7 @@ export default function AccountPopOver({ children, user, currStatus }) {
     <Popover>
       <Popover.Button className="w-full">{children}</Popover.Button>
 
-      <Popover.Panel className="absolute z-10 m-3 -translate-x-1/2 md:translate-x-0">
+      <Popover.Panel className="absolute z-10 m-3 -translate-x-1/2">
         <div className="bg-black text-white rounded-lg flex flex-col">
           <div className="bg-indigo-500 p-5 rounded-lg">
             <span className="text-2xl font-bold">{user.username}</span>

@@ -154,6 +154,7 @@ const AccountInfo = () => {
         </div>
         <button
           type="submit"
+          disabled={isFormSubmit}
           className="bg-indigo-400 self-center w-48 p-1 flex justify-center items-center"
         >
           {!isFormSubmit ? (
@@ -162,7 +163,7 @@ const AccountInfo = () => {
             <>
               <svg
                 role="status"
-                class="mr-2 w-6 h-6 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
+                className="mr-2 w-6 h-6 text-gray-200 animate-spin dark:text-gray-600 fill-blue-600"
                 viewBox="0 0 100 101"
                 fill="none"
                 xmlns="http://www.w3.org/2000/svg"
